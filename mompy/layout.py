@@ -35,7 +35,18 @@ CITIES = Table("cities", 0x6F980, 114, 100)
 UNITS = Table("units", 0x7E060, 32, 1009)
 NODES = Table("nodes", 0x85FE0, 48, 30)
 ENCOUNTERS = Table("lairs", 0x86660, 24, 102)
+# x, y, plane, active for each wizard and then the neutral player. Found 2026-10-13 by searching memory for the five
+# summoning-circle positions. The game keeps a second copy 0x1030 later (0x875F0), as it does for the node table.
+FORTRESSES = Table("fortresses", 0x865C0, 4, 6)
 
 UNIT_COUNT_REFERENCE = 0x34782   # a u16: how many unit records are live
 
-TABLES = (WIZARDS, CITIES, UNITS, NODES, ENCOUNTERS)
+TABLES = (WIZARDS, CITIES, UNITS, NODES, ENCOUNTERS, FORTRESSES)
+
+
+def table(name: str) -> Table:
+    """A table by name (the field table's blocks refer to these)."""
+    for t in TABLES:
+        if t.name == name:
+            return t
+    raise KeyError(name)

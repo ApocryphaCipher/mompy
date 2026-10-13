@@ -29,6 +29,7 @@ class Block:
     count: int
     first_number: int
     describe: str
+    table: str                       # the layout table the records sit in
 
 
 @dataclass(frozen=True)
@@ -142,7 +143,7 @@ def _load() -> Dict[str, object]:
     global _cache
     if _cache is None:
         doc = tomllib.loads(resources.files("mompy").joinpath("fields.toml").read_text(encoding="utf-8"))
-        blocks = {n: Block(n, b["stride"], b["count"], b["first_number"], b["describe"])
+        blocks = {n: Block(n, b["stride"], b["count"], b["first_number"], b["describe"], b["table"])
                   for n, b in doc["blocks"].items()}
         fields = [Field(**f) for f in doc["field"]]
         _cache = {"blocks": blocks, "fields": fields}

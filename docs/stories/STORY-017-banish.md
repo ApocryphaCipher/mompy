@@ -1,7 +1,7 @@
 # STORY-017: `mompy banish wizard N`: banish a wizard (and, if you mean it, finish them) (enhancement)
 
 **Parent:** [EPIC-001](../epics/EPIC-001-mompy-core.md)
-**Status:** proposed (2026-10-13). **Priority: nice to have.** Depends on [STORY-003](STORY-003-poke.md) (`poke`). Contains a spike as its first step.
+**Status:** the flag part is done (2026-10-13): `banish` and `unbanish` work on the real game. `--dead` (eliminating a wizard) is still a spike and is not built.. **Priority: nice to have.** Depends on [STORY-003](STORY-003-poke.md) (`poke`). Contains a spike as its first step.
 **Size:** small for the flag, medium for the rest
 **Raised by:** [Kevin](https://github.com/KevinAsbury), 2026-10-13 (first as a joke, `mompy pew wizard 3`, "just pew and dead"; then settled: **`mompy banish wizard 3`**. `pew` became a different command, [STORY-018](STORY-018-pew.md): kill the units under the mouse.)
 
@@ -36,3 +36,14 @@ On a throwaway game, `banish --dead` a rival and watch **one End Turn**: do the 
 ## Definition of done
 
 `banish` on a rival in the real game shows the cracked frame at once; one End Turn recorded (does the AI cast Spell of Return? does it come back?). `--dead` per the spike. Tests with the fake DOSBox: the flag, the refusals, the undo.
+
+## Outcome (2026-10-13): `banish` and `unbanish`
+
+Built: `mompy banish wizard N [--force] [--dry-run]` and `mompy unbanish wizard N [--dry-run]` (`mompy/banish.py`), and a `fortress` block in the field table so `mompy peek fortress N` and `mompy poke fortress N active 0` work (`x`, `y`, `plane` are read-only; `active` is the one editable field).
+`poke` and `peek` now take a block (`wizard` or `fortress`); a block names the layout table its records sit in, so the same code reads either.
+
+- **The fortress table in memory** was not known; it is at `0x865C0` (`+0x53D06` from the wizard table), found by searching for the five summoning-circle positions (details in [ram-layout.md](../reference/ram-layout.md)). There are two copies; **the game reads the first**.
+- **Safe:** the write is a compare-and-swap logged for `undo`; the fortress table is checked for six plausible `(x, y, plane, active)` records before anything is written (refused otherwise: another DOSBox build may lay it out differently). Banishing the player (wizard 1) needs `--force`; `unbanish` never does; wizard 0 and 6 and up are refused (the neutral player has no wizard). Already banished or not banished writes nothing and logs nothing.
+- **Real game (2026-10-13, the fork, MAXIMUS loaded):** `poke fortress 2 active 0 --force` (a guess field at that moment, hence the flag) made the Magic screen draw **Freya as a cracked stone frame** (Kevin looked); `banish wizard 2` then said she was already banished; `banish wizard 1` was refused; `unbanish wizard 2` lifted it. The field is now marked checked.
+- 92 tests (14 new) with a fortress table in the fake game: only the one byte changes, the neighbours are untouched, the player and out-of-range numbers are refused, dry runs write and log nothing, a table that does not look right is not written, undo brings the wizard back, and the CLI.
+- **Not done:** `--dead` (the spike: what the game does at End Turn with a banished wizard who has cities, and how to eliminate one cleanly: give the cities to neutral, mark units dead, clear heroes). Not observed either: what one End Turn does to a banished AI wizard (does he cast Spell of Return and come back?). Both are the next experiment, on a throwaway game.

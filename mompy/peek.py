@@ -32,7 +32,7 @@ def read_record(api: DosboxApi, game: locate.Game, block: str, number: int) -> b
     last = b.first_number + b.count - 1
     if not b.first_number <= number <= last:
         raise PeekError(f"there is no {b.describe} {number} (1 to {last})")
-    start = game.base + (number - b.first_number) * b.stride
+    start = game.base + layout.table(b.table).offset + (number - b.first_number) * b.stride
     return api.read(start, b.stride)
 
 
@@ -125,7 +125,7 @@ def peek(api: DosboxApi, block: str, number: int, spec: Optional[str], as_json: 
     names = list(game.names)
     own = number - 1 if block == "wizard" else None
     title = f"{F.blocks()[block].describe} {number}"
-    if block == "wizard":
+    if block in ("wizard", "fortress") and number <= len(names):
         title += f" ({names[number - 1]})"
     try:
         if spec is None:

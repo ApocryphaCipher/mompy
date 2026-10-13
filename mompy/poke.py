@@ -14,7 +14,7 @@ from typing import List, Optional, Tuple
 
 from . import fields as F
 from . import game as gamefile
-from . import peek
+from . import layout, peek
 from .api import ApiError, DosboxApi, Mismatch, WritesDisabled
 
 LOG_LIMIT = 200
@@ -93,9 +93,9 @@ def _parse_name(text: str) -> str:
 
 
 def resolve(game, field: F.Field, number: int, element: Optional[str], names: List[str]) -> Target:
-    """Where in memory the field (or one element) of wizard ``number`` sits."""
-    block = F.blocks()["wizard"]
-    record = game.base + (number - block.first_number) * block.stride
+    """Where in memory the field (or one element) of record ``number`` of the field's block sits."""
+    block = F.blocks()[field.block]
+    record = game.base + layout.table(block.table).offset + (number - block.first_number) * block.stride
     if element is None:
         if field.mirrored or (field.is_array and field.count > 24):
             hint = f"{field.name}.NAME" if field.mirrored else f"{field.name}.N"
@@ -154,23 +154,38 @@ def _write(api: DosboxApi, address: int, new: bytes, expect: bytes, label: str) 
                         "(the research fork needs it; stock DOSBox Staging does not).") from None
 
 
-def poke(api: DosboxApi, number: int, spec: str, text: str, dry_run: bool = False, force: bool = False) -> str:
-    """Change wizard ``number``'s ``spec`` (``gold``, ``books.sorcery``...) to ``text``. Returns what to print."""
+def _check_fortresses(api: DosboxApi, found) -> None:
+    """Write into the fortress table only if it looks like one here: six records of (x, y, plane, active)."""
+    table = layout.FORTRESSES
+    raw = api.read(found.base + table.offset, table.stride * table.count)
+    for i in range(table.count):
+        x, y, plane, active = raw[i * 4:i * 4 + 4]
+        if x >= 60 or y >= 40 or plane > 1 or active > 1:
+            raise PokeError("the fortress table does not look right in this game (a DOSBox build with another layout?): not writing")
+
+
+def poke(api: DosboxApi, number: int, spec: str, text: str, dry_run: bool = False, force: bool = False,
+         block_name: str = "wizard") -> str:
+    """Change record ``number`` of a block (wizard 1 is the player) at ``spec`` (``gold``, ``books.sorcery``...) to ``text``.
+    Returns what to print."""
     found = peek.find_game(api)
-    block = F.blocks()["wizard"]
+    block = F.blocks()[block_name]
     last = block.first_number + block.count - 1
     if not block.first_number <= number <= last:
-        raise PokeError(f"there is no wizard {number} (1 to {last})")
+        raise PokeError(f"there is no {block.describe} {number} (1 to {last})")
     names = list(found.names)
     name, _, element = spec.partition(".")
     try:
-        field = F.find("wizard", name)
+        field = F.find(block_name, name)
         check_allowed(field, force)
         target = resolve(found, field, number, element or None, names)
     except F.FieldError as err:
         raise PokeError(str(err)) from None
     new_value = _parse(target, text)
     label = _label(target, names)
+    if block_name == "fortress":
+        _check_fortresses(api, found)
+    label = ("" if block_name == "wizard" else f"{block_name} {number} ") + label
     try:
         current = api.read(target.address, target.size)
     except ApiError as err:

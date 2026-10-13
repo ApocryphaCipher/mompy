@@ -31,6 +31,9 @@ def game_memory(base: int = layout.REFERENCE_WIZARD_BASE,
         at = layout.UNITS.reference + shift + i * layout.UNITS.stride
         mem[at:at + 6] = bytes([5 + i, 7, 0, i % 5, 2, 40])            # x, y, plane, owner, moves, type
     struct.pack_into("<H", mem, layout.UNIT_COUNT_REFERENCE + shift, units)
+    for i in range(layout.FORTRESSES.count):                            # each wizard's fortress (x, y, plane, active), then the neutral player's
+        at = layout.FORTRESSES.reference + shift + i * layout.FORTRESSES.stride
+        mem[at:at + 4] = bytes([10 + 5 * i, 7 + i, i % 2, 1])
     for i in range(nodes):
         at = layout.NODES.reference + shift + i * layout.NODES.stride
         mem[at:at + 4] = bytes([30 + i, 9, 0, 0xFF])                   # x, y, plane, owner -1
