@@ -20,7 +20,7 @@
 | [STORY-016](STORY-016-spike-summon-a-unit.md) | Spike: what the game writes when a unit is summoned | proposed (nice to have) |
 | [STORY-017](STORY-017-banish.md) | `banish wizard N`: banish a wizard (`--dead` to finish them) | `banish`/`unbanish` done; `--dead` open |
 | [STORY-018](STORY-018-pew.md) | `pew`: kill the units on the tile under the mouse | proposed (nice to have; after `poke` and `where`) |
-| [STORY-019](STORY-019-poke-city.md) | `poke city <name> <field> <value>`: change a city by name (population first) | proposed (nice to have; after `where`) |
+| [STORY-019](STORY-019-poke-city.md) | `poke city <name> <field> <value>`: change a city by name (population first) | `population` built; real game: written, see the story |
 | [STORY-020](STORY-020-poke-city-build.md) | `poke city <name> build`: finish the current production next turn | proposed (nice to have; after 019) |
 
 Epic: [EPIC-001](../epics/EPIC-001-mompy-core.md).

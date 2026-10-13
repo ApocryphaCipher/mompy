@@ -30,6 +30,7 @@ class City:
     owner: int          # wizard record 0 to 4, or 5 for neutral
     size: int
     population: int     # thousands
+    slot: int = 0       # position in the city table: city number is slot + 1
 
 
 def read_cities(api: DosboxApi, game: locate.Game) -> List[City]:
@@ -41,7 +42,7 @@ def read_cities(api: DosboxApi, game: locate.Game) -> List[City]:
         rec = raw[i * table.stride:(i + 1) * table.stride]
         if locate._valid_city(rec):
             cities.append(City(rec[:14].split(b"\0", 1)[0].decode("latin-1"),
-                               rec[15], rec[16], rec[17], rec[18], rec[19], rec[20]))
+                               rec[15], rec[16], rec[17], rec[18], rec[19], rec[20], i))
     return cities
 
 
@@ -85,6 +86,22 @@ def _wizard(api: DosboxApi, game: locate.Game, index: int, cities: List[City]) -
         data["summoning_circle"]["city"] = here.name
         line += f", the city {here.name}"
     return data, line
+
+
+def find_city(api: DosboxApi, text: str) -> int:
+    """The number (1 to 100) of the one city that ``text`` names: a number, a whole name, or a unique prefix."""
+    text = text.strip()
+    if text.isdigit():
+        return int(text)
+    game = find_game(api)
+    cities = read_cities(api, game)
+    exact = [c for c in cities if c.name.lower() == text.lower()]
+    found = exact or [c for c in cities if c.name.lower().startswith(text.lower())]
+    if not found:
+        raise PeekError(f"there is no city called {text!r}")
+    if len(found) > 1:
+        raise PeekError(f"{text!r} could be " + ", ".join(c.name for c in found) + ": give more of the name")
+    return found[0].slot + 1
 
 
 def where(api: DosboxApi, query: str, as_json: bool = False) -> str:

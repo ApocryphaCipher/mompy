@@ -33,7 +33,10 @@ def read_record(api: DosboxApi, game: locate.Game, block: str, number: int) -> b
     if not b.first_number <= number <= last:
         raise PeekError(f"there is no {b.describe} {number} (1 to {last})")
     start = game.base + layout.table(b.table).offset + (number - b.first_number) * b.stride
-    return api.read(start, b.stride)
+    record = api.read(start, b.stride)
+    if block == "city" and not locate._valid_city(record):
+        raise PeekError(f"there is no city in slot {number} (it is empty, or the table does not look right)")
+    return record
 
 
 def _slice(field: F.Field, record: bytes) -> bytes:
@@ -127,6 +130,8 @@ def peek(api: DosboxApi, block: str, number: int, spec: Optional[str], as_json: 
     title = f"{F.blocks()[block].describe} {number}"
     if block in ("wizard", "fortress") and number <= len(names):
         title += f" ({names[number - 1]})"
+    if block == "city":
+        title += f" ({record[:14].split(b'\0', 1)[0].decode('latin-1')})"
     try:
         if spec is None:
             chosen: List[Tuple[F.Field, Optional[str]]] = [(f, None) for f in F.all_fields(block)]

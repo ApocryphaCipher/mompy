@@ -16,6 +16,16 @@ from . import where as whereis
 from .doctor import diagnose, render
 
 
+def _number(api: DosboxApi, block: str, text: str) -> int:
+    """The record number for what the player typed: a city may be named; everything else is a number."""
+    if block == "city":
+        return whereis.find_city(api, text)
+    try:
+        return int(text)
+    except ValueError:
+        raise peeking.PeekError(f"{text!r} is not a {block} number") from None
+
+
 def main(argv: Optional[List[str]] = None) -> int:
     parser = argparse.ArgumentParser(prog="mompy", description="Read and change a running Master of Magic.")
     parser.add_argument("--version", action="version", version=f"mompy {__version__}")
@@ -25,13 +35,13 @@ def main(argv: Optional[List[str]] = None) -> int:
     sub = parser.add_subparsers(dest="command", required=True)
     sub.add_parser("doctor", parents=[common], help="check that the game can be read and written safely")
     pk = sub.add_parser("peek", parents=[common], help="read a record's fields from the running game")
-    pk.add_argument("block", choices=["wizard", "fortress"], help="what to read")
-    pk.add_argument("number", type=int, help="which one; wizard 1 is the player")
+    pk.add_argument("block", choices=["wizard", "fortress", "city"], help="what to read")
+    pk.add_argument("number", help="which one; wizard 1 is the player; a city by name (darkmoor) or number")
     pk.add_argument("field", nargs="?", help="a field, or field.element (books.sorcery, relations.freya); omit for all")
     pk.add_argument("--json", action="store_true", help="print plain data for scripts")
     pk2 = sub.add_parser("poke", parents=[common], help="change a field of the running game (checked, undoable)")
-    pk2.add_argument("block", choices=["wizard", "fortress"], help="what to change")
-    pk2.add_argument("number", type=int, help="which one; wizard 1 is the player")
+    pk2.add_argument("block", choices=["wizard", "fortress", "city"], help="what to change")
+    pk2.add_argument("number", help="which one; wizard 1 is the player; a city by name (darkmoor) or number")
     pk2.add_argument("field", help="a field, or field.element (books.sorcery, relations.freya); or cast / dispel a global enchantment")
     pk2.add_argument("value", help="a number, an enum word (alliance), on/off for flags, or a,b,c for a whole array; for cast/dispel, the enchantment")
     pk2.add_argument("--dry-run", action="store_true", help="say what would change; write and log nothing")
@@ -50,7 +60,7 @@ def main(argv: Optional[List[str]] = None) -> int:
     wh.add_argument("name", help="a city or wizard name, any case")
     wh.add_argument("--json", action="store_true", help="print plain data for scripts; several matches are all listed")
     fl = sub.add_parser("fields", help="list the fields mompy knows, with their ranges and how sure we are")
-    fl.add_argument("block", nargs="?", choices=["wizard", "fortress"])
+    fl.add_argument("block", nargs="?", choices=["wizard", "fortress", "city"])
 
     args = parser.parse_args(argv)
     if args.command == "doctor":
@@ -74,6 +84,7 @@ def main(argv: Optional[List[str]] = None) -> int:
             if args.command == "undo":
                 print(poking.undo(api))
             else:
+                args.number = _number(api, args.block, args.number)
                 if args.field in ("cast", "dispel"):
                     if args.block != "wizard":
                         raise poking.PokeError(f"{args.field} is for wizards: mompy poke wizard N {args.field} aura_of_majesty")
@@ -99,7 +110,8 @@ def main(argv: Optional[List[str]] = None) -> int:
         return 0
     if args.command == "peek":
         try:
-            print(peeking.peek(DosboxApi(args.url), args.block, args.number, args.field, args.json))
+            api = DosboxApi(args.url)
+            print(peeking.peek(api, args.block, _number(api, args.block, args.number), args.field, args.json))
         except (peeking.PeekError, ApiError) as err:
             print(f"mompy: {err}", file=sys.stderr)
             return 1

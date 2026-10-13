@@ -15,6 +15,13 @@ first_number = 1
 describe = "fortress"
 table = "fortresses"
 
+[blocks.city]
+stride = 114
+count = 100
+first_number = 1
+describe = "city"
+table = "cities"
+
 [[field]]
 block = "wizard"
 name = "name"
@@ -290,3 +297,69 @@ enum = { "0" = "banished", "1" = "in place" }
 writable = true
 confidence = "checked"
 note = "0 means the wizard has lost his fortress: banished (he casts Spell of Return). The Magic screen draws him as a cracked stone frame: seen by changing this byte in a save and, live, in memory (2026-10-13; the first of the two copies is the one the game reads)."
+
+[[field]]
+block = "city"
+name = "name"
+offset = 0x0
+type = "text"
+length = 14
+writable = false
+confidence = "checked"
+note = "The city's name, NUL-padded; the game's own city list shows it."
+
+[[field]]
+block = "city"
+name = "x"
+offset = 0xF
+type = "u8"
+min = 0
+max = 59
+writable = false
+confidence = "checked"
+note = "Map column."
+
+[[field]]
+block = "city"
+name = "y"
+offset = 0x10
+type = "u8"
+min = 0
+max = 39
+writable = false
+confidence = "checked"
+note = "Map row."
+
+[[field]]
+block = "city"
+name = "plane"
+offset = 0x11
+type = "u8"
+min = 0
+max = 1
+enum = { "0" = "Arcanus", "1" = "Myrror" }
+writable = false
+confidence = "checked"
+note = "0 Arcanus, 1 Myrror."
+
+[[field]]
+block = "city"
+name = "owner"
+offset = 0x12
+type = "u8"
+min = 0
+max = 5
+writable = false
+confidence = "checked"
+note = "Wizard record 0 to 4 (wizard 1 is 0), or 5 for neutral. Not editable: handing a city over also clears its enchantments and moves its units (Mirror's edit_city does all three)."
+
+[[field]]
+block = "city"
+name = "population"
+offset = 0x14
+type = "u8"
+min = 1
+max = 25
+writable = true
+confidence = "checked"
+note = "Population in thousands: the city screen shows this times 1000 plus the tens at +24 (a live RAM write showed it). Only the thousands are written; the tens stay. 25 as the top is Mirror's guess at the game's cap."
