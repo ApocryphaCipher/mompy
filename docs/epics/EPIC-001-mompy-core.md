@@ -33,5 +33,7 @@ separate project if players want it.
 - [STORY-016](../stories/STORY-016-spike-summon-a-unit.md): spike: what the game writes when a unit is summoned (nice to have)
 - [STORY-017](../stories/STORY-017-banish.md): `banish wizard N`, banish a wizard; `--dead` to finish them (nice to have)
 - [STORY-018](../stories/STORY-018-pew.md): `pew`, kill the units on the tile under the mouse (nice to have)
+- [STORY-019](../stories/STORY-019-poke-city.md): `poke city <name> <field> <value>`, change a city by name, population first (nice to have)
+- [STORY-020](../stories/STORY-020-poke-city-build.md): `poke city <name> build`, finish the current production next turn (nice to have)
 
 Suggested order: 008 (a quick check that decides everything else), 001, 002, 003, then 004 to 007.
