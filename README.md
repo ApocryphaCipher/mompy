@@ -11,7 +11,7 @@ mompy talks to **DOSBox Staging's built-in web API** (`webserver_enabled = true`
 and write the emulated machine's memory. It needs no game files of its own and ships none: only
 offsets, ranges and what we have checked about them.
 
-**Status: just started.** `mompy doctor` exists (below); `peek`, `fields`, `poke`, `undo`, `banish`, `unbanish`, and `cast`/`dispel` (a global enchantment) exist too (see `docs/stories/`).
+**Status: just started.** `mompy doctor` exists (below); `peek`, `fields`, `poke`, `undo`, `banish`, `unbanish`, and `cast`/`dispel` (a global enchantment) and `where` exist too (see `docs/stories/`).
 Nothing here has been tried on anyone's machine but Kevin's.
 
 ## `mompy peek` and `mompy fields`
@@ -66,6 +66,18 @@ python -m mompy peek fortress 3        # the fortress record: where, and whether
 
 A banished wizard has lost his fortress: the Magic screen draws him as a cracked stone frame and, in the game's rules, he casts Spell of Return. He is **not dead**: he is only
 eliminated if he has no cities left. It is one byte (`active` of the fortress table), written like any `poke` (a compare-and-swap, logged for `mompy undo`).
+
+## `mompy where`
+
+```
+python -m mompy where Blackstone    # Blackstone: Myrror (51, 22), owner Jafar, a size 3 of population 15
+python -m mompy where freya         # Freya (wizard 2): summoning circle Arcanus (23, 25), the city Dover
+python -m mompy where black         # several matches are listed, never guessed
+python -m mompy where dover --json
+```
+
+Finds a city or a wizard by name, any case. A whole name wins; otherwise a unique prefix. Read-only. The coordinates are the ones Mirror's editors take
+(tile x, tile y, plane). Population is in thousands, as the game keeps it; size classes above Village have not been named yet, so they print as `size N`.
 
 ## `mompy doctor`
 

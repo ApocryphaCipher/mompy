@@ -1,7 +1,7 @@
 # STORY-011: `mompy where <name>`: find a city (or a wizard) by name (enhancement)
 
 **Parent:** [EPIC-001](../epics/EPIC-001-mompy-core.md)
-**Status:** proposed (2026-10-13). **Priority: nice to have.** The cheapest of the "where" ideas: it needs no mouse and no new knowledge.
+**Status:** built (2026-10-13), PR open; checked on a real game (position and owner: Blackstone only; size and population: Fellwood and Darkmoor). **Priority: nice to have.** The cheapest of the "where" ideas: it needs no mouse and no new knowledge.
 **Size:** small
 **Raised by:** [Kevin](https://github.com/KevinAsbury), 2026-10-13 ("mompy where <cityname> is a nice feature too")
 
@@ -32,3 +32,13 @@ Freya (wizard 2): summoning circle Arcanus (23, 25), the city Darkmoor ...
 ## Definition of done
 
 On the real game: `where Blackstone` gives Myrror (51, 22) and owner Jafar (the Magic screen says "Summon To: Blackstone"); two other cities are checked against the map; an ambiguous prefix lists its matches. Tests with the fake DOSBox.
+
+## Outcome
+
+Built as `mompy/where.py` and `mompy where NAME [--json]`, with `tests/test_where.py` (13 tests, fake DOSBox).
+
+- A whole name (any case) wins; otherwise a unique prefix; several matches are listed (as JSON, all of them), never guessed. No match suggests near names.
+- Cities and wizards are searched together. A wizard prints the summoning circle and the city standing on it; a circle that is not on the map is reported as such, not printed.
+- Size is the class byte (+19) with the three names we know (Outpost, Hamlet, Village), else `size N`; population is the byte at +20, in thousands. Both as Mirror's `Cities` documents them.
+- Empty and stale city slots are skipped with `doctor`'s plausibility test.
+- Real game (fork 0.84.0-alpha, Kevin's MAXIMUS save, 2026-10-13): `where Blackstone` gives Myrror (51, 22), owner Jafar, as the Definition of done says. Fellwood: the city screen says "Hamlet of Fellwood", Dark Elf, population 7,250, which `where` matches (Hamlet, 7, owner Jafar). Darkmoor: the city screen says "Village of Darkmoor", Dark Elf, and Kevin read its population as 4, which `where` matches (Village, 4). Its screen does not show the owner or the map position, so those two are not checked for it. Kept on purpose: the population is the rough thousands only, not the exact figure.
