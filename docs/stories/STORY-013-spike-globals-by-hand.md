@@ -5,6 +5,10 @@
 **Size:** small to medium (a play session)
 **Raised by:** [Kevin](https://github.com/KevinAsbury), 2026-10-13 ("not sure, flag as a test and see")
 
+## Data so far (2026-10-13)
+
+- **Aura of Majesty** cast on Jafar by `mompy poke wizard 1 cast aura_of_majesty`: it **appeared in the Magic screen's "Overland Enchantments" box** at once, no mana paid. After one End Turn it was still active, relations rose (Freya 0 to 2, Sharee and Tauron -20 to -16, on both wizards' records) and mana fell 9 (about 8 more than a normal turn: probably the upkeep). A real cast had jumped every relation to 20 first; the flag alone gave +2/+4 (guess: the jump is the cast routine). Not tried: an unaffordable upkeep.
+
 ## The question
 
 [STORY-012](STORY-012-cast.md) writes one byte and trusts the game to take it from there. Is that true for **every** global, or do some need more than the flag?
