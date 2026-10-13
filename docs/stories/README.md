@@ -12,7 +12,7 @@
 | [STORY-007](STORY-007-packaging.md) | Install, README, licence | proposed |
 | [STORY-009](STORY-009-dosbox-memory-map-endpoint.md) | Ask DOSBox where the game was loaded | proposed (nice to have) |
 | [STORY-010](STORY-010-where.md) | `mompy where`: the tile under the mouse | proposed (nice to have) |
-| [STORY-011](STORY-011-where-name.md) | `mompy where <name>`: find a city or wizard by name | proposed (nice to have; cheapest first) |
+| [STORY-011](STORY-011-where-name.md) | `mompy where <name>`: find a city or wizard by name | built (2026-10-13), PR open; checked on a real game |
 | [STORY-012](STORY-012-cast.md) | `poke ... cast <global>`: a global enchantment straight on the wizard | built; real game: shows in the Magic screen and acts at End Turn |
 | [STORY-013](STORY-013-spike-globals-by-hand.md) | Spike: what does the game do with a global set by hand? | proposed (nice to have) |
 | [STORY-014](STORY-014-spike-wonky-globals.md) | Spike: the wonky globals (Spell of Mastery, Planar Seal...) | proposed (nice to have) |
