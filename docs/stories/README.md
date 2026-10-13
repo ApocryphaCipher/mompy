@@ -10,5 +10,6 @@
 | [STORY-005](STORY-005-spell-names.md) | Spell names from the player's files | proposed |
 | [STORY-006](STORY-006-more-fields.md) | Relations, globals, defeated; find the missing blocks | proposed |
 | [STORY-007](STORY-007-packaging.md) | Install, README, licence | proposed |
+| [STORY-009](STORY-009-dosbox-memory-map-endpoint.md) | Ask DOSBox where the game was loaded | proposed (nice to have) |
 
 Epic: [EPIC-001](../epics/EPIC-001-mompy-core.md).
