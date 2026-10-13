@@ -8,6 +8,7 @@ from typing import List, Optional
 
 from . import __version__
 from .api import DEFAULT_URL, ApiError, DosboxApi
+from . import banish as banishing
 from . import peek as peeking
 from . import poke as poking
 from .doctor import diagnose, render
@@ -22,33 +23,53 @@ def main(argv: Optional[List[str]] = None) -> int:
     sub = parser.add_subparsers(dest="command", required=True)
     sub.add_parser("doctor", parents=[common], help="check that the game can be read and written safely")
     pk = sub.add_parser("peek", parents=[common], help="read a record's fields from the running game")
-    pk.add_argument("block", choices=["wizard"], help="what to read")
+    pk.add_argument("block", choices=["wizard", "fortress"], help="what to read")
     pk.add_argument("number", type=int, help="which one; wizard 1 is the player")
     pk.add_argument("field", nargs="?", help="a field, or field.element (books.sorcery, relations.freya); omit for all")
     pk.add_argument("--json", action="store_true", help="print plain data for scripts")
     pk2 = sub.add_parser("poke", parents=[common], help="change a field of the running game (checked, undoable)")
-    pk2.add_argument("block", choices=["wizard"], help="what to change")
+    pk2.add_argument("block", choices=["wizard", "fortress"], help="what to change")
     pk2.add_argument("number", type=int, help="which one; wizard 1 is the player")
     pk2.add_argument("field", help="a field, or field.element (books.sorcery, relations.freya)")
     pk2.add_argument("value", help="a number, an enum word (alliance), on/off for flags, or a,b,c for a whole array")
     pk2.add_argument("--dry-run", action="store_true", help="say what would change; write and log nothing")
     pk2.add_argument("--force", action="store_true", help="also write a field that is only a guess")
     sub.add_parser("undo", parents=[common], help="put the last poke back")
+    bn = sub.add_parser("banish", parents=[common], help="banish a wizard: take his fortress (he is not dead; he casts Spell of Return)")
+    bn.add_argument("block", choices=["wizard"])
+    bn.add_argument("number", type=int, help="which wizard; 1 is the player and needs --force")
+    bn.add_argument("--force", action="store_true", help="allow banishing the player")
+    bn.add_argument("--dry-run", action="store_true", help="say what would change; write nothing")
+    ub = sub.add_parser("unbanish", parents=[common], help="give a banished wizard his fortress back")
+    ub.add_argument("block", choices=["wizard"])
+    ub.add_argument("number", type=int)
+    ub.add_argument("--dry-run", action="store_true", help="say what would change; write nothing")
     fl = sub.add_parser("fields", help="list the fields mompy knows, with their ranges and how sure we are")
-    fl.add_argument("block", nargs="?", choices=["wizard"])
+    fl.add_argument("block", nargs="?", choices=["wizard", "fortress"])
 
     args = parser.parse_args(argv)
     if args.command == "doctor":
         report = diagnose(DosboxApi(args.url))
         print(render(report, args.url))
         return 0 if report.ready else 1
+    if args.command in ("banish", "unbanish"):
+        try:
+            api = DosboxApi(args.url)
+            if args.command == "banish":
+                print(banishing.banish(api, args.number, args.force, args.dry_run))
+            else:
+                print(banishing.unbanish(api, args.number, args.dry_run))
+        except (poking.PokeError, peeking.PeekError, ApiError) as err:
+            print(f"mompy: {err}", file=sys.stderr)
+            return 1
+        return 0
     if args.command in ("poke", "undo"):
         try:
             api = DosboxApi(args.url)
             if args.command == "undo":
                 print(poking.undo(api))
             else:
-                print(poking.poke(api, args.number, args.field, args.value, args.dry_run, args.force))
+                print(poking.poke(api, args.number, args.field, args.value, args.dry_run, args.force, block_name=args.block))
         except (poking.PokeError, peeking.PeekError, ApiError) as err:
             print(f"mompy: {err}", file=sys.stderr)
             return 1

@@ -18,7 +18,7 @@
 | [STORY-014](STORY-014-spike-wonky-globals.md) | Spike: the wonky globals (Spell of Mastery, Planar Seal...) | proposed (nice to have) |
 | [STORY-015](STORY-015-cast-unit.md) | `poke ... cast unit.<name>`: summon any unit, no fuss | proposed (nice to have; after `poke`) |
 | [STORY-016](STORY-016-spike-summon-a-unit.md) | Spike: what the game writes when a unit is summoned | proposed (nice to have) |
-| [STORY-017](STORY-017-banish.md) | `banish wizard N`: banish a wizard (`--dead` to finish them) | proposed (nice to have; after `poke`) |
+| [STORY-017](STORY-017-banish.md) | `banish wizard N`: banish a wizard (`--dead` to finish them) | `banish`/`unbanish` done; `--dead` open |
 | [STORY-018](STORY-018-pew.md) | `pew`: kill the units on the tile under the mouse | proposed (nice to have; after `poke` and `where`) |
 
 Epic: [EPIC-001](../epics/EPIC-001-mompy-core.md).

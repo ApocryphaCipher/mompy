@@ -16,10 +16,11 @@ differ too. The tables below are therefore the **research setup's**; `doctor` fi
 | units | `0x7E060` | 32 | 1009 (the live count is a u16 at `0x34782`) |
 | magic nodes | `0x85FE0` | 48 | 30 |
 | lairs / encounters | `0x86660` | 24 | 102 |
+| fortresses | `0x865C0` | 4 | 6 (the five wizards, then the neutral player) |
 | terrain | `0x72630` | u16 per tile | 2 planes × 60 × 40 |
 | terrain flags / landmass / minerals / explored | `0x773A0` / `0x74DC0` / `0x760B0` / `0x78690` | 1 byte per tile | 2 planes × 2400 |
 
-**Not located in RAM yet:** the fortress block (whose "active" byte is the *banished* flag; it is at save offset `0x65F8`), the item block and the lair block. STORY-006 finds them.
+**Located 2026-10-13:** the fortress table (see below). **Not located in RAM yet:** the fortress block's neighbours, the item block and the lair block. *Old note:* the fortress block (whose "active" byte is the *banished* flag; it is at save offset `0x65F8`), the item block and the lair block. STORY-006 finds them.
 
 ## In a wizard record (offsets from the start of the record; all **checked** in the real game, see Mirror's `docs/reference/wizard-record-and-exploration.md`)
 
@@ -44,3 +45,10 @@ differ too. The tables below are therefore the **research setup's**; `doctor` fi
 - **A spell is cast at End Turn**, not when it is chosen; setting a global by hand may skip the cost and the upkeep (STORY-006 tests it).
 - A unit moved by writing its position vanished from the map until the turn ended (research fork notes, 2026-09-23).
 - Saving the running game writes what is in memory, so a write is kept only if the player then saves.
+
+## The fortress table (found 2026-10-13, STORY-017)
+
+Six records of `x, y, plane, active` at `0x865C0` in the research setup (`+0x53D06` from the wizard table). Found by searching all of memory for the five wizards' summoning-circle positions followed by an unknown byte: it matched the sequence
+`(51,22,1,1) (23,25,0,1) (39,20,1,1) (33,9,0,1) (43,26,0,1) (49,8,0,1)` (the last is the neutral player's). The game keeps **two copies**, `0x865C0` and `0x875F0` (`0x1030` apart, the same gap as the node table's two copies);
+**the first is the one the game reads**: clearing its `active` byte for Freya made the Magic screen draw her as a cracked stone frame at once, and `unbanish` made it normal again (Kevin looked, both times).
+`active` 0 is *banished*: a wizard who has lost his fortress, who then casts Spell of Return (`MMOMS.TXT` section 5.3), not necessarily dead. The relative offset is assumed to hold on other DOSBox builds as the other tables' did (checked for the 0.83 shift, not for this table).

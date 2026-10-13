@@ -11,7 +11,7 @@ mompy talks to **DOSBox Staging's built-in web API** (`webserver_enabled = true`
 and write the emulated machine's memory. It needs no game files of its own and ships none: only
 offsets, ranges and what we have checked about them.
 
-**Status: just started.** `mompy doctor` exists (below); `peek`, `fields`, `poke` and `undo` exist too (see `docs/stories/`).
+**Status: just started.** `mompy doctor` exists (below); `peek`, `fields`, `poke`, `undo`, `banish` and `unbanish` exist too (see `docs/stories/`).
 Nothing here has been tried on anyone's machine but Kevin's.
 
 ## `mompy peek` and `mompy fields`
@@ -41,6 +41,18 @@ python -m mompy undo                              # put the last poke back
 Every write is a compare-and-swap, every value is range-checked against the field table (`mompy fields`), and nothing is clamped silently. A field the game works out again
 (power base...) or that mompy has not seen the game accept is refused. Needs the research fork's `webserver_allow_writes = true`; stock DOSBox Staging does not need it.
 The undo log and the remembered game address live in `~/.mompy` (`MOMPY_HOME` to change it).
+
+## `mompy banish` and `mompy unbanish`
+
+```
+python -m mompy banish wizard 3        # wizard 3 (Sss'ra) is banished
+python -m mompy unbanish wizard 3      # wizard 3 (Sss'ra): banishment lifted
+python -m mompy banish wizard 1 --force   # the player: refused without --force
+python -m mompy peek fortress 3        # the fortress record: where, and whether it is in place
+```
+
+A banished wizard has lost his fortress: the Magic screen draws him as a cracked stone frame and, in the game's rules, he casts Spell of Return. He is **not dead**: he is only
+eliminated if he has no cities left. It is one byte (`active` of the fortress table), written like any `poke` (a compare-and-swap, logged for `mompy undo`).
 
 ## `mompy doctor`
 
