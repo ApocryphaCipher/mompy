@@ -1,7 +1,7 @@
 # STORY-003: poke, safely
 
 **Parent:** [EPIC-001](../epics/EPIC-001-mompy-core.md)
-**Status:** built (2026-10-13), PR open; not yet run against a real game
+**Status:** done (2026-10-13): built, tested with a fake DOSBox, and run on Kevin's real game
 **Size:** medium
 **Raised by:** [Kevin](https://github.com/KevinAsbury), 2026-10-13
 
@@ -32,4 +32,9 @@ Built: `mompy poke wizard N FIELD[.ELEMENT] VALUE [--dry-run] [--force]` and `mo
 - **A bug the tests found in `doctor`'s scan** (from STORY-001): it required every wizard name to be three or more characters and anchored on the first wizard, so a wizard named "Al" made `doctor`, `peek` and `poke` all report "no wizard table found". Names of 1 to 19 characters are accepted now (as Mirror's editor allows), and the scan tries each wizard as the anchor. Tested.
 - **Tests isolated from the real home:** every test runs with `MOMPY_HOME` in a temporary folder (a first version of the cache wrote into the real `~/.mompy`; that was cleaned up).
 - 77 tests (32 new), warnings as errors, with the fake DOSBox: each write changes only the intended bytes, every refusal writes nothing and logs nothing, the race and refusal answers, the pair rule (including a failing second write), undo in reverse order and when the game changed, and the cache (the second command does not scan; stale, corrupt and moved-game caches rescan).
-- **Not yet done (the story's definition of done):** run on a real game: `poke wizard 1 gold 30000` should show 30000 on the main screen and survive one End Turn.
+**Real game, 2026-10-13** (fork `0.84.0-alpha (83716)`, MAXIMUS loaded, `webserver_allow_writes = true`):
+- `doctor` READY, then `poke wizard 1 gold 12345` (`gold: 30000 -> 12345`; a `--dry-run` first changed nothing): **the main screen showed 12345** (Kevin).
+- `poke wizard 1 relations.freya 40` wrote **both** records (two writes, `0x32a0d` and `0x32ed4`; Freya's view of Jafar and Jafar's view of Freya both read 40) and one `undo` put both back to 0.
+- **One End Turn:** the gold was **12410** (12345 plus the turn's income, not reset). `undo` then **refused** ("gold was changed since: not undone, and the entry is kept"), as designed, and the original 30000 was put back with a plain `poke`.
+- The remembered address held across all of it: no full memory scan after the first command.
+- *Not tried on a real game:* the READ-ONLY refusal text (writes disabled), a mid-turn race (only in the fake), `--force`, and a hostile cache (tested only against the fake).
