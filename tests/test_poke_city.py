@@ -120,3 +120,15 @@ class CityCommandTest(CityCase):
         code, _, err = self.run_cli("peek", "wizard", "freya", "gold")
         self.assertEqual(code, 1)
         self.assertIn("'freya' is not a wizard number", err)
+
+
+class RunAsScriptTest(CityCase):
+    def test_python_mompy_without_dash_m_works_too(self):
+        import subprocess
+        import sys
+        from pathlib import Path
+
+        root = Path(__file__).resolve().parent.parent
+        done = subprocess.run([sys.executable, "-W", "error", str(root / "mompy"), "peek", "city", "darkmoor", "population",
+                               "--url", self.server.url], capture_output=True, text=True, timeout=60)
+        self.assertEqual((done.returncode, done.stdout.strip()), (0, "population = 4"), done.stderr)
