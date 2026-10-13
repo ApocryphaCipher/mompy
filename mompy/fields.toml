@@ -1,0 +1,235 @@
+# Every field of a game record that mompy knows. Offsets are from the start of the record.
+# Where each was checked: docs/reference/ram-layout.md. "confidence" is "checked" (seen to drive the real game) or "guess".
+
+[blocks.wizard]
+stride = 1224   # 0x4C8
+count = 5
+first_number = 1
+describe = "wizard"
+
+[[field]]
+block = "wizard"
+name = "name"
+offset = 0x1
+type = "text"
+length = 20
+writable = true
+confidence = "checked"
+note = "Printable ASCII, 1 to 19 characters, NUL-padded to 20 bytes."
+
+[[field]]
+block = "wizard"
+name = "banner"
+offset = 0x16
+type = "u8"
+enum = { "0" = "blue", "1" = "green", "2" = "purple", "3" = "red", "4" = "yellow" }
+writable = false
+confidence = "checked"
+note = "The wizard's flag colour."
+
+[[field]]
+block = "wizard"
+name = "fame"
+offset = 0x24
+type = "u16"
+min = 0
+max = 30000
+writable = true
+confidence = "checked"
+note = "The base value. The Info screen shows it plus a bonus (77 shown as 90, 30000 as 30013)."
+
+[[field]]
+block = "wizard"
+name = "power_base"
+offset = 0x26
+type = "u16"
+writable = false
+derived = true
+confidence = "checked"
+note = "Worked out again by the game; a write would be overwritten."
+
+[[field]]
+block = "wizard"
+name = "ratios"
+offset = 0x2A
+type = "u8"
+count = 3
+labels = ["research", "mana", "skill"]
+writable = false
+confidence = "guess"
+note = "Percent split of the power base; they sum to 100. Only the skill slot's position was checked."
+
+[[field]]
+block = "wizard"
+name = "summoning_circle"
+offset = 0x2E
+type = "i16"
+count = 3
+labels = ["x", "y", "plane"]
+writable = false
+confidence = "checked"
+note = "Map position of the wizard's summoning circle; plane 0 Arcanus, 1 Myrror."
+
+[[field]]
+block = "wizard"
+name = "research_candidates"
+offset = 0x34
+type = "u16"
+count = 8
+writable = false
+confidence = "checked"
+note = "Spell numbers the game offers to research next (0 = empty slot)."
+
+[[field]]
+block = "wizard"
+name = "skill_left"
+offset = 0x54
+type = "u16"
+writable = false
+derived = true
+confidence = "checked"
+note = "Casting skill left this turn."
+
+[[field]]
+block = "wizard"
+name = "casting_skill"
+offset = 0x56
+type = "u16"
+writable = false
+derived = true
+confidence = "checked"
+note = "The nominal casting skill, 'Casting Skill: N(N)' on the Magic screen."
+
+[[field]]
+block = "wizard"
+name = "tax_rate"
+offset = 0x58
+type = "u16"
+min = 0
+max = 6
+writable = false
+confidence = "checked"
+note = "Index into the tax list: 0 is no tax, 6 is 3 gold per citizen."
+
+[[field]]
+block = "wizard"
+name = "books"
+offset = 0x5A
+type = "i16"
+count = 5
+labels = ["nature", "sorcery", "chaos", "life", "death"]
+min = 0
+max = 13
+writable = true
+confidence = "checked"
+note = "Spellbooks per realm. 13 in every realm was loaded and survived a turn."
+
+[[field]]
+block = "wizard"
+name = "retorts"
+offset = 0x64
+type = "u8"
+count = 18
+labels = ["Alchemy", "Warlord", "Chaos Mastery", "Nature Mastery", "Sorcery Mastery", "Infernal Power", "Divine Power", "Sage Master", "Channeler", "Myrran", "Archmage", "Mana Focusing", "Node Mastery", "Famous", "Runemaster", "Conjurer", "Charismatic", "Artificer"]
+min = 0
+max = 1
+writable = true
+confidence = "checked"
+note = "1 if the wizard has the retort. The save does not enforce the new-game rules."
+
+[[field]]
+block = "wizard"
+name = "relations"
+offset = 0x152
+type = "i8"
+count = 6
+labels = "wizards"
+min = -100
+max = 100
+writable = true
+confidence = "checked"
+note = "How this wizard sees each other wizard (the Diplomacy screen's figure); the neutral player is last. The game keeps each pair on both wizards, so a write must change both."
+
+[[field]]
+block = "wizard"
+name = "treaty_status"
+offset = 0x158
+type = "u8"
+count = 6
+labels = "wizards"
+enum = { "0" = "none (peace)", "1" = "wizard pact", "2" = "alliance", "3" = "war" }
+min = 0
+max = 3
+writable = true
+confidence = "checked"
+note = "Toward each other wizard; kept on both. Peace is just 0."
+
+[[field]]
+block = "wizard"
+name = "research_left"
+offset = 0x25A
+type = "u16"
+min = 0
+max = 65535
+writable = true
+confidence = "checked"
+note = "Research points left on the spell being researched."
+
+[[field]]
+block = "wizard"
+name = "mana"
+offset = 0x25C
+type = "u16"
+min = 0
+max = 30000
+writable = true
+confidence = "checked"
+note = "Magic reserve. 30000 is the game's own cap."
+
+[[field]]
+block = "wizard"
+name = "researching"
+offset = 0x262
+type = "u16"
+min = 0
+max = 214
+writable = true
+confidence = "checked"
+note = "Spell number being researched, 0 for none. Set it only to one of research_candidates, or the Research page shows nothing."
+
+[[field]]
+block = "wizard"
+name = "spells"
+offset = 0x264
+type = "u8"
+count = 214
+enum = { "0" = "unknown", "1" = "knowable", "2" = "known", "3" = "on the research list" }
+min = 0
+max = 3
+writable = true
+confidence = "checked"
+note = "Spell n is byte n-1. Spells are learned without the matching books."
+
+[[field]]
+block = "wizard"
+name = "gold"
+offset = 0x356
+type = "u16"
+min = 0
+max = 30000
+writable = true
+confidence = "checked"
+note = "Treasury. 30000 is the game's own cap."
+
+[[field]]
+block = "wizard"
+name = "globals"
+offset = 0x482
+type = "u8"
+count = 24
+labels = ["Eternal Night", "Evil Omens", "Zombie Mastery", "Aura of Majesty", "Wind Mastery", "Suppress Magic", "Time Stop", "Nature Awareness", "Nature's Wrath", "Herb Mastery", "Chaos Surge", "Doom Mastery", "Great Wasting", "Meteor Storm", "Armageddon", "Tranquility", "Life Force", "Crusade", "Just Cause", "Holy Arms", "Planar Seal", "Charm of Life", "Detect Magic", "Awareness"]
+min = 0
+max = 1
+writable = true
+confidence = "checked"
+note = "1 when this wizard has that global enchantment active. Only bytes 3 (Aura of Majesty) and 18 (Just Cause) have been seen set."

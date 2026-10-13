@@ -14,8 +14,7 @@ python -m compileall -q mompy
 ```
 
 Tests use `unittest` (standard library) and a fake DOSBox web server (`tests/fake_dosbox.py`), so they need no game and no DOSBox.
-The code targets Python 3.9, so no newer syntax (no `match`, no `X | Y` outside annotations, which `from __future__ import annotations` keeps as text);
-only 3.14 has been run so far.
+The code targets **Python 3.12 or newer** (Kevin: use modern Python). Only 3.14 has been run so far; the standard library is enough (`tomllib` reads the field table).
 
 Do not weaken or skip a test to get green. If a check could not be run, say so and why.
 
@@ -47,7 +46,7 @@ Mirror's `docs/reference/` and from your own check on a real game; when they dis
 
 ## 6. Code
 
-Standard library only (Python 3.9+): `urllib`, `json`, `argparse`, `struct`. Small functions, names from the game's
+Standard library only (Python 3.12+): `urllib`, `json`, `tomllib`, `argparse`, `struct`. Small functions, names from the game's
 domain (wizard, record, field), no network calls except the DOSBox API on `127.0.0.1`.
 
 ## 7. Documentation and tickets

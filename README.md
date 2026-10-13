@@ -11,8 +11,20 @@ mompy talks to **DOSBox Staging's built-in web API** (`webserver_enabled = true`
 and write the emulated machine's memory. It needs no game files of its own and ships none: only
 offsets, ranges and what we have checked about them.
 
-**Status: just started.** `mompy doctor` exists (below); `peek` and `poke` are next (see `docs/stories/`).
+**Status: just started.** `mompy doctor` exists (below); `peek` and `fields` exist too; `poke` is next (see `docs/stories/`).
 Nothing here has been tried on anyone's machine but Kevin's.
+
+## `mompy peek` and `mompy fields`
+
+```
+python -m mompy peek wizard 1 gold          # gold = 30000
+python -m mompy peek wizard 1 books         # books = nature 0, sorcery 12, chaos 0, life 3, death 0
+python -m mompy peek wizard 1 relations.freya
+python -m mompy peek wizard 2               # every field of wizard 2
+python -m mompy fields                      # what mompy knows, the ranges, and how sure we are
+```
+
+`--json` prints plain data for scripts. Wizard 1 is the player. Read-only.
 
 ## `mompy doctor`
 
@@ -28,7 +40,7 @@ It ends with `READY`, `READ-ONLY` or `NOT READY`, and exits 0 only for `READY`.
 
 - DOSBox Staging with its web API on (`webserver_enabled = true`) running *Master of Magic* 1.31. Developed against **0.84-alpha** (Kevin's research fork);
   the 0.83.0 release works too (checked), and `doctor` recognises both. A fork build also needs `webserver_allow_writes = true` before it accepts a write; stock DOSBox Staging does not.
-- Python 3.9 or newer. No other packages.
+- Python 3.12 or newer. No other packages.
 
 ## Layout
 

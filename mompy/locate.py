@@ -22,6 +22,17 @@ class Candidate(NamedTuple):
     names: List[str]
 
 
+class Game(NamedTuple):
+    base: int                        # where the wizard table is
+    names: List[str]
+    checks: List["TableCheck"]
+    alternatives: List[int]          # other places that also looked like the wizard table
+
+
+class GameNotFound(Exception):
+    """No usable game in memory; the message says why, in words for the player."""
+
+
 class TableCheck(NamedTuple):
     name: str
     address: int
@@ -123,3 +134,22 @@ def check_tables(memory: bytes, wizard_base: int) -> List[TableCheck]:
         results.append(TableCheck("nodes", addr, good >= 1, f"{good} plausible of {layout.NODES.count} slots"))
 
     return results
+
+
+def find_game(memory: bytes) -> Game:
+    """The game's wizard table, if memory holds one whose surrounding tables look right.
+
+    Raises ``GameNotFound`` otherwise. When several places qualify the first is used and the others are
+    reported in ``alternatives``.
+    """
+    candidates = find_wizard_tables(memory)
+    if not candidates:
+        raise GameNotFound("no wizard table found: load a saved game first (and the game needs all five wizards)")
+    verified = [(c, check_tables(memory, c.base)) for c in candidates]
+    good = [(c, t) for c, t in verified if all(x.ok for x in t)]
+    if not good:
+        c, t = verified[0]
+        raise GameNotFound(f"wizard names found at {c.base:#x}, but the tables around them do not look right: "
+                           + "; ".join(f"{x.name}: {x.detail}" for x in t if not x.ok))
+    chosen, checks = good[0]
+    return Game(chosen.base, chosen.names, checks, [c.base for c, _ in good[1:]])

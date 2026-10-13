@@ -102,3 +102,13 @@ class FakeDosbox:
     def __exit__(self, *exc):
         self._server.shutdown()
         self._server.server_close()
+
+
+def put_field(mem: bytearray, base: int, block: str, number: int, name: str, value) -> None:
+    """Set one field of record ``number`` in a game memory image (with the same encoder ``poke`` will use)."""
+    from mompy import fields as F
+
+    blk = F.blocks()[block]
+    field = F.find(block, name)
+    at = base + (number - blk.first_number) * blk.stride + field.offset
+    mem[at:at + field.size] = field.encode(value)

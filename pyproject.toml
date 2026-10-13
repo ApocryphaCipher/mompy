@@ -3,7 +3,7 @@ name = "mompy"
 version = "0.0.1"
 description = "Read and change a running Master of Magic through DOSBox Staging's memory API"
 readme = "README.md"
-requires-python = ">=3.9"
+requires-python = ">=3.12"
 dependencies = []          # standard library only, on purpose: easy to install and to share
 
 [project.scripts]
@@ -15,3 +15,6 @@ build-backend = "setuptools.build_meta"
 
 [tool.setuptools]
 packages = ["mompy"]
+
+[tool.setuptools.package-data]
+mompy = ["fields.toml"]
