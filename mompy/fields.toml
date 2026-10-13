@@ -67,6 +67,7 @@ type = "i16"
 count = 3
 labels = ["x", "y", "plane"]
 writable = false
+format = "map_position"
 confidence = "checked"
 note = "Map position of the wizard's summoning circle; plane 0 Arcanus, 1 Myrror."
 

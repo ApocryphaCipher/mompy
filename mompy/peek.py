@@ -49,9 +49,31 @@ def _plain(field: F.Field, value: int) -> str:
     return field.enum.get(str(value), str(value)) if field.enum else str(value)
 
 
-def render(field: F.Field, record: bytes, names: List[str], element: Optional[str] = None) -> str:
-    """One field (or one element of it) as ``name = ...``."""
+PLANES = ("Arcanus", "Myrror")
+
+
+def _position(values: List[int], cities: Dict[Tuple[int, int, int], str]) -> str:
+    x, y, plane = values
+    where = f"x {x}, y {y}, plane {plane}"
+    if plane in (0, 1):
+        where += f" ({PLANES[plane]})"
+    city = cities.get((x, y, plane))
+    return where + (f", the city {city}" if city else "")
+
+
+def _others(field: F.Field, values: List[int], own: Optional[int]) -> List[Tuple[int, int]]:
+    """(index, value) for each element, leaving out the wizard's own slot in a per-wizard list:
+    a wizard has no relation or treaty with himself."""
+    return [(i, v) for i, v in enumerate(values) if not (field.labels == "wizards" and i == own)]
+
+
+def render(field: F.Field, record: bytes, names: List[str], element: Optional[str] = None,
+           own: Optional[int] = None, cities: Optional[Dict[Tuple[int, int, int], str]] = None) -> str:
+    """One field (or one element of it) as ``name = ...``. ``own`` is the 0-based index of the record's
+    own wizard, whose slot is left out of lists about other wizards."""
     value = field.decode(_slice(field, record))
+    if field.format == "map_position" and element is None:
+        return f"{field.name} = {_position(value, cities or {})}"                 # type: ignore[arg-type]
     if element is not None:
         i = field.element(element, names)
         label = field.label_for(i, names)
@@ -70,22 +92,38 @@ def render(field: F.Field, record: bytes, names: List[str], element: Optional[st
         return f"{field.name} = {', '.join(parts)}  (ask for one with {field.name}.N)"
     if field.labels:
         return f"{field.name} = " + ", ".join(f"{field.label_for(i, names)} {_plain(field, v)}"
-                                              for i, v in enumerate(values))
+                                              for i, v in _others(field, values, own))
     return f"{field.name} = " + ", ".join(_plain(field, v) for v in values)
 
 
-def as_data(field: F.Field, record: bytes, names: List[str]) -> object:
-    """One field as plain data for ``--json``: numbers raw, arrays keyed by label when there are labels."""
+def as_data(field: F.Field, record: bytes, names: List[str], own: Optional[int] = None) -> object:
+    """One field as plain data for ``--json``: numbers raw, arrays keyed by label when there are labels
+    (without the wizard's own slot in a per-wizard list)."""
     value = field.decode(_slice(field, record))
     if field.is_array and field.labels:
-        return {field.label_for(i, names): v for i, v in enumerate(value)}      # type: ignore[arg-type]
+        return {field.label_for(i, names): v for i, v in _others(field, value, own)}   # type: ignore[arg-type]
     return value
+
+
+def read_cities(api: DosboxApi, game: locate.Game) -> Dict[Tuple[int, int, int], str]:
+    """(x, y, plane) -> name for each city in memory, to name a position."""
+    table = layout.CITIES
+    start = game.base + table.offset
+    raw = api.read(start, table.stride * table.count)
+    cities: Dict[Tuple[int, int, int], str] = {}
+    for i in range(table.count):
+        rec = raw[i * table.stride:(i + 1) * table.stride]
+        if locate._valid_city(rec):
+            cities[(rec[15], rec[16], rec[17])] = rec[:14].split(b"\0", 1)[0].decode("latin-1")
+    return cities
 
 
 def peek(api: DosboxApi, block: str, number: int, spec: Optional[str], as_json: bool = False) -> str:
     game = find_game(api)
     record = read_record(api, game, block, number)
     names = list(game.names)
+    own = number - 1 if block == "wizard" else None
+    cities = read_cities(api, game) if any(f.format == "map_position" for f in F.all_fields(block)) else {}
     title = f"{F.blocks()[block].describe} {number}"
     if block == "wizard":
         title += f" ({names[number - 1]})"
@@ -101,8 +139,8 @@ def peek(api: DosboxApi, block: str, number: int, spec: Optional[str], as_json: 
                 i = f.element(el, names)                                         # type: ignore[arg-type]
                 return json.dumps({f.name: f.decode(_slice(f, record))[i]})      # type: ignore[index]
             return json.dumps({"block": block, "number": number,
-                               "fields": {f.name: as_data(f, record, names) for f, _ in chosen}}, indent=1)
-        lines = [render(f, record, names, el) for f, el in chosen]
+                               "fields": {f.name: as_data(f, record, names, own) for f, _ in chosen}}, indent=1)
+        lines = [render(f, record, names, el, own, cities) for f, el in chosen]
     except F.FieldError as err:
         raise PeekError(str(err)) from None
     return "\n".join(([title] if spec is None else []) + [("  " if spec is None else "") + ln for ln in lines])

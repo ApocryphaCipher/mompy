@@ -45,6 +45,7 @@ class Field:
     max: Optional[int] = None
     writable: bool = False
     derived: bool = False
+    format: str = ""                 # "map_position": x, y, plane; shown with the plane name and the city there
     confidence: str = "guess"
     note: str = ""
 

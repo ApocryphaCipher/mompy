@@ -154,11 +154,27 @@ class PeekTest(unittest.TestCase):
 
     def test_relations_use_the_wizards_own_names(self):
         self.assertEqual(self.p(1, "relations"),
-                         "relations = Jafar 0, Freya 70, Sss'ra 0, Sharee 50, Tauron -90, neutral -81")
+                         "relations = Freya 70, Sss'ra 0, Sharee 50, Tauron -90, neutral -81")
         self.assertEqual(self.p(1, "relations.freya"), "relations.Freya = 70")
         self.assertEqual(self.p(1, "relations.NEUTRAL"), "relations.neutral = -81")
         self.assertIn("Tauron war", self.p(1, "treaty_status"))
         self.assertIn("Sharee alliance", self.p(1, "treaty_status"))
+
+    def test_a_wizard_has_no_relation_with_himself(self):
+        self.assertNotIn("Jafar", self.p(1, "relations"))
+        self.assertNotIn("Jafar", self.p(1, "treaty_status"))
+        self.assertTrue(self.p(2, "relations").startswith("relations = Jafar "))      # others still see him
+        self.assertNotIn("Freya", self.p(2, "relations"))
+        data = json.loads(self.p(1, "relations", as_json=True))["fields"]["relations"]
+        self.assertNotIn("Jafar", data)
+        self.assertEqual(data["neutral"], -81)
+        self.assertEqual(self.p(1, "relations.jafar"), "relations.Jafar = 0")        # still readable on request
+
+    def test_the_summoning_circle_names_its_plane_and_city(self):
+        self.assertEqual(self.p(1, "summoning_circle"), "summoning_circle = x 38, y 21, plane 1 (Myrror)")
+        put_field(self.mem, BASE, "wizard", 2, "summoning_circle", [10, 20, 0])      # where City0 stands
+        self.assertEqual(self.p(2, "summoning_circle"),
+                         "summoning_circle = x 10, y 20, plane 0 (Arcanus), the city City0")
 
     def test_the_214_spells_are_summarised_and_one_can_be_asked_for(self):
         out = self.p(1, "spells")

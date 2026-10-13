@@ -1,7 +1,7 @@
 # STORY-002: The field table and peek
 
 **Parent:** [EPIC-001](../epics/EPIC-001-mompy-core.md)
-**Status:** built (2026-10-13), PR open; the run against Kevin's real game is still to do
+**Status:** done (2026-10-13): built, tested, and compared with the game's own Magic screen
 **Size:** medium
 **Raised by:** [Kevin](https://github.com/KevinAsbury), 2026-10-13
 
@@ -27,4 +27,8 @@ Built: the field table `mompy/fields.toml` (TOML, since the Python floor became 
 - Wizard numbering is the human one (1 is the player), as on Mirror's page; 0 and 6 are refused with the range.
 - Read-only by construction: a test checks that no write is sent and that memory is unchanged.
 - 43 tests (23 new): the table is consistent (no overlaps, labels match counts, ranges fit their types, derived fields are not editable, the documented offsets are the ones in the table), every type decodes and encodes back, and `peek` is tested against the fake server for each field kind, JSON, errors, another game address (`0x3239A`) and no game.
-- *Not yet done:* compare with the game's own screens on a real game (the story's definition of done).
+- A wizard's own slot is left out of the lists about other wizards (`relations`, `treaty_status`: no relation with himself), still readable with `relations.jafar`; and `summoning_circle` names its plane and the city there.
+
+**Real game, 2026-10-13** (fork `0.84.0-alpha (83716)`, MAXIMUS loaded), `peek wizard 1` against Kevin's Magic screen: casting skill 217 (screen `217(217)`), magic reserve 30000 (`30000`), power base 1376 (`1376`),
+researching spell 53 (`Vertigo`), summoning circle x 51, y 22, Myrror, the city **Blackstone** (`Summon To: Blackstone`). The relations match the portraits' attitude words and icons: Freya 0 `Neutral`, Sharee -20 and Tauron -20 `Uneasy`;
+Freya's two peace-symbol icons are her alliances with Sharee and Tauron, which is what `treaty_status` reads for wizard 2 (alliance, alliance). Not compared on screen: the Info screen's books, retorts and fame (30000 stored).
