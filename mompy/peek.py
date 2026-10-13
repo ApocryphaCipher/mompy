@@ -124,7 +124,6 @@ def peek(api: DosboxApi, block: str, number: int, spec: Optional[str], as_json: 
     record = read_record(api, game, block, number)
     names = list(game.names)
     own = number - 1 if block == "wizard" else None
-    cities = read_cities(api, game) if any(f.format == "map_position" for f in F.all_fields(block)) else {}
     title = f"{F.blocks()[block].describe} {number}"
     if block == "wizard":
         title += f" ({names[number - 1]})"
@@ -141,6 +140,8 @@ def peek(api: DosboxApi, block: str, number: int, spec: Optional[str], as_json: 
                 return json.dumps({f.name: f.decode(_slice(f, record))[i]})      # type: ignore[index]
             return json.dumps({"block": block, "number": number,
                                "fields": {f.name: as_data(f, record, names, own) for f, _ in chosen}}, indent=1)
+        # the city table is read only to name a position (the summoning circle): not for `peek wizard 1 gold`
+        cities = read_cities(api, game) if any(f.format == "map_position" and el is None for f, el in chosen) else {}
         lines = [render(f, record, names, el, own, cities) for f, el in chosen]
     except F.FieldError as err:
         raise PeekError(str(err)) from None
