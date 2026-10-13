@@ -19,7 +19,7 @@ differ too. The tables below are therefore the **research setup's**; `doctor` fi
 | terrain | `0x72630` | u16 per tile | 2 planes × 60 × 40 |
 | terrain flags / landmass / minerals / explored | `0x773A0` / `0x74DC0` / `0x760B0` / `0x78690` | 1 byte per tile | 2 planes × 2400 |
 
-**Not located in RAM yet:** the fortress block (whose "active" byte is the *defeated* flag; it is at save offset `0x65F8`), the item block and the lair block. STORY-006 finds them.
+**Not located in RAM yet:** the fortress block (whose "active" byte is the *banished* flag; it is at save offset `0x65F8`), the item block and the lair block. STORY-006 finds them.
 
 ## In a wizard record (offsets from the start of the record; all **checked** in the real game, see Mirror's `docs/reference/wizard-record-and-exploration.md`)
 
