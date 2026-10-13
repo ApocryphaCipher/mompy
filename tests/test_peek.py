@@ -9,7 +9,7 @@ from mompy.api import DosboxApi
 from mompy.cli import main
 from mompy.peek import PeekError, describe_fields, peek
 
-from .fake_dosbox import FakeDosbox, game_memory, put_field
+from .fake_dosbox import FakeDosbox, HomeTestCase, game_memory, put_field
 
 BASE = layout.REFERENCE_WIZARD_BASE
 
@@ -130,8 +130,9 @@ class DecodeTest(unittest.TestCase):
             F.find("wizard", "gold").element("1")
 
 
-class PeekTest(unittest.TestCase):
+class PeekTest(HomeTestCase):
     def setUp(self):
+        super().setUp()
         self.mem = game()
         self.server = FakeDosbox(self.mem)
         self.server.__enter__()
@@ -238,7 +239,7 @@ class PeekTest(unittest.TestCase):
                 peek(DosboxApi(fake.url), "wizard", 1, "gold")
 
 
-class CliTest(unittest.TestCase):
+class CliTest(HomeTestCase):
     def run_cli(self, *argv):
         out, err = io.StringIO(), io.StringIO()
         with contextlib.redirect_stdout(out), contextlib.redirect_stderr(err):

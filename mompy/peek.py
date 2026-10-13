@@ -11,7 +11,8 @@ from typing import Dict, List, Optional, Tuple
 
 from . import fields as F
 from . import layout, locate
-from .api import MEMORY_SIZE, DosboxApi
+from .api import DosboxApi
+from .game import connect
 
 
 class PeekError(Exception):
@@ -20,7 +21,7 @@ class PeekError(Exception):
 
 def find_game(api: DosboxApi) -> locate.Game:
     try:
-        return locate.find_game(api.read(0, MEMORY_SIZE))
+        return connect(api)
     except locate.GameNotFound as err:
         raise PeekError(f"{err}\nRun 'mompy doctor' to see what is wrong.") from None
 

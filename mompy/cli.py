@@ -9,6 +9,7 @@ from typing import List, Optional
 from . import __version__
 from .api import DEFAULT_URL, ApiError, DosboxApi
 from . import peek as peeking
+from . import poke as poking
 from .doctor import diagnose, render
 
 
@@ -25,6 +26,14 @@ def main(argv: Optional[List[str]] = None) -> int:
     pk.add_argument("number", type=int, help="which one; wizard 1 is the player")
     pk.add_argument("field", nargs="?", help="a field, or field.element (books.sorcery, relations.freya); omit for all")
     pk.add_argument("--json", action="store_true", help="print plain data for scripts")
+    pk2 = sub.add_parser("poke", parents=[common], help="change a field of the running game (checked, undoable)")
+    pk2.add_argument("block", choices=["wizard"], help="what to change")
+    pk2.add_argument("number", type=int, help="which one; wizard 1 is the player")
+    pk2.add_argument("field", help="a field, or field.element (books.sorcery, relations.freya)")
+    pk2.add_argument("value", help="a number, an enum word (alliance), on/off for flags, or a,b,c for a whole array")
+    pk2.add_argument("--dry-run", action="store_true", help="say what would change; write and log nothing")
+    pk2.add_argument("--force", action="store_true", help="also write a field that is only a guess")
+    sub.add_parser("undo", parents=[common], help="put the last poke back")
     fl = sub.add_parser("fields", help="list the fields mompy knows, with their ranges and how sure we are")
     fl.add_argument("block", nargs="?", choices=["wizard"])
 
@@ -33,6 +42,17 @@ def main(argv: Optional[List[str]] = None) -> int:
         report = diagnose(DosboxApi(args.url))
         print(render(report, args.url))
         return 0 if report.ready else 1
+    if args.command in ("poke", "undo"):
+        try:
+            api = DosboxApi(args.url)
+            if args.command == "undo":
+                print(poking.undo(api))
+            else:
+                print(poking.poke(api, args.number, args.field, args.value, args.dry_run, args.force))
+        except (poking.PokeError, peeking.PeekError, ApiError) as err:
+            print(f"mompy: {err}", file=sys.stderr)
+            return 1
+        return 0
     if args.command == "fields":
         print(peeking.describe_fields(args.block))
         return 0

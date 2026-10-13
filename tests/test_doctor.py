@@ -7,7 +7,7 @@ from mompy.api import ApiError, DosboxApi, Mismatch, WritesDisabled
 from mompy.cli import main
 from mompy.doctor import FAIL, OK, WARN, diagnose, render
 
-from .fake_dosbox import FakeDosbox, game_memory
+from .fake_dosbox import FakeDosbox, HomeTestCase, game_memory
 
 
 def statuses(report):
@@ -38,6 +38,14 @@ class LocateTest(unittest.TestCase):
             found = locate.find_wizard_tables(bytes(game_memory(base)))
             self.assertEqual([c.base for c in found], [base])
             self.assertEqual(found[0].names[0], "Jafar")
+
+    def test_a_wizard_with_a_very_short_name_is_still_found(self):
+        mem = game_memory(names=("Al", "Freya", "Sss'ra", "X", "Tauron"))
+        found = locate.find_wizard_tables(bytes(mem))
+        self.assertEqual([c.base for c in found], [layout.REFERENCE_WIZARD_BASE])
+        self.assertEqual(found[0].names, ["Al", "Freya", "Sss'ra", "X", "Tauron"])
+        with FakeDosbox(mem) as fake:
+            self.assertTrue(diagnose(DosboxApi(fake.url)).ready)
 
     def test_nothing_without_a_loaded_game(self):
         self.assertEqual(locate.find_wizard_tables(bytes(game_memory(names=("", "", "", "", "")))), [])
@@ -165,7 +173,7 @@ class DoctorTest(unittest.TestCase):
         self.assertEqual(report.wizard_base, layout.REFERENCE_WIZARD_BASE)
 
 
-class CliTest(unittest.TestCase):
+class CliTest(HomeTestCase):
     def run_cli(self, *argv):
         out = io.StringIO()
         with contextlib.redirect_stdout(out):

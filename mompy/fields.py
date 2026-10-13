@@ -45,6 +45,7 @@ class Field:
     max: Optional[int] = None
     writable: bool = False
     derived: bool = False
+    mirrored: bool = False           # the game keeps it on both wizards of a pair (relations, treaties)
     format: str = ""                 # "map_position": x, y, plane; shown with the plane name and the city there
     confidence: str = "guess"
     note: str = ""
@@ -53,6 +54,11 @@ class Field:
     def size(self) -> int:
         """Bytes this field occupies in a record."""
         return self.length if self.type == "text" else _SIZES[self.type] * self.count
+
+    @property
+    def item_size(self) -> int:
+        """Bytes of one element (the whole field for a single number)."""
+        return _SIZES[self.type]
 
     @property
     def is_array(self) -> bool:
@@ -67,6 +73,13 @@ class Field:
         step = _SIZES[self.type]
         values = [struct.unpack(_STRUCT[self.type], raw[i:i + step])[0] for i in range(0, len(raw), step)]
         return values if self.is_array else values[0]
+
+    def decode_item(self, raw: bytes) -> int:
+        """One element's bytes as a number."""
+        return struct.unpack(_STRUCT[self.type], raw)[0]
+
+    def encode_item(self, value: int) -> bytes:
+        return struct.pack(_STRUCT[self.type], value)
 
     def encode(self, value: Value) -> bytes:
         """The reverse of ``decode`` (a later story writes with it; tested here so the two agree)."""

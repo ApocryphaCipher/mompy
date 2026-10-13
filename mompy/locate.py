@@ -41,13 +41,16 @@ class TableCheck(NamedTuple):
 
 
 def _name_at(memory: bytes, record_start: int) -> Optional[str]:
-    """The wizard name in the record at ``record_start``, if it is a plausible one."""
+    """The wizard name in the record at ``record_start``, if it is a plausible one.
+
+    One to 19 printable characters, NUL-padded to the end of the field. (The scan *finds* a table through a name of three or
+    more letters, but a wizard called "Al" must not stop the other four from counting.)"""
     at = record_start + layout.WIZARD_NAME_AT
     field = memory[at:at + layout.WIZARD_NAME_LEN]
     if len(field) < layout.WIZARD_NAME_LEN:
         return None
     name = field.split(b"\0", 1)[0]
-    if not 3 <= len(name) <= 19 or not all(32 <= c < 127 for c in name):
+    if not 1 <= len(name) <= 19 or not all(32 <= c < 127 for c in name):      # the game allows a name of one letter
         return None
     if any(field[len(name):]):          # a name is NUL-padded to the end of its field
         return None
@@ -63,13 +66,16 @@ def find_wizard_tables(memory: bytes) -> List[Candidate]:
     found: List[Candidate] = []
     seen = set()
     for m in _NAME.finditer(memory):
-        base = m.start() - layout.WIZARD_NAME_AT
-        if base < 0 or base in seen:
-            continue
-        names = [_name_at(memory, base + i * layout.WIZARD_STRIDE) for i in range(layout.WIZARD_COUNT)]
-        if all(names):
-            seen.add(base)
-            found.append(Candidate(base, names))
+        # the name found may be any of the five wizards' (the first may be "Al"): try each place it could sit
+        hit = m.start() - layout.WIZARD_NAME_AT
+        for slot in range(layout.WIZARD_COUNT):
+            base = hit - slot * layout.WIZARD_STRIDE
+            if base < 0 or base in seen:
+                continue
+            names = [_name_at(memory, base + i * layout.WIZARD_STRIDE) for i in range(layout.WIZARD_COUNT)]
+            if all(names):
+                seen.add(base)
+                found.append(Candidate(base, names))
     return found
 
 
