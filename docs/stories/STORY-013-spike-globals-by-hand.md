@@ -7,7 +7,7 @@
 
 ## Data so far (2026-10-13)
 
-- **Aura of Majesty** cast on Jafar by `mompy poke wizard 1 cast aura_of_majesty`: it **appeared in the Magic screen's "Overland Enchantments" box** at once, no mana paid. What End Turn does with it: not yet seen.
+- **Aura of Majesty** cast on Jafar by `mompy poke wizard 1 cast aura_of_majesty`: it **appeared in the Magic screen's "Overland Enchantments" box** at once, no mana paid. After one End Turn it was still active, relations rose (Freya 0 to 2, Sharee and Tauron -20 to -16, on both wizards' records) and mana fell 9 (about 8 more than a normal turn: probably the upkeep). A real cast had jumped every relation to 20 first; the flag alone gave +2/+4 (guess: the jump is the cast routine). Not tried: an unaffordable upkeep.
 
 ## The question
 

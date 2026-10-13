@@ -1,7 +1,7 @@
 # STORY-012: `mompy poke wizard N cast <global>`: put a global enchantment straight on a wizard (enhancement)
 
 **Parent:** [EPIC-001](../epics/EPIC-001-mompy-core.md)
-**Status:** built (2026-10-13): `cast` and `dispel` work on the real game (the Magic screen lists the enchantment). The End Turn effect is still to see. **Priority: nice to have.**
+**Status:** built (2026-10-13): `cast` and `dispel` work on the real game (the Magic screen lists the enchantment). One End Turn seen: the game acts on it. **Priority: nice to have.**
 **Size:** small to medium (most of it is checking each global in the game)
 **Raised by:** [Kevin](https://github.com/KevinAsbury), 2026-10-13
 
@@ -38,5 +38,7 @@ Built: `mompy poke wizard N cast <global>` and `dispel <global>` (`mompy/cast.py
 Already cast (or not cast): nothing written, nothing logged. Any wizard can be the caster, and two wizards may hold the same global (Kevin's answer 5; tested). The **five questionable ones** (Time Stop, Planar Seal, Armageddon, Meteor Storm, Great Wasting) need `--force` to cast; `dispel` never needs it.
 
 - **Real game, 2026-10-13** (the fork, MAXIMUS loaded): `poke wizard 1 cast aura_of_majesty` printed `Aura of Majesty cast on wizard 1 (Jafar)`, mana stayed 29999 (nothing paid), and **the Magic screen's "Overland Enchantments" box listed Aura of Majesty** (Kevin looked, with a screenshot). *That answers question 3 of the ticket* (it shows in the box) *and the first half of question 1 for this spell*: the game accepts a hand-set byte without any casting.
-- **Not yet seen:** what End Turn does with it (does Aura of Majesty raise the relations; is the upkeep charged; is it dispelled when unaffordable). That, and the same question for the other 23, is the spike [STORY-013](STORY-013-spike-globals-by-hand.md). Also open: what a *power level* in the byte would mean (only 0 and 1 have been seen) and the questionable five ([STORY-014](STORY-014-spike-wonky-globals.md)).
+- **One End Turn later (Kevin pressed it):** Aura of Majesty was **still active** and the relations rose: Jafar's view of Freya 0 to **2**, of Sharee -20 to **-16**, of Tauron -20 to **-16**; the wizards' views of Jafar moved the same amounts (kept on both sides); Sss'ra (not met) and the neutral player did not move. Mana went 29999 to **29990** (a normal turn on this save costs about 1): *probably* the upkeep (the spell book lists 5 a turn; retorts change it), not isolated.
+  **A difference from a real cast:** when Kevin cast it through the game (2026-10-12) the first turn took *every* relation to 20, then +2 a turn; the hand-set flag gave +2 and +4 and no jump. *Guess:* the jump to 20 is the game's cast routine, the per-turn rise is the flag.
+- **Not yet seen:** whether the game dispels it when the upkeep cannot be paid, and the same questions for the other 23 globals: the spike [STORY-013](STORY-013-spike-globals-by-hand.md). Also open: what a *power level* in the byte would mean (only 0 and 1 have been seen) and the questionable five ([STORY-014](STORY-014-spike-wonky-globals.md)).
 - 109 tests (17 new), warnings as errors, with the fake DOSBox: the write changes only the one byte, every spelling of a name, ambiguous and unknown names, the caster is whichever wizard you name, two holders, already cast, dry run, the five need `--force` and the other 19 do not, `dispel` of a questionable one needs nothing, `undo`, writes disabled, the race, and the command line.
