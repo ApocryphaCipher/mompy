@@ -46,10 +46,15 @@ class BuildTest(CityCase):
             build(self.api, 2)
         self.assertEqual(bytes(self.mem), before)
 
-    def test_a_unit_needs_force(self):
+    def test_a_unit_needs_no_force(self):
         put_production(self.mem, 3, 158)
-        with self.assertRaisesRegex(PokeError, "not a building"):
-            build(self.api, 4)
+        self.assertIn("item 158", build(self.api, 4))
+
+    def test_an_item_that_is_neither_needs_force(self):
+        for item in (0, 50, 0xFFFC):
+            put_production(self.mem, 3, item)
+            with self.assertRaisesRegex(PokeError, "neither a building"):
+                build(self.api, 4)
         self.assertIn("completes", build(self.api, 4, force=True))
 
     def test_already_full_and_dry_run(self):
