@@ -25,5 +25,6 @@ separate project if players want it.
 - [STORY-008](../stories/STORY-008-stock-dosbox.md): confirm it works against the released DOSBox Staging binaries
 - [STORY-009](../stories/STORY-009-dosbox-memory-map-endpoint.md): ask DOSBox where the game was loaded (nice to have)
 - [STORY-010](../stories/STORY-010-where.md): `mompy where`, the map tile under the game's mouse cursor (nice to have)
+- [STORY-011](../stories/STORY-011-where-name.md): `mompy where <name>`, find a city or wizard by name (nice to have)
 
 Suggested order: 008 (a quick check that decides everything else), 001, 002, 003, then 004 to 007.

@@ -13,7 +13,7 @@ Point the mouse at something in the running game and ask `mompy where`; it print
 Myrror (51, 22)  city Blackstone, owner Jafar   2 units
 ```
 
-Uses: no more counting tiles to find a lair, a stack or a node's coordinates for Mirror's editors (move, lair and node tools) or for `mompy peek`; and a `--watch` mode
+The reverse (a name in, a place out) is [STORY-011](STORY-011-where-name.md), which needs no mouse and could come first. Uses: no more counting tiles to find a lair, a stack or a node's coordinates for Mirror's editors (move, lair and node tools) or for `mompy peek`; and a `--watch` mode
 that follows the cursor and prints as it moves. The wizard, city, unit, node and lair tables are already readable ([ram-layout.md](../reference/ram-layout.md)); the tile contents come from them.
 
 ## What is already known (Mirror's `docs/reference/live-ram-map.md`, "Surveyor hovering, the map view and the plane", 2026-09-24)
