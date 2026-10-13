@@ -1,7 +1,7 @@
 # STORY-012: `mompy poke wizard N cast <global>`: put a global enchantment straight on a wizard (enhancement)
 
 **Parent:** [EPIC-001](../epics/EPIC-001-mompy-core.md)
-**Status:** proposed (2026-10-13). **Priority: nice to have.** Depends on [STORY-003](STORY-003-poke.md) (`poke`).
+**Status:** built (2026-10-13): `cast` and `dispel` work on the real game (the Magic screen lists the enchantment). The End Turn effect is still to see. **Priority: nice to have.**
 **Size:** small to medium (most of it is checking each global in the game)
 **Raised by:** [Kevin](https://github.com/KevinAsbury), 2026-10-13
 
@@ -31,3 +31,12 @@ Time Stop, Planar Seal, Armageddon, Meteor Storm, Great Wasting. *(Spell of Mast
 ## Definition of done
 
 `cast` and `dispel` write the right byte for any global, refuse the questionable ones without `--force`, and `cast` on one already active writes nothing. Seen once on the real game: Aura of Majesty cast on Jafar appears in the Magic screen's box and relations rise at the next End Turn (the game's own sums). Tests with the fake DOSBox for the write, the refusals, `--force` and the undo.
+
+## Outcome (2026-10-13)
+
+Built: `mompy poke wizard N cast <global>` and `dispel <global>` (`mompy/cast.py`), on top of `poke`: a compare-and-swap on byte *n* of the wizard's 24 globals, logged for `undo`, `--dry-run` writes nothing. The name goes through the same element lookup as `peek` (`aura_of_majesty`, `natures-wrath`, `globals.aura_of_majesty`, a unique prefix; an ambiguous one such as `nature` lists its matches).
+Already cast (or not cast): nothing written, nothing logged. Any wizard can be the caster, and two wizards may hold the same global (Kevin's answer 5; tested). The **five questionable ones** (Time Stop, Planar Seal, Armageddon, Meteor Storm, Great Wasting) need `--force` to cast; `dispel` never needs it.
+
+- **Real game, 2026-10-13** (the fork, MAXIMUS loaded): `poke wizard 1 cast aura_of_majesty` printed `Aura of Majesty cast on wizard 1 (Jafar)`, mana stayed 29999 (nothing paid), and **the Magic screen's "Overland Enchantments" box listed Aura of Majesty** (Kevin looked, with a screenshot). *That answers question 3 of the ticket* (it shows in the box) *and the first half of question 1 for this spell*: the game accepts a hand-set byte without any casting.
+- **Not yet seen:** what End Turn does with it (does Aura of Majesty raise the relations; is the upkeep charged; is it dispelled when unaffordable). That, and the same question for the other 23, is the spike [STORY-013](STORY-013-spike-globals-by-hand.md). Also open: what a *power level* in the byte would mean (only 0 and 1 have been seen) and the questionable five ([STORY-014](STORY-014-spike-wonky-globals.md)).
+- 109 tests (17 new), warnings as errors, with the fake DOSBox: the write changes only the one byte, every spelling of a name, ambiguous and unknown names, the caster is whichever wizard you name, two holders, already cast, dry run, the five need `--force` and the other 19 do not, `dispel` of a questionable one needs nothing, `undo`, writes disabled, the race, and the command line.

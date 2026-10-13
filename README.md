@@ -11,7 +11,7 @@ mompy talks to **DOSBox Staging's built-in web API** (`webserver_enabled = true`
 and write the emulated machine's memory. It needs no game files of its own and ships none: only
 offsets, ranges and what we have checked about them.
 
-**Status: just started.** `mompy doctor` exists (below); `peek`, `fields`, `poke`, `undo`, `banish` and `unbanish` exist too (see `docs/stories/`).
+**Status: just started.** `mompy doctor` exists (below); `peek`, `fields`, `poke`, `undo`, `banish`, `unbanish`, and `cast`/`dispel` (a global enchantment) exist too (see `docs/stories/`).
 Nothing here has been tried on anyone's machine but Kevin's.
 
 ## `mompy peek` and `mompy fields`
@@ -41,6 +41,19 @@ python -m mompy undo                              # put the last poke back
 Every write is a compare-and-swap, every value is range-checked against the field table (`mompy fields`), and nothing is clamped silently. A field the game works out again
 (power base...) or that mompy has not seen the game accept is refused. Needs the research fork's `webserver_allow_writes = true`; stock DOSBox Staging does not need it.
 The undo log and the remembered game address live in `~/.mompy` (`MOMPY_HOME` to change it).
+
+## `mompy poke ... cast`: a global enchantment, straight on a wizard
+
+```
+python -m mompy poke wizard 1 cast aura_of_majesty     # Aura of Majesty cast on wizard 1 (Jafar)
+python -m mompy poke wizard 1 dispel aura_of_majesty   # ... dispelled
+python -m mompy poke wizard 2 cast just_cause          # any wizard can be the caster; two wizards can hold the same one
+python -m mompy peek wizard 1 globals                  # which ones are on
+```
+
+It sets the one byte the game keeps for that enchantment (the wizard is the caster). **No mana, no spell book, none of the game's casting checks**, and no waiting for End Turn: it is active now, and the game's own sums
+(the effect, the upkeep, a dispel it cannot afford) happen at End Turn. The name can be spelled loosely (`aura`, `natures-wrath`, `globals.aura_of_majesty`). Five enchantments that change how turns or the whole map work
+(Time Stop, Planar Seal, Armageddon, Meteor Storm, Great Wasting) need `--force` to cast; they have not been tried by hand yet. `mompy undo` takes the last one off.
 
 ## `mompy banish` and `mompy unbanish`
 

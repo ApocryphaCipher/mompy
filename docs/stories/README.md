@@ -13,7 +13,7 @@
 | [STORY-009](STORY-009-dosbox-memory-map-endpoint.md) | Ask DOSBox where the game was loaded | proposed (nice to have) |
 | [STORY-010](STORY-010-where.md) | `mompy where`: the tile under the mouse | proposed (nice to have) |
 | [STORY-011](STORY-011-where-name.md) | `mompy where <name>`: find a city or wizard by name | proposed (nice to have; cheapest first) |
-| [STORY-012](STORY-012-cast.md) | `poke ... cast <global>`: a global enchantment straight on the wizard | proposed (nice to have; after `poke`) |
+| [STORY-012](STORY-012-cast.md) | `poke ... cast <global>`: a global enchantment straight on the wizard | built; shows in the Magic screen; End Turn effect to see |
 | [STORY-013](STORY-013-spike-globals-by-hand.md) | Spike: what does the game do with a global set by hand? | proposed (nice to have) |
 | [STORY-014](STORY-014-spike-wonky-globals.md) | Spike: the wonky globals (Spell of Mastery, Planar Seal...) | proposed (nice to have) |
 | [STORY-015](STORY-015-cast-unit.md) | `poke ... cast unit.<name>`: summon any unit, no fuss | proposed (nice to have; after `poke`) |

@@ -9,6 +9,7 @@ from typing import List, Optional
 from . import __version__
 from .api import DEFAULT_URL, ApiError, DosboxApi
 from . import banish as banishing
+from . import cast as casting
 from . import peek as peeking
 from . import poke as poking
 from .doctor import diagnose, render
@@ -30,10 +31,10 @@ def main(argv: Optional[List[str]] = None) -> int:
     pk2 = sub.add_parser("poke", parents=[common], help="change a field of the running game (checked, undoable)")
     pk2.add_argument("block", choices=["wizard", "fortress"], help="what to change")
     pk2.add_argument("number", type=int, help="which one; wizard 1 is the player")
-    pk2.add_argument("field", help="a field, or field.element (books.sorcery, relations.freya)")
-    pk2.add_argument("value", help="a number, an enum word (alliance), on/off for flags, or a,b,c for a whole array")
+    pk2.add_argument("field", help="a field, or field.element (books.sorcery, relations.freya); or cast / dispel a global enchantment")
+    pk2.add_argument("value", help="a number, an enum word (alliance), on/off for flags, or a,b,c for a whole array; for cast/dispel, the enchantment")
     pk2.add_argument("--dry-run", action="store_true", help="say what would change; write and log nothing")
-    pk2.add_argument("--force", action="store_true", help="also write a field that is only a guess")
+    pk2.add_argument("--force", action="store_true", help="also write a field that is only a guess, or cast one of the questionable globals")
     sub.add_parser("undo", parents=[common], help="put the last poke back")
     bn = sub.add_parser("banish", parents=[common], help="banish a wizard: take his fortress (he is not dead; he casts Spell of Return)")
     bn.add_argument("block", choices=["wizard"])
@@ -69,7 +70,15 @@ def main(argv: Optional[List[str]] = None) -> int:
             if args.command == "undo":
                 print(poking.undo(api))
             else:
-                print(poking.poke(api, args.number, args.field, args.value, args.dry_run, args.force, block_name=args.block))
+                if args.field in ("cast", "dispel"):
+                    if args.block != "wizard":
+                        raise poking.PokeError(f"{args.field} is for wizards: mompy poke wizard N {args.field} aura_of_majesty")
+                    if args.field == "cast":
+                        print(casting.cast(api, args.number, args.value, args.dry_run, args.force))
+                    else:
+                        print(casting.dispel(api, args.number, args.value, args.dry_run))
+                else:
+                    print(poking.poke(api, args.number, args.field, args.value, args.dry_run, args.force, block_name=args.block))
         except (poking.PokeError, peeking.PeekError, ApiError) as err:
             print(f"mompy: {err}", file=sys.stderr)
             return 1

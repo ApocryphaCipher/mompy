@@ -5,6 +5,10 @@
 **Size:** small to medium (a play session)
 **Raised by:** [Kevin](https://github.com/KevinAsbury), 2026-10-13 ("not sure, flag as a test and see")
 
+## Data so far (2026-10-13)
+
+- **Aura of Majesty** cast on Jafar by `mompy poke wizard 1 cast aura_of_majesty`: it **appeared in the Magic screen's "Overland Enchantments" box** at once, no mana paid. What End Turn does with it: not yet seen.
+
 ## The question
 
 [STORY-012](STORY-012-cast.md) writes one byte and trusts the game to take it from there. Is that true for **every** global, or do some need more than the flag?
