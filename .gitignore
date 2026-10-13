@@ -1,0 +1,13 @@
+__pycache__/
+*.pyc
+.venv/
+dist/
+build/
+*.egg-info/
+.pytest_cache/
+.coverage
+# game files and saves never go in this repo (see AGENTS.md section 3)
+*.LBX
+*.lbx
+*.GAM
+*.EXE

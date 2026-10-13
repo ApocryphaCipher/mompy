@@ -1,0 +1,46 @@
+# Where Master of Magic keeps its tables in DOSBox's memory
+
+**Source:** `gama`'s `layout.py` (the addresses), which found them with the memory API; Mirror's
+`docs/reference/live-ram-map.md` and `save-to-ram-map.md` (how each was checked). The game is **Master of Magic 1.31, GOG release**, run in DOSBox
+Staging with the usual config. The game's data segment is `0x289F0` (SS = `0x289F`).
+
+**Caveat:** the addresses held across two launches with the same DOSBox setup. They belong to **one game executable**; another release will
+differ. `doctor` therefore checks that a table *looks right* (names printable at the record stride, counts in range) before anything is written (STORY-001).
+
+## Tables (linear addresses, one record after another)
+
+| Table | Address | Record size | Count |
+| --- | --- | --- | --- |
+| wizards | `0x328BA` | `0x4C8` | 5 (the neutral player's sixth record is not at this address) |
+| cities | `0x6F980` | 114 | 100 |
+| units | `0x7E060` | 32 | 1009 (the live count is a u16 at `0x34782`) |
+| magic nodes | `0x85FE0` | 48 | 30 |
+| lairs / encounters | `0x86660` | 24 | 102 |
+| terrain | `0x72630` | u16 per tile | 2 planes × 60 × 40 |
+| terrain flags / landmass / minerals / explored | `0x773A0` / `0x74DC0` / `0x760B0` / `0x78690` | 1 byte per tile | 2 planes × 2400 |
+
+**Not located in RAM yet:** the fortress block (whose "active" byte is the *defeated* flag; it is at save offset `0x65F8`), the item block and the lair block. STORY-006 finds them.
+
+## In a wizard record (offsets from the start of the record; all **checked** in the real game, see Mirror's `docs/reference/wizard-record-and-exploration.md`)
+
+| Field | Offset | Type | Range we have seen the game accept |
+| --- | --- | --- | --- |
+| name | `+0x01` | 20 bytes, NUL-padded | printable ASCII, 1 to 19 characters |
+| fame | `+0x24` | u16 | to 30000 (the Info screen shows it plus a bonus: 77 shows as 90) |
+| books (Nature, Sorcery, Chaos, Life, Death) | `+0x5A` | 5 × i16 | 0 to 13 each |
+| retorts | `+0x64` | 18 × u8 | 0 or 1 |
+| research points left | `+0x25A` | u16 | |
+| mana | `+0x25C` | u16 | to 30000 |
+| spell being researched | `+0x262` | u16 | only one of the eight candidates at `+0x34`, or the Research page shows nothing |
+| spell library | `+0x264` | 214 × u8 | 0 unknown, 1 knowable, 2 known, 3 on the research list |
+| gold | `+0x356` | u16 | to 30000 |
+| visible relations | `+0x128 + 42 + other` | i8 | −100 to 100 (written on **both** wizards) |
+| treaty status | `+0x128 + 48 + other` | u8 | 0 none (peace), 1 wizard pact, 2 alliance, 3 war |
+| global enchantments | `+0x482` | 24 × u8 | 1 when active; byte 3 Aura of Majesty and 18 Just Cause seen set |
+
+## What a write does not do
+
+- **Derived values** (power base, casting skill, a unit's level) are worked out again by the game, at a load or at End Turn.
+- **A spell is cast at End Turn**, not when it is chosen; setting a global by hand may skip the cost and the upkeep (STORY-006 tests it).
+- A unit moved by writing its position vanished from the map until the turn ended (research fork notes, 2026-09-23).
+- Saving the running game writes what is in memory, so a write is kept only if the player then saves.
