@@ -13,7 +13,7 @@ mompy poke wizard 1 cast unit.war_bears --count 3
 mompy poke wizard 1 cast unit.swordsmen --at blackstone
 ```
 
-Like [`cast <global>`](STORY-012-cast.md): no mana, no spell book, none of the game's checks. Any unit type in the game, regardless of books or race: a fantastic creature, a normal racial unit, a boat or a catapult.
+Like [`cast <global>`](STORY-012-cast.md): no mana, no spell book, none of the game's checks. Any unit type in the game, regardless of books: a fantastic creature, a normal racial unit, a boat or a catapult.
 The unit is created **in the units table** (`0xB734` in a save, `0x7E060` in the research setup's memory; 1009 records of 32 bytes) with the wizard as owner.
 
 **Where:** by default the wizard's summoning city (the Magic screen's "Summon To", which is the summoning circle in the wizard record: `peek wizard 1 summoning_circle`); `--at <city name>` (STORY-011's lookup) or `--at x,y,plane`.
@@ -24,6 +24,9 @@ A record is 32 bytes: `+0..+2` x, y, plane; `+3` owner; `+4` max moves; `+5` uni
 `+21` sight range; `+23` mutations; `+24..+27` enchantments. So a summon needs: a **free slot** (a dead record has owner `0xFF`), the **live count** updated, and every field filled in sensibly for the type
 (max moves and sight range come from the game's own per-type data, which `gama`'s layout puts in memory at the data segment + `0x19C`, 256 records of 36 bytes: *unchecked*). What else the game writes, and what it needs to *show* the unit
 (a unit moved by writing its position vanished from the map until End Turn, 2026-09-23), is the spike's question.
+
+**No race to set** (Kevin's question, 2026-10-13): a unit record has no race field. The race belongs to the unit *type* (`+5`: type 40 is Barbarian Swordsmen, type 140 Orc Bowmen; the summoned creatures are "fantastic" and have none). The unit's banner colour follows its **owner** (`+3`), which is the wizard.
+So a summon is a type, an owner and a place. Race only enters the *name*: several races share names ("Swordsmen", "Bowmen", "Spearmen"), so `unit.swordsmen` is ambiguous and the lookup lists the matches (`barbarian_swordsmen`, `orc_swordsmen`, ...) instead of guessing, while `unit.war_bears` is unique.
 
 ## Refusals (the game's own rules, so a bad summon cannot corrupt the map)
 
