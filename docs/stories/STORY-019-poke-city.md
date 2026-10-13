@@ -21,7 +21,7 @@ mompy peek city darkmoor
 
 ## Notes
 
-- `where` shows `+20` only (thousands). It should show the shown population (`+24`) too when this lands; a small follow-up to STORY-011.
+- `where` shows `+20` only (thousands, "population 7"). That is deliberate: Kevin only needs the rough figure there (2026-10-13).
 - A city's record is 114 bytes; the table is found the way `doctor` finds it.
 
 ## Definition of done
