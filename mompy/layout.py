@@ -1,0 +1,41 @@
+"""Where Master of Magic keeps its tables, relative to the wizard table.
+
+The addresses are the research setup's (``docs/reference/ram-layout.md``: GOG 1.31 in DOSBox Staging
+0.84-alpha, wizard table at ``0x328BA``). Another DOSBox build moves the whole game by a fixed number of bytes
+(0.83.0 sat ``0x520`` lower), so every table is stored as an offset from the wizard table and a
+located game adds its own base. Nothing here is trusted without the plausibility checks in ``locate``.
+"""
+
+from __future__ import annotations
+
+from typing import NamedTuple
+
+REFERENCE_WIZARD_BASE = 0x328BA
+
+WIZARD_STRIDE = 0x4C8
+WIZARD_COUNT = 5
+WIZARD_NAME_AT = 1       # +0x01, 20 bytes NUL-padded
+WIZARD_NAME_LEN = 20
+
+
+class Table(NamedTuple):
+    name: str
+    reference: int       # address in the research setup
+    stride: int
+    count: int
+
+    @property
+    def offset(self) -> int:
+        """Bytes from the wizard table to this table."""
+        return self.reference - REFERENCE_WIZARD_BASE
+
+
+WIZARDS = Table("wizards", REFERENCE_WIZARD_BASE, WIZARD_STRIDE, WIZARD_COUNT)
+CITIES = Table("cities", 0x6F980, 114, 100)
+UNITS = Table("units", 0x7E060, 32, 1009)
+NODES = Table("nodes", 0x85FE0, 48, 30)
+ENCOUNTERS = Table("lairs", 0x86660, 24, 102)
+
+UNIT_COUNT_REFERENCE = 0x34782   # a u16: how many unit records are live
+
+TABLES = (WIZARDS, CITIES, UNITS, NODES, ENCOUNTERS)

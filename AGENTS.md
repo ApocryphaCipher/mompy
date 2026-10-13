@@ -9,9 +9,13 @@ tests green, docs a little truer than you found them.
 ## 1. Done means checked
 
 ```
-python -m pytest
+python -W error -m unittest discover -s tests -t .
 python -m compileall -q mompy
 ```
+
+Tests use `unittest` (standard library) and a fake DOSBox web server (`tests/fake_dosbox.py`), so they need no game and no DOSBox.
+The code targets Python 3.9, so no newer syntax (no `match`, no `X | Y` outside annotations, which `from __future__ import annotations` keeps as text);
+only 3.14 has been run so far.
 
 Do not weaken or skip a test to get green. If a check could not be run, say so and why.
 
