@@ -13,5 +13,6 @@
 | [STORY-009](STORY-009-dosbox-memory-map-endpoint.md) | Ask DOSBox where the game was loaded | proposed (nice to have) |
 | [STORY-010](STORY-010-where.md) | `mompy where`: the tile under the mouse | proposed (nice to have) |
 | [STORY-011](STORY-011-where-name.md) | `mompy where <name>`: find a city or wizard by name | proposed (nice to have; cheapest first) |
+| [STORY-012](STORY-012-cast.md) | `poke ... cast <global>`: a global enchantment straight on the wizard | proposed (nice to have; after `poke`) |
 
 Epic: [EPIC-001](../epics/EPIC-001-mompy-core.md).
