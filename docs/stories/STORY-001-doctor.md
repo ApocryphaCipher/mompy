@@ -11,7 +11,7 @@
 
 - Is the server up (`/dosbox/info`) and which DOSBox version is it?
 - Does a write work? (Write a scratch location with a compare-and-swap and read it back; never a game table.)
-- **Where is the game's memory?** Not at a fixed address: scan the 16 MiB for five printable names at the wizard record stride (`0x4C8`) and take the shift from `0x328BA`. *First case:* the released macOS DOSBox 0.83.0 put it at `0x3239A` (shift `-0x520`), 2026-10-13.
+- **Where is the game's memory?** Not at a fixed address: scan the 16 MiB for five printable names at the wizard record stride (`0x4C8`) and take the shift from `0x328BA`. *First case:* the released macOS DOSBox 0.83.0 put it at `0x3239A` (shift `-0x520`), 2026-10-13, with default settings **and** with Kevin's config file; his research fork with that same config has it at `0x328BA`. So the base depends on the DOSBox build, and a second tester's setup will differ again.
 - Does the game's memory **look like the layout in [ram-layout.md](../reference/ram-layout.md)?** Five names, printable, at the wizard stride; city, unit and node counts in range.
   If not, say so and make every later command refuse (unless the player gives the table's address by hand).
 - Which extras does this server have (screenshot, pause)?
