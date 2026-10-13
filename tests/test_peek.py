@@ -115,6 +115,14 @@ class DecodeTest(unittest.TestCase):
         rel = F.find("wizard", "relations")
         self.assertEqual(rel.element("freya", ["Jafar", "Freya"]), 1)
         self.assertEqual(rel.element("neutral", ["Jafar"]), 1)
+        g = F.find("wizard", "globals")
+        for spelling in ("Aura of Majesty", "aura_of_majesty", "aura-of-majesty", "AURA OF  MAJESTY", "aura"):
+            self.assertEqual(g.element(spelling), 3, spelling)
+        self.assertEqual(g.element("natures_wrath"), 8)         # the apostrophe is optional
+        self.assertEqual(g.element("just"), 18)
+        with self.assertRaisesRegex(F.FieldError, "could be Nature Awareness, Nature's Wrath"):
+            g.element("nature")                                   # ambiguous: listed, not guessed
+        self.assertEqual(books.element("nature"), 0)             # an exact label beats a prefix
         for bad in ("sorcerer", "0", "6"):
             with self.assertRaises(F.FieldError):
                 books.element(bad)

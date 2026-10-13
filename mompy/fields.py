@@ -90,21 +90,36 @@ class Field:
         return str(index + 1)
 
     def element(self, selector: str, wizard_names: Sequence[str] = ()) -> int:
-        """The 0-based index of an element, from its label (``sorcery``, ``freya``) or its 1-based number."""
+        """The 0-based index of an element, from its label or its 1-based number.
+
+        Labels ignore case, underscores, hyphens and apostrophes (``aura_of_majesty``, ``natures-wrath``);
+        a unique prefix works (``aura``); an ambiguous one lists its matches instead of guessing.
+        """
         if not self.is_array:
             raise FieldError(f"{self.name} is a single value, it has no elements")
-        wanted = selector.strip().lower()
-        for i in range(self.count):
-            if self.label_for(i, wizard_names).lower() == wanted:
-                return i
+        wanted = _normal(selector)
+        labels = [_normal(self.label_for(i, wizard_names)) for i in range(self.count)]
+        if wanted in labels:
+            return labels.index(wanted)
         if wanted.isdigit() and 1 <= int(wanted) <= self.count:
             return int(wanted) - 1
+        prefixed = [i for i, l in enumerate(labels) if wanted and l.startswith(wanted)]
+        if len(prefixed) == 1:
+            return prefixed[0]
+        if len(prefixed) > 1:
+            raise FieldError(f"{selector!r} could be "
+                             + ", ".join(self.label_for(i, wizard_names) for i in prefixed[:6]))
         raise FieldError(f"{self.name} has no element {selector!r} (1 to {self.count}"
                          + (f", or {self._label_help(wizard_names)}" if self.labels else "") + ")")
 
     def _label_help(self, wizard_names: Sequence[str]) -> str:
         shown = [self.label_for(i, wizard_names) for i in range(min(self.count, 8))]
         return ", ".join(shown) + (", ..." if self.count > 8 else "")
+
+
+def _normal(text: str) -> str:
+    """A name for comparing: lower case, underscores and hyphens as spaces, no apostrophes, one space between words."""
+    return " ".join(text.lower().replace("_", " ").replace("-", " ").replace("'", "").split())
 
 
 _cache: Optional[Dict[str, object]] = None
