@@ -5,7 +5,7 @@
 | [STORY-008](STORY-008-stock-dosbox.md) | Works with released DOSBox Staging | macOS done; Windows and Linux to do |
 | [STORY-001](STORY-001-doctor.md) | `doctor` | done |
 | [STORY-002](STORY-002-field-table-and-peek.md) | The field table and `peek` | done |
-| [STORY-003](STORY-003-poke.md) | `poke`, safely | proposed |
+| [STORY-003](STORY-003-poke.md) | `poke`, safely | done |
 | [STORY-004](STORY-004-snapshot-and-diff.md) | `snapshot` and `diff` | proposed |
 | [STORY-005](STORY-005-spell-names.md) | Spell names from the player's files | proposed |
 | [STORY-006](STORY-006-more-fields.md) | Relations, globals, banished; find the missing blocks | proposed |

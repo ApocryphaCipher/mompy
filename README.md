@@ -11,7 +11,7 @@ mompy talks to **DOSBox Staging's built-in web API** (`webserver_enabled = true`
 and write the emulated machine's memory. It needs no game files of its own and ships none: only
 offsets, ranges and what we have checked about them.
 
-**Status: just started.** `mompy doctor` exists (below); `peek` and `fields` exist too; `poke` is next (see `docs/stories/`).
+**Status: just started.** `mompy doctor` exists (below); `peek`, `fields`, `poke` and `undo` exist too (see `docs/stories/`).
 Nothing here has been tried on anyone's machine but Kevin's.
 
 ## `mompy peek` and `mompy fields`
@@ -25,6 +25,22 @@ python -m mompy fields                      # what mompy knows, the ranges, and 
 ```
 
 `--json` prints plain data for scripts. Wizard 1 is the player. Read-only.
+
+## `mompy poke` and `mompy undo`
+
+```
+python -m mompy poke wizard 1 gold 30000          # gold: 8293 -> 30000
+python -m mompy poke wizard 1 books.sorcery 13
+python -m mompy poke wizard 1 retorts.alchemy on
+python -m mompy poke wizard 1 relations.freya 70  # a relation lives on both wizards: both are written, or neither
+python -m mompy poke wizard 1 treaty_status.sharee alliance
+python -m mompy poke wizard 1 gold 30000 --dry-run  # say what would change, write nothing
+python -m mompy undo                              # put the last poke back
+```
+
+Every write is a compare-and-swap, every value is range-checked against the field table (`mompy fields`), and nothing is clamped silently. A field the game works out again
+(power base...) or that mompy has not seen the game accept is refused. Needs the research fork's `webserver_allow_writes = true`; stock DOSBox Staging does not need it.
+The undo log and the remembered game address live in `~/.mompy` (`MOMPY_HOME` to change it).
 
 ## `mompy doctor`
 

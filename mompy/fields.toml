@@ -148,6 +148,7 @@ labels = "wizards"
 min = -100
 max = 100
 writable = true
+mirrored = true
 confidence = "checked"
 note = "How this wizard sees each other wizard (the Diplomacy screen's figure); the neutral player is last. The game keeps each pair on both wizards, so a write must change both."
 
@@ -162,6 +163,7 @@ enum = { "0" = "none (peace)", "1" = "wizard pact", "2" = "alliance", "3" = "war
 min = 0
 max = 3
 writable = true
+mirrored = true
 confidence = "checked"
 note = "Toward each other wizard; kept on both. Peace is just 0."
 

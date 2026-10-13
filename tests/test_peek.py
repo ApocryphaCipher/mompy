@@ -9,7 +9,7 @@ from mompy.api import DosboxApi
 from mompy.cli import main
 from mompy.peek import PeekError, describe_fields, peek
 
-from .fake_dosbox import FakeDosbox, game_memory, put_field
+from .fake_dosbox import FakeDosbox, HomeTestCase, game_memory, put_field
 
 BASE = layout.REFERENCE_WIZARD_BASE
 
@@ -130,8 +130,9 @@ class DecodeTest(unittest.TestCase):
             F.find("wizard", "gold").element("1")
 
 
-class PeekTest(unittest.TestCase):
+class PeekTest(HomeTestCase):
     def setUp(self):
+        super().setUp()
         self.mem = game()
         self.server = FakeDosbox(self.mem)
         self.server.__enter__()
@@ -183,6 +184,20 @@ class PeekTest(unittest.TestCase):
         put_field(self.mem, BASE, "wizard", 2, "summoning_circle", [10, 20, 0])      # where City0 stands
         self.assertEqual(self.p(2, "summoning_circle"),
                          "summoning_circle = x 10, y 20, plane 0 (Arcanus), the city City0")
+
+    def test_the_city_table_is_read_only_when_a_position_needs_naming(self):
+        cities_url = f"/api/v1/memory/{layout.CITIES.reference}/{layout.CITIES.stride * layout.CITIES.count}"
+        self.p(1, "gold")                                                        # the first command scans and remembers
+        reads = lambda: sum(r[1] == cities_url for r in self.server.requests)
+        self.server.requests.clear()
+        self.p(1, "gold")
+        confirm = reads()                                                         # the cache check reads the table once
+        self.server.requests.clear()
+        self.p(1, "summoning_circle")
+        self.assertEqual(reads(), confirm + 1)                                    # naming the circle reads it once more
+        self.server.requests.clear()
+        self.p(1)                                                                 # the whole record includes the circle
+        self.assertEqual(reads(), confirm + 1)
 
     def test_the_214_spells_are_summarised_and_one_can_be_asked_for(self):
         out = self.p(1, "spells")
@@ -238,7 +253,7 @@ class PeekTest(unittest.TestCase):
                 peek(DosboxApi(fake.url), "wizard", 1, "gold")
 
 
-class CliTest(unittest.TestCase):
+class CliTest(HomeTestCase):
     def run_cli(self, *argv):
         out, err = io.StringIO(), io.StringIO()
         with contextlib.redirect_stdout(out), contextlib.redirect_stderr(err):
