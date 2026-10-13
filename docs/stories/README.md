@@ -2,7 +2,7 @@
 
 | Story | Title | State |
 | --- | --- | --- |
-| [STORY-008](STORY-008-stock-dosbox.md) | Works with released DOSBox Staging | proposed |
+| [STORY-008](STORY-008-stock-dosbox.md) | Works with released DOSBox Staging | in progress: macOS API and write checked |
 | [STORY-001](STORY-001-doctor.md) | `doctor` | proposed |
 | [STORY-002](STORY-002-field-table-and-peek.md) | The field table and `peek` | proposed |
 | [STORY-003](STORY-003-poke.md) | `poke`, safely | proposed |

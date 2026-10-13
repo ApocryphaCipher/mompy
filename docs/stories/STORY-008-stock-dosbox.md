@@ -1,7 +1,7 @@
 # STORY-008: Works with released DOSBox Staging
 
 **Parent:** [EPIC-001](../epics/EPIC-001-momctl-core.md)
-**Status:** proposed (2026-10-13)
+**Status:** in progress (2026-10-13): macOS release checked headless (API, write and compare-and-swap all work); the real game in it, and Windows and Linux, still to do
 **Size:** small
 **Raised by:** [Kevin](https://github.com/KevinAsbury), 2026-10-13
 
@@ -18,3 +18,9 @@ at tag `v0.83.0` has `PUT` and `If-Match`), but nobody has run the **released bi
 ## Definition of done
 
 The reference doc lists, per platform, a DOSBox release that was tried, and the result.
+
+## Progress (2026-10-13)
+
+- **macOS v0.83.0 release, checked:** the memory read, the `PUT`, the compare-and-swap and its 412 all work, as does the `Host` guard; the fork-only endpoints are absent.
+  Details and the exact requests are in [reference/dosbox-api.md](../reference/dosbox-api.md). The check ran on a scratch address with no game, so it proves the API, not yet the game's tables.
+- **To do:** (a) start Master of Magic in the released build and read and write a wizard record (Kevin at the keyboard); (b) a Windows run and a Linux run, by someone who has those; (c) if a platform lacks the API, record how to get one.
