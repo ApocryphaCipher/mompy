@@ -35,18 +35,25 @@ prompt (a double-click through Finder was *not* tried). Against a scratch addres
 - `GET /api/v1/dosbox/info` answers (`version`, `configHome`, `configWebserver`).
 - `GET /api/v1/memory/:addr/4` reads four bytes.
 - `PUT` with `If-Match: "AAAAAA=="` (the bytes expected, base64) and the body `01 02 03 04` answers **200** and the bytes are written; read back, they are `01 02 03 04`.
-- `PUT` with a **wrong** `If-Match` answers **412 and changes nothing**; the answer's body carries the *current* bytes (`"data": "AQIDBA=="`), which `momctl` can show in its error.
+- `PUT` with a **wrong** `If-Match` answers **412 and changes nothing**; the answer's body carries the *current* bytes (`"data": "AQIDBA=="`), which `mompy` can show in its error.
 - `PUT` with the right expectation again writes (`aa bb cc dd`).
 - A request with another `Host` header gets **403** (the rebinding guard).
 - `GET /cpu/state` and `GET /dos/internals` answer 200. **`POST /capture/screenshot`, `/dosbox/pause`, `/dosbox/resume` and `/signatures/reload` are 404**: they are the research fork's, as expected.
 - No write gate: with `webserver_enabled` on, the write was allowed with no other setting.
 
-*Not yet checked:* the same on the **real game** in the released build (STORY-008 step 4), and Windows and Linux.
+**On the real game, macOS release, 2026-10-13** (Kevin's MAXIMUS save loaded in the stock build, started from `~/DOS` with the default config and `webserver_port=8186`):
+
+- The wizard table was **not** where the research fork's setup has it. Scanning memory for five printable names at the `0x4C8` stride found it at **`0x3239A`**, which is **`0x520` bytes lower** than `0x328BA`.
+  With that one shift every other table decoded correctly: the city names at `0x6F980 - 0x520`, the node coordinates, the terrain values and the unit count.
+  *So the layout is the same and only the base moves with the DOSBox setup:* addresses must be found, not hard-coded (STORY-001).
+- A read-modify-write of wizard 1's gold (`+0x356`) with a compare-and-swap (30000 to 12321) answered 200 and **the game's main screen then showed 12321 GP** (Kevin looked). It was put back to 30000 afterwards.
+
+*Not yet checked:* Windows and Linux.
 
 ## Only in the research fork (mompy must not depend on them)
 
 `webserver_allow_writes` (a gate: with it off the fork refuses writes with 403; **upstream has no such gate**: writes work whenever the server is on),
-`POST /capture/screenshot`, `dosbox/pause` and `resume`, signature watching and a DOS file-call log. `momctl` may use a screenshot or pause
+`POST /capture/screenshot`, `dosbox/pause` and `resume`, signature watching and a DOS file-call log. `mompy` may use a screenshot or pause
 if the server has them, and must say it is not available otherwise.
 
 ## Speed and size

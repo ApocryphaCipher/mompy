@@ -1,11 +1,11 @@
-# EPIC-001: momctl, a command line for a running game
+# EPIC-001: mompy, a command line for a running game
 
 **Status:** proposed (2026-10-13), nothing built
 **Owner:** [Kevin](https://github.com/KevinAsbury)
 
 ## The idea
 
-`momctl peek wizard 1 gold` and `momctl poke wizard 1 gold 30000`: read and change a running *Master of Magic* through DOSBox Staging's
+`mompy peek wizard 1 gold` and `mompy poke wizard 1 gold 30000`: read and change a running *Master of Magic* through DOSBox Staging's
 memory API, safely (compare-and-swap, range checks, undo) and with the offsets and limits that Mirror's research has already verified.
 It is for players ("give me 30000 gold") and for the research loop (change a value, look at the screen, no save, load and End Turn).
 

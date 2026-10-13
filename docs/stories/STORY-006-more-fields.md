@@ -1,6 +1,6 @@
 # STORY-006: Relations, treaties, global enchantments, the defeated flag
 
-**Parent:** [EPIC-001](../epics/EPIC-001-momctl-core.md)
+**Parent:** [EPIC-001](../epics/EPIC-001-mompy-core.md)
 **Status:** proposed (2026-10-13)
 **Size:** large
 **Raised by:** [Kevin](https://github.com/KevinAsbury), 2026-10-13
