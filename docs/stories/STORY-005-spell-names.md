@@ -1,6 +1,6 @@
 # STORY-005: Spell names from the player's own files
 
-**Parent:** [EPIC-001](../epics/EPIC-001-momctl-core.md)
+**Parent:** [EPIC-001](../epics/EPIC-001-mompy-core.md)
 **Status:** proposed (2026-10-13)
 **Size:** small
 **Raised by:** [Kevin](https://github.com/KevinAsbury), 2026-10-13

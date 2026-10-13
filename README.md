@@ -3,8 +3,8 @@
 Change a running game of *Master of Magic* from the command line:
 
 ```
-momctl peek wizard 1 gold
-momctl poke wizard 1 gold 30000
+mompy peek wizard 1 gold
+mompy poke wizard 1 gold 30000
 ```
 
 mompy talks to **DOSBox Staging's built-in web API** (`webserver_enabled = true`), which can read

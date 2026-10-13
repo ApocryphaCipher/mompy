@@ -1,11 +1,11 @@
-# EPIC-001: momctl, a command line for a running game
+# EPIC-001: mompy, a command line for a running game
 
 **Status:** proposed (2026-10-13), nothing built
 **Owner:** [Kevin](https://github.com/KevinAsbury)
 
 ## The idea
 
-`momctl peek wizard 1 gold` and `momctl poke wizard 1 gold 30000`: read and change a running *Master of Magic* through DOSBox Staging's
+`mompy peek wizard 1 gold` and `mompy poke wizard 1 gold 30000`: read and change a running *Master of Magic* through DOSBox Staging's
 memory API, safely (compare-and-swap, range checks, undo) and with the offsets and limits that Mirror's research has already verified.
 It is for players ("give me 30000 gold") and for the research loop (change a value, look at the screen, no save, load and End Turn).
 
@@ -23,5 +23,6 @@ separate project if players want it.
 - [STORY-006](../stories/STORY-006-more-fields.md): relations, treaties, global enchantments, the defeated flag; locate the missing blocks
 - [STORY-007](../stories/STORY-007-packaging.md): install with `pipx`, the README, the licence
 - [STORY-008](../stories/STORY-008-stock-dosbox.md): confirm it works against the released DOSBox Staging binaries
+- [STORY-009](../stories/STORY-009-dosbox-memory-map-endpoint.md): ask DOSBox where the game was loaded (nice to have)
 
 Suggested order: 008 (a quick check that decides everything else), 001, 002, 003, then 004 to 007.

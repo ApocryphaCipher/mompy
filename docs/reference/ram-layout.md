@@ -4,8 +4,8 @@
 `docs/reference/live-ram-map.md` and `save-to-ram-map.md` (how each was checked). The game is **Master of Magic 1.31, GOG release**, run in DOSBox
 Staging with the usual config. The game's data segment is `0x289F0` (SS = `0x289F`).
 
-**Caveat:** the addresses held across two launches with the same DOSBox setup. They belong to **one game executable**; another release will
-differ. `doctor` therefore checks that a table *looks right* (names printable at the record stride, counts in range) before anything is written (STORY-001).
+**Caveat:** the addresses held across two launches with the same DOSBox setup. They belong to **one game executable *and one DOSBox setup*:** in the released DOSBox Staging 0.83.0 with its default config the same game's tables were all **`0x520` lower** (the wizard table at `0x3239A`; checked 2026-10-13, see [dosbox-api.md](dosbox-api.md)). **The cause is the DOSBox version, found 2026-10-13:** the stock 0.83.0 build puts the table at `0x3239A` both with defaults and with Kevin's config file, and Kevin's research fork (a 0.84-alpha snapshot) puts it at `0x328BA` both with defaults and with that config. DOSBox Staging's `main` added **DOS `STACKS`** support (`src/dos/dos_stacks.cpp`, commit `ba118457b`, 2026-04-28; the `stacks = auto` setting, absent from the v0.83.0 tag) which allocates a block when DOS starts: two interrupt wrappers (2 × 0x20), a 9-entry table (9 × 8) and 9 stacks of 128 bytes = 1288 bytes, rounded up to **81 paragraphs, plus the one paragraph of memory-block header** DOS puts before any allocation = **82 paragraphs = 0x520 bytes**, exactly the measured shift. Everything the game loads afterwards sits that much higher. In a 0.84-or-later DOSBox a different `stacks` setting changes the shift again. Another game release will
+differ too. The tables below are therefore the **research setup's**; `doctor` finds the wizard table by scanning and applies the same shift to the rest, then checks that each table *looks right* (names printable at the record stride, counts in range) before anything is written (STORY-001).
 
 ## Tables (linear addresses, one record after another)
 
