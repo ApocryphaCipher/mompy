@@ -27,5 +27,7 @@ separate project if players want it.
 - [STORY-010](../stories/STORY-010-where.md): `mompy where`, the map tile under the game's mouse cursor (nice to have)
 - [STORY-011](../stories/STORY-011-where-name.md): `mompy where <name>`, find a city or wizard by name (nice to have)
 - [STORY-012](../stories/STORY-012-cast.md): `poke wizard N cast <global>`, a global enchantment straight on the wizard (nice to have)
+- [STORY-013](../stories/STORY-013-spike-globals-by-hand.md): spike: what the game does with a global set by hand (nice to have)
+- [STORY-014](../stories/STORY-014-spike-wonky-globals.md): spike: the wonky globals, Spell of Mastery, Planar Seal... (nice to have)
 
 Suggested order: 008 (a quick check that decides everything else), 001, 002, 003, then 004 to 007.
