@@ -31,5 +31,6 @@ separate project if players want it.
 - [STORY-014](../stories/STORY-014-spike-wonky-globals.md): spike: the wonky globals, Spell of Mastery, Planar Seal... (nice to have)
 - [STORY-015](../stories/STORY-015-cast-unit.md): `poke wizard N cast unit.<name>`, summon any unit, no fuss (nice to have)
 - [STORY-016](../stories/STORY-016-spike-summon-a-unit.md): spike: what the game writes when a unit is summoned (nice to have)
+- [STORY-017](../stories/STORY-017-pew.md): `pew wizard N`, banish a wizard; `--dead` to finish them (nice to have)
 
 Suggested order: 008 (a quick check that decides everything else), 001, 002, 003, then 004 to 007.
