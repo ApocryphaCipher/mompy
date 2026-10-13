@@ -24,7 +24,7 @@ Do not weaken or skip a test to get green. If a check could not be run, say so a
 
 ## 3. Game files and copyright
 
-The game's files (`*.LBX`, `*.GAM`, `*.EXE`, anything decoded from them) **never go in this repository.** They live in `../magic/`,
+The game's files (`*.LBX`, `*.GAM`, `*.EXE`, anything decoded from them) **never go in this repository.** They stay in the player's own game folder,
 outside it. Tests use synthetic data. The repository carries offsets, ranges and checked facts, and names only
 as the player's own `SPELLDAT.LBX` supplies them at run time (a bundled fallback list is Kevin's call, see the backlog).
 

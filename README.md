@@ -19,14 +19,17 @@ been tried on anyone's machine but Kevin's.
 - DOSBox Staging 0.83 or newer (its web API; `webserver_enabled = true`) running *Master of Magic* 1.31.
 - Python 3.9 or newer. No other packages.
 
-## Layout of the project folder
+## Layout
 
 ```
-mompy/
-  src/              this repository: the Python code and docs/ (epics, stories, notes, reference)
-  dosbox-staging/   a clean checkout of upstream DOSBox Staging, for building and reading its source
-  magic/            the game's own files, for reference; never committed
+mompy/              this repository
+  mompy/            the Python package (standard library only)
+  tests/
+  docs/             epics, stories, notes, reference, backlog (the project's tickets)
 ```
+
+The game's own files stay in the player's install folder; the repository never contains them. To read DOSBox Staging's
+source, clone [dosbox-staging/dosbox-staging](https://github.com/dosbox-staging/dosbox-staging) anywhere outside this folder.
 
 Related: [Mirror](https://github.com/ApocryphaCipher/Mirror) edits *save files* (and holds the verified
 research on the formats), and `gama` turns memory dumps into data.
