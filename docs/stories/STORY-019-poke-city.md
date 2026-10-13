@@ -1,7 +1,7 @@
 # STORY-019: `mompy poke city <name> <field> <value>`: change a city by name (enhancement)
 
 **Parent:** [EPIC-001](../epics/EPIC-001-mompy-core.md)
-**Status:** proposed (2026-10-13). **Priority: nice to have.** After [STORY-011](STORY-011-where-name.md) (`where` already finds a city by name and has the reader).
+**Status:** `population` built (2026-10-13), PR open. Other fields open. **Priority: nice to have.** After [STORY-011](STORY-011-where-name.md) (`where` already finds a city by name and has the reader).
 **Size:** medium
 **Raised by:** [Kevin](https://github.com/KevinAsbury), 2026-10-13 (`mompy poke city darkmoor population 25`)
 
@@ -27,3 +27,10 @@ mompy peek city darkmoor
 ## Definition of done
 
 On the real game: `poke city darkmoor population 25` and the city screen says 25,000; `undo` puts it back; one End Turn shows what the game does with it (written down, whatever it is). Tests with the fake DOSBox.
+
+## Outcome (first cut)
+
+- A `city` block in the field table (read-only name, x, y, plane, owner; writable `population`, 1 to 25 thousands). `peek city NAME` and `poke city NAME population N` work, by name (whole name, unique prefix) or by number; `where.find_city` does the naming.
+- **Decision:** only `+20` is written; the tens at `+24` are left alone (Kevin does not need the precision). The story's "write both" was dropped.
+- `owner` stays read-only: a bare byte write would skip what Mirror's `edit_city` does with it (clears enchantments, moves units). An empty city slot is refused.
+- Tests: `tests/test_poke_city.py` (fake DOSBox). Real game (fork 0.84.0-alpha): `poke city darkmoor population 25` wrote 4 -> 25 and read back 25. **Not yet seen on the city screen, and no End Turn run on it.** Open: the game's real cap (25 is Mirror's guess).

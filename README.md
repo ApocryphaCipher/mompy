@@ -11,7 +11,7 @@ mompy talks to **DOSBox Staging's built-in web API** (`webserver_enabled = true`
 and write the emulated machine's memory. It needs no game files of its own and ships none: only
 offsets, ranges and what we have checked about them.
 
-**Status: just started.** `mompy doctor` exists (below); `peek`, `fields`, `poke`, `undo`, `banish`, `unbanish`, and `cast`/`dispel` (a global enchantment) and `where` exist too (see `docs/stories/`).
+**Status: just started.** `mompy doctor` exists (below); `peek`, `fields`, `poke`, `undo`, `banish`, `unbanish`, and `cast`/`dispel` (a global enchantment) `where` and `poke city` exist too (see `docs/stories/`).
 Nothing here has been tried on anyone's machine but Kevin's.
 
 ## `mompy peek` and `mompy fields`
@@ -78,6 +78,17 @@ python -m mompy where dover --json
 
 Finds a city or a wizard by name, any case. A whole name wins; otherwise a unique prefix. Read-only. The coordinates are the ones Mirror's editors take
 (tile x, tile y, plane). Population is in thousands, as the game keeps it; size classes above Village have not been named yet, so they print as `size N`.
+
+## Cities: `peek city` and `poke city`
+
+```
+python -m mompy peek city darkmoor                    # name, position, plane, owner, population
+python -m mompy poke city darkmoor population 25      # city Darkmoor population: 4 -> 25
+python -m mompy undo
+```
+
+A city is named the way `where` names it (whole name, else a unique prefix; an ambiguous one is refused), or given by its number. Only `population` can be changed so far, in
+thousands (1 to 25). The game also keeps the tens, which are left alone. Same safety as every `poke`: compare-and-swap, range checks, `--dry-run`, `undo`.
 
 ## `mompy doctor`
 

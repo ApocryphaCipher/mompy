@@ -185,7 +185,11 @@ def poke(api: DosboxApi, number: int, spec: str, text: str, dry_run: bool = Fals
     label = _label(target, names)
     if block_name == "fortress":
         _check_fortresses(api, found)
-    label = ("" if block_name == "wizard" else f"{block_name} {number} ") + label
+    if block_name == "city":
+        record = peek.read_record(api, found, "city", number)       # refuses an empty slot
+        label = f"city {record[:14].split(b'\0', 1)[0].decode('latin-1')} " + label
+    elif block_name != "wizard":
+        label = f"{block_name} {number} " + label
     try:
         current = api.read(target.address, target.size)
     except ApiError as err:
