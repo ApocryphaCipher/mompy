@@ -20,9 +20,18 @@ separate project if players want it.
 - [STORY-003](../stories/STORY-003-poke.md): `poke` with compare-and-swap, range checks, `--dry-run` and `undo`
 - [STORY-004](../stories/STORY-004-snapshot-and-diff.md): `snapshot` and `diff`
 - [STORY-005](../stories/STORY-005-spell-names.md): spell names from the player's own `SPELLDAT.LBX`
-- [STORY-006](../stories/STORY-006-more-fields.md): relations, treaties, global enchantments, the defeated flag; locate the missing blocks
+- [STORY-006](../stories/STORY-006-more-fields.md): relations, treaties, global enchantments, the banished flag; locate the missing blocks
 - [STORY-007](../stories/STORY-007-packaging.md): install with `pipx`, the README, the licence
 - [STORY-008](../stories/STORY-008-stock-dosbox.md): confirm it works against the released DOSBox Staging binaries
 - [STORY-009](../stories/STORY-009-dosbox-memory-map-endpoint.md): ask DOSBox where the game was loaded (nice to have)
+- [STORY-010](../stories/STORY-010-where.md): `mompy where`, the map tile under the game's mouse cursor (nice to have)
+- [STORY-011](../stories/STORY-011-where-name.md): `mompy where <name>`, find a city or wizard by name (nice to have)
+- [STORY-012](../stories/STORY-012-cast.md): `poke wizard N cast <global>`, a global enchantment straight on the wizard (nice to have)
+- [STORY-013](../stories/STORY-013-spike-globals-by-hand.md): spike: what the game does with a global set by hand (nice to have)
+- [STORY-014](../stories/STORY-014-spike-wonky-globals.md): spike: the wonky globals, Spell of Mastery, Planar Seal... (nice to have)
+- [STORY-015](../stories/STORY-015-cast-unit.md): `poke wizard N cast unit.<name>`, summon any unit, no fuss (nice to have)
+- [STORY-016](../stories/STORY-016-spike-summon-a-unit.md): spike: what the game writes when a unit is summoned (nice to have)
+- [STORY-017](../stories/STORY-017-banish.md): `banish wizard N`, banish a wizard; `--dead` to finish them (nice to have)
+- [STORY-018](../stories/STORY-018-pew.md): `pew`, kill the units on the tile under the mouse (nice to have)
 
 Suggested order: 008 (a quick check that decides everything else), 001, 002, 003, then 004 to 007.
