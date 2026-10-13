@@ -1,7 +1,7 @@
 # DOSBox Staging's web API, as mompy uses it
 
 **Sources:** DOSBox Staging's own source (`src/webserver/`, tag `v0.83.0` and `main` of 2026-10-13, read 2026-10-13), and Kevin's research fork
-(`ApocryphaCipher/dosbox-staging`, branch `webserver-write-guard`) and Mirror's `docs/reference/live-ram-map.md`, which record what was
+(`ApocryphaCipher/dosbox-staging`, branch `apocrypha/research`) and Mirror's `docs/reference/live-ram-map.md`, which record what was
 tried against a running game.
 
 ## Turn it on
