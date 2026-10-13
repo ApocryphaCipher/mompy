@@ -31,9 +31,9 @@ Verdicts: **READY** (exit 0), **READ-ONLY** (the game was found, writes refused:
 - The scan reads all 16 MiB once and looks for five printable names at the wizard record stride (names must be NUL-padded). Candidates are then checked: cities (name, position on the 60 × 40 map, plane, owner), the unit count and units, and nodes. If two places qualify it says so and takes the first.
 - An address other than the one expected for the DOSBox version is a **warning**, not a failure: the tables are what decide.
 - **A bug the tests caught:** the real server's 412 answer nests the current bytes under `"memory"`, not at the top level (seen in the STORY-008 run); the fake server follows the real shape.
-- Tests: 20, with a fake DOSBox server in `tests/`; warnings are errors. Not yet run: Python 3.9, and a real game.
+- Tests: 20, with a fake DOSBox server in `tests/`; warnings are errors. Run on 3.14 only (the floor is 3.12).
 
 **Real game, 2026-10-13:** Kevin's fork (`0.84.0-alpha (83716)`, the `apocrypha/research` build), MAXIMUS loaded, `webserver_allow_writes = true`:
 every check `ok`, verdict **READY**, exit 0, **0.2 s** in all. Wizard table at `0x328BA` (as expected for 0.84): Jafar, Freya, Sss'ra, Sharee, Tauron;
 cities 33 plausible of 100 slots at `0x6F980`; units 147 live and all 147 plausible at `0x7E060`; nodes 30 of 30 at `0x85FE0`; the write accepted. Read back afterwards: the wizard names were unchanged.
-*Not tried on a real game:* the READ-ONLY verdict (start the fork without `webserver_allow_writes`), the 0.83.0 layout (the stock build is gone; the STORY-008 run found `0x3239A` there), Python 3.9.
+*Not tried on a real game:* the READ-ONLY verdict (start the fork without `webserver_allow_writes`), the 0.83.0 layout (the stock build is gone; the STORY-008 run found `0x3239A` there), Python 3.12 and 3.13 (3.14 only so far).

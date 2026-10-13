@@ -55,23 +55,16 @@ def diagnose(api: DosboxApi) -> Report:
     checks.append(Check("Memory", OK, f"read {len(memory) // (1024 * 1024)} MiB"))
 
     # 3. the wizard table
-    candidates = locate.find_wizard_tables(memory)
-    if not candidates:
-        checks.append(Check("Game", FAIL,
-                            "no wizard table found: load a saved game first (and the game needs all five wizards)"))
+    try:
+        game = locate.find_game(memory)
+    except locate.GameNotFound as err:
+        checks.append(Check("Game", FAIL, str(err)))
         return Report(checks, None, False)
-    verified = [(c, locate.check_tables(memory, c.base)) for c in candidates]
-    good = [(c, t) for c, t in verified if all(x.ok for x in t)]
-    if not good:
-        c, t = verified[0]
-        checks.append(Check("Game", FAIL, f"wizard names found at {c.base:#x}, but the tables around them "
-                                          "do not look right: " + "; ".join(f"{x.name}: {x.detail}" for x in t if not x.ok)))
-        return Report(checks, None, False)
-    if len(good) > 1:
-        checks.append(Check("Game", WARN, f"{len(good)} places look like the wizard table "
-                                          f"({', '.join(hex(c.base) for c, _ in good)}); using the first"))
-    chosen, table_checks = good[0]
-    checks.append(Check("Game", OK, "wizards: " + ", ".join(chosen.names)))
+    if game.alternatives:
+        checks.append(Check("Game", WARN, f"{len(game.alternatives) + 1} places look like the wizard table "
+                                          f"({', '.join(hex(b) for b in [game.base] + game.alternatives)}); using the first"))
+    checks.append(Check("Game", OK, "wizards: " + ", ".join(game.names)))
+    chosen, table_checks = game, game.checks
 
     expected = versions.expected_wizard_base(ver)
     if expected is None:
