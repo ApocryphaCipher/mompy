@@ -16,7 +16,7 @@ mompy poke wizard 1 cast unit.swordsmen --at blackstone
 Like [`cast <global>`](STORY-012-cast.md): no mana, no spell book, none of the game's checks. Any unit type in the game, regardless of books: a fantastic creature, a normal racial unit, a boat or a catapult.
 The unit is created **in the units table** (`0xB734` in a save, `0x7E060` in the research setup's memory; 1009 records of 32 bytes) with the wizard as owner.
 
-**Where:** by default the wizard's summoning city (the Magic screen's "Summon To", which is the summoning circle in the wizard record: `peek wizard 1 summoning_circle`); `--at <city name>` (STORY-011's lookup) or `--at x,y,plane`.
+**Where:** by default **the summoning circle's coordinates** (Kevin: the position is easy, set it there) — the wizard's summoning city (the Magic screen's "Summon To", which is the summoning circle in the wizard record: `peek wizard 1 summoning_circle`); `--at <city name>` (STORY-011's lookup) or `--at x,y,plane`.
 
 ## What it has to do (from the units table layout in Mirror's `docs/reference/kazzmir-save-layouts.md`)
 
@@ -31,6 +31,7 @@ So a summon is a type, an owner and a place. Race only enters the *name*: severa
 ## Refusals (the game's own rules, so a bad summon cannot corrupt the map)
 
 - A tile holds **at most nine** units; one tile belongs to **one owner** (Mirror's `edit_units` checks the same: another owner's units or city on the tile refuses).
+  **A full stack:** Kevin's expectation is that the game pops the unit next to the city when the summoning circle's tile is full. That is what the game's *summon routine* does when it runs; a record written by hand does not run it. [STORY-016](STORY-016-spike-summon-a-unit.md) tests what the game does with a tenth unit written onto a full tile (moves it next door, ignores it, breaks). Until that is known `cast` does not rely on it: it places the unit itself on the nearest free neighbouring tile (same plane, no foreign units or cities on it) and says where it went. If the game turns out to do it, that step is dropped.
 - **Heroes** (types 0 to 34) are not summoned this way: a hero is also an entry in the wizard's hero list with item slots, which is [EPIC-010](https://github.com/ApocryphaCipher/Mirror/blob/main/docs/epics/EPIC-010-heroes.md)'s job in Mirror and a later story here.
 - No free slot: say so.
 - A land unit placed on ocean (or a boat on land) is allowed but warned about.

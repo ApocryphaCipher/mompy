@@ -18,6 +18,7 @@ Needs [STORY-004](STORY-004-snapshot-and-diff.md) (`snapshot` and `diff`) and th
 3. Where do **max moves** and **sight range** come from? Compare the new record with the per-type table in memory (data segment + `0x19C`, 256 × 36 bytes, per `gama`'s layout: names, costs and speeds may be there).
 4. **Write the record by hand** into a free slot (owner `0xFF` marks a free one) with the learnt template and update whatever else the diff showed. Does the unit appear at once, after End Turn, or not at all? Does it move, fight, cost upkeep, survive a save and load?
 5. What marks a slot **free**, and does the game reuse the lowest free slot or append?
+6. **A full stack.** In play, summon (or finish building) a unit in a city whose tile already holds nine of your units and watch where it appears: next to the city? Which neighbour, and by what rule (first free in some order, nearest)? Then write a **tenth** record onto a full tile **by hand**: does the game move it, ignore it, show a stack of ten, or break at End Turn? (Kevin's expectation: the game pops it next door. That is the summon routine's job; the question is whether the game also tidies a tile that is over-full some other way.) The answer decides whether `cast` must pick a free neighbouring tile itself.
 
 ## Definition of done
 
