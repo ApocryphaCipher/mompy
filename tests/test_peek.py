@@ -51,7 +51,7 @@ class FieldTableTest(unittest.TestCase):
                 seen.append((f.offset, f.offset + f.size))
 
     def test_ranges_fit_their_types_and_editable_fields_have_limits(self):
-        limits = {"u8": (0, 255), "i8": (-128, 127), "u16": (0, 65535), "i16": (-32768, 32767)}
+        limits = {"u8": (0, 255), "i8": (-128, 127), "u16": (0, 65535), "i16": (-32768, 32767), "u32": (0, 2**32 - 1)}
         for f in F.all_fields():
             if f.min is not None:
                 lo, hi = limits[f.type]

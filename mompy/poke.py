@@ -190,7 +190,7 @@ def poke(api: DosboxApi, number: int, spec: str, text: str, dry_run: bool = Fals
     block = F.blocks()[block_name]
     last = block.first_number + block.count - 1
     if not block.first_number <= number <= last:
-        raise PokeError(f"there is no {block.describe} {number} (1 to {last})")
+        raise PokeError(f"there is no {block.describe} {number} ({block.first_number} to {last})")
     names = found.names
     name, _, element = spec.partition(".")
     try:
@@ -206,6 +206,11 @@ def poke(api: DosboxApi, number: int, spec: str, text: str, dry_run: bool = Fals
     if block_name == "city":
         record = peek.read_record(api, found, "city", number)       # refuses an empty slot
         label = f"city {record[:14].split(b'\0', 1)[0].decode('latin-1')} " + label
+    elif block_name == "unit":
+        record = peek.read_record(api, found, "unit", number)       # refuses a number the game has not got
+        if record[2] == 0xFF and record[3] == 0xFF:
+            raise PokeError(f"unit {number} is dead (marked for removal at End Turn): nothing to change")
+        label = f"unit {number} " + label
     elif block_name != "wizard":
         label = f"{block_name} {number} " + label
     try:

@@ -62,7 +62,7 @@ class PewTest(SummonCase):
         self.stack(52, 22, 1, 0, 1)                                    # a neighbour survives
         before = bytes(self.mem)
         out = pew(self.api, "blackstone")
-        self.assertIn("3 killed at Blackstone (Myrror 51, 22): War Bears (Jafar), War Bears (Jafar), War Bears (Jafar)", out)
+        self.assertIn("3 killed at Blackstone (Myrror 51, 22): War Bears #4 (Jafar), War Bears #5 (Jafar), War Bears #6 (Jafar)", out)
         for i in ids:
             self.assertEqual(list(self.mem[unit_at(i) + 2:unit_at(i) + 4]), [0xFF, 0xFF])
         changed = self.differing(before)
@@ -139,7 +139,7 @@ class WherePointerTest(SummonCase):
         PewTest.stack(self, 51, 22, 1, 0, 2, kind=179)
         put_view(self.mem)
         self.assertEqual(where(self.api, "pointer"),
-                         "Myrror (51, 22)  city Blackstone, owner Jafar  2 units: War Bears (Jafar), War Bears (Jafar)")
+                         "Myrror (51, 22)  city Blackstone, owner Jafar  2 units: War Bears #4 (Jafar), War Bears #5 (Jafar)")
         put_view(self.mem, pointer=(250, 100))
         from mompy.peek import PeekError
         with self.assertRaisesRegex(PeekError, "not over the map"):

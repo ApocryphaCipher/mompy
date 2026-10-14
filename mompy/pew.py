@@ -49,7 +49,7 @@ def pew(api: DosboxApi, at: str, dry_run: bool = False) -> str:
 
     def what(i: int) -> str:
         owner = raw[i * 32 + 3]
-        return f"{types[raw[i * 32 + 5]].name} ({names[owner] if owner < len(names) else 'neutral'})"
+        return f"{types[raw[i * 32 + 5]].name} #{i} ({names[owner] if owner < len(names) else 'neutral'})"
 
     listing = ", ".join(what(i) for i in victims)
     if dry_run:

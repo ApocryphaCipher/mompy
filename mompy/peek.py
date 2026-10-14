@@ -7,6 +7,7 @@ and refused if its tables do not look right.
 from __future__ import annotations
 
 import json
+import struct
 from typing import Dict, List, Optional, Tuple
 
 from . import fields as F
@@ -31,7 +32,11 @@ def read_record(api: DosboxApi, game: locate.Game, block: str, number: int) -> b
     b = F.blocks()[block]
     last = b.first_number + b.count - 1
     if not b.first_number <= number <= last:
-        raise PeekError(f"there is no {b.describe} {number} (1 to {last})")
+        raise PeekError(f"there is no {b.describe} {number} ({b.first_number} to {last})")
+    if block == "unit":
+        live = struct.unpack("<H", api.read(game.base + (layout.UNIT_COUNT_REFERENCE - layout.REFERENCE_WIZARD_BASE), 2))[0]
+        if number >= live:
+            raise PeekError(f"there is no unit {number}: the game has units 0 to {live - 1}")
     start = game.base + layout.table(b.table).offset + (number - b.first_number) * b.stride
     record = api.read(start, b.stride)
     if block == "city" and not locate._valid_city(record):
@@ -54,6 +59,40 @@ def _spell(value: int, names: List[str]) -> str:
     if value == 0:
         return "none"
     return f"{spells[value]} ({value})" if spells and value < len(spells) else str(value)
+
+
+def _owner(value: int, names: List[str]) -> str:
+    return names[value] if value < len(names) else ("neutral" if value == 5 else "dead" if value == 255 else str(value))
+
+
+def _unit_type(value: int, names: List[str]) -> str:
+    types = getattr(names, "unit_types", None)
+    return f"{types[value]} ({value})" if types and value < len(types) else str(value)
+
+
+def _weapon(value: int) -> str:
+    grade = ("normal", "magic", "mithril", "adamantium")[value & 3]
+    flags = [name for bit, name in ((0x4, "demon skin"), (0x8, "fire breath"), (0x10, "demon wings"), (0x20, "undead")) if value & bit]
+    return f"{grade} weapons" + (", " + ", ".join(flags) if flags else "") + f" ({value})"
+
+
+def _enchantments(value: int) -> str:
+    from .mass import ENCHANTMENTS
+    on = [name for name, bit in ENCHANTMENTS.items() if value & bit]
+    return ", ".join(on) if on else "none"
+
+
+def _formatted(field: F.Field, value, names: List[str]) -> Optional[str]:
+    """A value in words, for the fields whose format says how (owner, unit type, weapons, enchantments); None for the rest."""
+    if field.format == "owner":
+        return _owner(value, names)
+    if field.format == "unit_type":
+        return _unit_type(value, names)
+    if field.format == "mutations":
+        return _weapon(value)
+    if field.format == "enchantments":
+        return _enchantments(value)
+    return None
 
 
 def _plain(field: F.Field, value: int) -> str:
@@ -86,6 +125,9 @@ def render(field: F.Field, record: bytes, names: List[str], element: Optional[st
     value = field.decode(_slice(field, record))
     if field.format == "map_position" and element is None:
         return f"{field.name} = {_position(value, cities or {})}"                 # type: ignore[arg-type]
+    words = _formatted(field, value, names) if element is None and not isinstance(value, list) else None
+    if words is not None:
+        return f"{field.name} = {words}"
     if field.format == "spell" and element is None:
         values = value if isinstance(value, list) else [value]
         return f"{field.name} = " + ", ".join(_spell(v, names) for v in values)       # type: ignore[arg-type]
@@ -143,6 +185,11 @@ def peek(api: DosboxApi, block: str, number: int, spec: Optional[str], as_json: 
         title += f" ({names[number - 1]})"
     if block == "city":
         title += f" ({record[:14].split(b'\0', 1)[0].decode('latin-1')})"
+    if block == "unit":
+        from .summon import read_types
+        names.unit_types = [t.name for t in read_types(api, game)]
+        dead = record[2] == 0xFF and record[3] == 0xFF
+        title += f" ({names.unit_types[record[5]] if record[5] < len(names.unit_types) else record[5]}, {'dead' if dead else _owner(record[3], names)})"
     try:
         if spec is None:
             chosen: List[Tuple[F.Field, Optional[str]]] = [(f, None) for f in F.all_fields(block)]
