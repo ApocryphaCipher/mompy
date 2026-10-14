@@ -1,7 +1,7 @@
 # STORY-017: `mompy banish wizard N`: banish a wizard (and, if you mean it, finish them) (enhancement)
 
 **Parent:** [EPIC-001](../epics/EPIC-001-mompy-core.md)
-**Status:** the flag part is done (2026-10-13): `banish` and `unbanish` work on the real game. `--dead` (eliminating a wizard) is still a spike and is not built.. **Priority: nice to have.** Depends on [STORY-003](STORY-003-poke.md) (`poke`). Contains a spike as its first step.
+**Status:** the flag part is done (2026-10-13): `banish` and `unbanish` work on the real game. `--dead` (eliminating a wizard) is built and was run for one End Turn on the real game (2026-10-13). **Priority: nice to have.** Depends on [STORY-003](STORY-003-poke.md) (`poke`). Contains a spike as its first step.
 **Size:** small for the flag, medium for the rest
 **Raised by:** [Kevin](https://github.com/KevinAsbury), 2026-10-13 (first as a joke, `mompy pew wizard 3`, "just pew and dead"; then settled: **`mompy banish wizard 3`**. `pew` became a different command, [STORY-018](STORY-018-pew.md): kill the units under the mouse.)
 
@@ -47,3 +47,19 @@ Built: `mompy banish wizard N [--force] [--dry-run]` and `mompy unbanish wizard 
 - **Real game (2026-10-13, the fork, MAXIMUS loaded):** `poke fortress 2 active 0 --force` (a guess field at that moment, hence the flag) made the Magic screen draw **Freya as a cracked stone frame** (Kevin looked); `banish wizard 2` then said she was already banished; `banish wizard 1` was refused; `unbanish wizard 2` lifted it. The field is now marked checked.
 - 92 tests (14 new) with a fortress table in the fake game: only the one byte changes, the neighbours are untouched, the player and out-of-range numbers are refused, dry runs write and log nothing, a table that does not look right is not written, undo brings the wizard back, and the CLI.
 - **Not done:** `--dead` (the spike: what the game does at End Turn with a banished wizard who has cities, and how to eliminate one cleanly: give the cities to neutral, mark units dead, clear heroes). Not observed either: what one End Turn does to a banished AI wizard (does he cast Spell of Return and come back?). Both are the next experiment, on a throwaway game.
+
+## Outcome (2026-10-13): `--dead`
+
+`mompy banish wizard N --dead [--dry-run] [--force]` (`mompy/eliminate.py`, `tests/test_eliminate.py`). The shape comes from the wizard the game itself eliminated, Freya in `JAFAR-PLAYED.GAM` (no cities, no units, every hero entry empty, gold, mana and power base 0, fortress flag cleared; books, retorts, spells and relations untouched). One undoable change, all or none:
+
+- the fortress flag cleared; his cities to the neutral player (owner 5) with their enchantments cleared (they record the caster), and the city enchantments he cast on other wizards' cities cleared;
+- his units marked dead the way `pew` does it, heroes included; his hero list emptied (`-1` unit index, the rest zero, as in the game's own eliminated wizard);
+- his gold and mana 0 and his 24 global enchantments off. The player needs `--force`.
+
+**Real game (fork 0.84.0-alpha, a spare MAXIMUS game, 2026-10-13):** `banish wizard 2 --dead` on Freya (2 cities, 9 units, 1 hero: 14 writes), then one End Turn (Kevin).
+- The Magic screen draws her as a cracked stone frame; clicking it opens the game's own **"Shattered Gem"** text: "the wizard has been eliminated from the game or has been banished". So the game uses one picture for both.
+- **No crash, nothing came back.** Afterwards Freya's cities (Dover, Denislin) were still neutral, her gold and mana still 0, her power base 0, her fortress flag still 0, her hero list still empty, and no unit of hers was alive.
+- **End Turn swept the dead records:** the live unit count went from 147 to 137 and no dead markers were left (this settles the "swept at End Turn" rule from Mirror's notes for `pew` too).
+- No sign of Spell of Return (her mana stayed 0): not looked for directly.
+- *Observed, not understood:* Freya's treaty list still shows an alliance with Sharee and Tauron, and the others' lists the same: the game does not clear diplomacy for an eliminated wizard (the eliminated Freya in `JAFAR-PLAYED.GAM` had none, but she was eliminated by play).
+- Not done: the conqueror's "defeated wizards" counter (`+0x354`, a guess) was not touched; a plain **banished** wizard who keeps his cities across an End Turn (does he cast Spell of Return?) was not run.
