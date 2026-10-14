@@ -145,8 +145,7 @@ python -m mompy unit dispel mass.flight --at hellgate
 python -m mompy undo
 ```
 
-Puts one of the 32 unit enchantments (Flight, Wind Walking, Water Walking, Invisibility, Heroism, Bless...) on every unit on a tile, with no mana and no checks; `dispel` takes it off. The units' owner pays the upkeep at End Turn:
-four Flying Nagas cost about 16 mana. Heroes on the tile are included. The map may need a nudge to redraw.
+Puts one of the 32 unit enchantments (Flight, Wind Walking, Water Walking, Invisibility, Heroism, Bless...) on every unit on a tile, with no mana and no checks; `dispel` takes it off. The units' owner pays the upkeep at End Turn; if the wizard cannot, the game **disbands his summoned creatures** and dissipates the unit spells (below). Heroes on the tile are included. The map may need a nudge to redraw.
 
 ## `mompy doctor`
 

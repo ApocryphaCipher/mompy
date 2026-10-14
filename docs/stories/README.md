@@ -24,6 +24,6 @@
 | [STORY-020](STORY-020-poke-city-build.md) | `poke city <name> build`: finish the current production next turn | built; real game: the building stands after one End Turn |
 | [STORY-021](STORY-021-mercury.md) | `unit mercury`: give a stack all the movement it needs | built; real game: 63.5 moves, crossed a continent |
 | [STORY-022](STORY-022-spike-weapon-quality.md) | Spike: where does a unit's weapon quality (adamantine) live? | done: byte found in the vault, seen on the unit screen |
-| [STORY-023](STORY-023-mass-spells.md) | `cast mass.<spell>`: a unit enchantment on a whole stack (by city name or `pointer`) | built; real game: Flight showed and worked, upkeep about 4 mana a unit |
+| [STORY-023](STORY-023-mass-spells.md) | `cast mass.<spell>`: a unit enchantment on a whole stack (by city name or `pointer`) | built; real game: Flight showed and worked; no mana: summoned creatures disbanded and unit spells dissipated |
 
 Epic: [EPIC-001](../epics/EPIC-001-mompy-core.md).
