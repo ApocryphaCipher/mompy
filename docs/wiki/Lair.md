@@ -9,6 +9,8 @@ mompy peek lair <number or name> [field[.element]]
 mompy poke lair <number or name> <field>[.<element>] <value>
 ```
 
+**Element tables on this page:** [items](#elements-of-items)
+
 | Field | Type | Values | Change it | Sure | What it is |
 | --- | --- | --- | --- | --- | --- |
 | `x` | u8 | a whole number from 0 to 59 | read-only | checked | Map column. |
@@ -25,8 +27,8 @@ mompy poke lair <number or name> <field>[.<element>] <value>
 | `spell_code` | u8 | a whole number | read-only | guess | 0 to 6 in every save; kazzmir's SpellSpecial. It does not decide the reward (the reward is rolled when the site is cleared). |
 | `flags` | u8 | a whole number | read-only | guess | Who has looked at it (guess): 0x02 seen after Freya came near. |
 | `item_count` | u8 | a whole number | read-only | checked | How many item rewards (0 to 3); 0 becomes 1 when an item is made at clearing. |
-| `items` | i16 x 3 | a whole number | read-only | checked | Indexes into the item block; -1 or 0 for none. |
+| `items` | i16 x 3 | a whole number; the elements: [Elements of items](#elements-of-items) | read-only | checked | Indexes into the item block; -1 or 0 for none. |
 
-### `items.<element>`
+### Elements of items
 
 3 values: `items.1` to `items.3`, or all of them as `a,b,c`.

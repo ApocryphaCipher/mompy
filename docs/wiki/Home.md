@@ -4,6 +4,20 @@
 
 Tables of the options of `mompy peek`, `poke` and friends, one page per kind of record. They are generated from the field table, so they match the program.
 
+## Look something up
+
+| I want to know... | Where |
+| --- | --- |
+| The 24 global enchantments (`globals.<name>`) | [Wizard#elements-of-globals](Wizard.md#elements-of-globals) |
+| The 18 retorts (`retorts.<name>`) | [Wizard#elements-of-retorts](Wizard.md#elements-of-retorts) |
+| Spellbooks per realm (`books.<realm>`) | [Wizard#elements-of-books](Wizard.md#elements-of-books) |
+| Spells: what `spells.<spell name>` takes (known, unknown...) | [Wizard#elements-of-spells](Wizard.md#elements-of-spells) |
+| Relations and treaties with each wizard | [Wizard#elements-of-relations](Wizard.md#elements-of-relations) |
+| The 32 unit enchantments (`unit cast mass.<name>`) | [Unit-enchantments](Unit-enchantments.md) |
+| Weapon grades (`unit weapons <grade>`) | [Unit-enchantments#weapon-grades](Unit-enchantments.md#weapon-grades) |
+
+## All the pages
+
 | Page | Records |
 | --- | --- |
 | [Wizard](Wizard.md) | 5 |
