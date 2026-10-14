@@ -16,6 +16,7 @@ from . import peek as peeking
 from . import pew as pewing
 from . import poke as poking
 from . import summon
+from . import mass
 from . import unit as units
 from . import where as whereis
 from .doctor import diagnose, render
@@ -68,7 +69,9 @@ def main(argv: Optional[List[str]] = None) -> int:
     wh.add_argument("name", help="a city or wizard name, any case")
     wh.add_argument("--json", action="store_true", help="print plain data for scripts; several matches are all listed")
     un = sub.add_parser("unit", parents=[common], help="act on units in the running game")
-    un.add_argument("action", choices=["mercury"], help="mercury: give units all the movement they can hold, for this turn")
+    un.add_argument("action", choices=["mercury", "cast", "dispel"],
+                    help="mercury: all the movement units can hold, for this turn; cast / dispel: a unit enchantment on the whole stack")
+    un.add_argument("spell", nargs="?", help="for cast / dispel: mass.flight, mass.wind_walking ...")
     un.add_argument("--at", help="the stack on a city or x,y,plane")
     un.add_argument("--wizard", type=int, help="every unit of this wizard (1 is the player)")
     un.add_argument("--dry-run", action="store_true", help="say what would change; write nothing")
@@ -111,6 +114,9 @@ def main(argv: Optional[List[str]] = None) -> int:
                 if args.block == "city" and args.field == "create":
                     print(summon.create(api, args.number, args.value.removeprefix("unit."), args.count, args.dry_run))
                     return 0
+                if args.block == "city" and args.field in ("cast", "dispel"):
+                    print(mass.change(api, str(args.number), args.value, args.field == "cast", args.dry_run))
+                    return 0
                 if args.field in ("cast", "dispel"):
                     if args.block != "wizard":
                         raise poking.PokeError(f"{args.field} is for wizards: mompy poke wizard N {args.field} aura_of_majesty")
@@ -142,7 +148,12 @@ def main(argv: Optional[List[str]] = None) -> int:
         return 0
     if args.command == "unit":
         try:
-            print(units.mercury(DosboxApi(args.url), args.at, args.wizard, args.dry_run))
+            if args.action == "mercury":
+                print(units.mercury(DosboxApi(args.url), args.at, args.wizard, args.dry_run))
+            else:
+                if not args.spell or not args.at:
+                    raise poking.PokeError(f"mompy unit {args.action} mass.flight --at PLACE  (a city, x,y,plane or pointer)")
+                print(mass.change(DosboxApi(args.url), args.at, args.spell, args.action == "cast", args.dry_run))
         except (poking.PokeError, peeking.PeekError, ApiError) as err:
             print(f"mompy: {err}", file=sys.stderr)
             return 1
