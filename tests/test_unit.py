@@ -23,7 +23,7 @@ class MercuryTest(MercuryCase):
     def test_a_wizards_units_get_the_top_value_and_nothing_else_changes(self):
         before = bytes(self.mem)
         out = mercury(self.api, wizard=1)
-        self.assertEqual(out, "1 of 1 units set to 63.5 moves (wizard 1 (Jafar)'s units)")
+        self.assertEqual(out, "set 1 of 1 units to 63.5 moves (wizard 1 (Jafar)'s units)")
         self.assertEqual(self.mem[unit_at(0) + 8], MERCURY)
         self.assertEqual(self.differing(before), [unit_at(0) + 8])
         self.assertEqual(self.mem[unit_at(0) + 4], before[unit_at(0) + 4])         # max moves untouched
@@ -46,13 +46,14 @@ class MercuryTest(MercuryCase):
         self.fill_tile(51, 22, 1, 0, 2)
         mid = bytes(self.mem)
         mercury(self.api, at="51,22,1")
-        undo(self.api)
+        self.assertEqual(undo(self.api), "undid: unit mercury on 2 units 63.5 moves -> their old moves")
         self.assertEqual(bytes(self.mem), mid)
         self.assertNotEqual(mid, before)
 
     def test_dry_run_and_already_full(self):
         before = bytes(self.mem)
-        self.assertTrue(mercury(self.api, wizard=1, dry_run=True).startswith("(dry run) would set"))
+        self.assertEqual(mercury(self.api, wizard=1, dry_run=True),
+                         "(dry run) would set 1 of 1 units to 63.5 moves (wizard 1 (Jafar)'s units)")
         self.assertEqual(bytes(self.mem), before)
         mercury(self.api, wizard=1)
         self.assertIn("already have 63.5 moves, nothing written", mercury(self.api, wizard=1))

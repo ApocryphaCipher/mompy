@@ -47,9 +47,9 @@ def mercury(api: DosboxApi, at: Optional[str] = None, wizard: Optional[int] = No
     todo = [i for i in chosen if raw[i * 32 + MOVES_LEFT] != MERCURY]
     if not todo:
         return f"{who}: all {len(chosen)} already have {MERCURY / 2:g} moves, nothing written"
-    summary = f"{len(todo)} of {len(chosen)} units set to {MERCURY / 2:g} moves ({who})"
+    what = f"{len(todo)} of {len(chosen)} units to {MERCURY / 2:g} moves ({who})"
     if dry_run:
-        return f"(dry run) would set {summary}"
+        return f"(dry run) would set {what}"
 
     writes: List[dict] = []
     try:
@@ -65,5 +65,5 @@ def mercury(api: DosboxApi, at: Optional[str] = None, wizard: Optional[int] = No
             except ApiError:
                 err = PokeError(f"{err}; some units' moves could NOT be put back: check them in the game")
         raise PokeError(str(err)) from None
-    _log(api.url, "unit mercury", f"{len(todo)} units", f"{MERCURY / 2:g} moves", writes)
-    return summary
+    _log(api.url, f"unit mercury on {len(todo)} units", "their old moves", f"{MERCURY / 2:g} moves", writes)
+    return f"set {what}"
