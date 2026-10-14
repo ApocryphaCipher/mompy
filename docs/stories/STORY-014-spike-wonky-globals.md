@@ -33,3 +33,7 @@ Tried on Kevin's spare game, in the order mildest first, one End Turn each; deta
 - **Time Stop:** shows in the Magic screen and is charged (about 100 mana more than usual), but the other wizards, cities and units all moved, through three End Turns (Kevin suggested it might start a turn late; it did not): the flag alone does nothing. `cast` still asks for `--force` and says so. Not explored why.
 - Kept as it was: Spell of Mastery is not one of the 24 flags; not tried.
 - Kevin's judgement ("I know how the game handles them"): the effect of each was not examined beyond what he happened to see; the question asked was only whether the game survives.
+
+## Update: the real Time Stop (2026-10-14)
+
+Kevin cast the real spell (it was already in his book). It sets the same byte, but the game also keeps its time-stop state somewhere mompy has not found: the sidebar read -200 mana, gold and food 0, and Next Turn did not end the turn (the turn comes back, 200 mana poorer). The AI wizards' records and the cities were nearly still; units of every owner nevertheless changed. Details and the mistake in my first comparison in [globals.md](../reference/globals.md). So a hand-set Time Stop stays `--force` (it only draws the icon and charges the upkeep); to find the real state, snapshot the data segment with the spell cast for real and diff it against one with the hand-set flag.

@@ -37,4 +37,11 @@ Time Stop then cast alone (the four dispelled first), one End Turn: **it showed 
 Kevin's thought: it might only start at the next turn. **Tried again, flag on through two more End Turns:** the AI wizards still took both turns (117 diff lines on wizards 2 to 5: research, gold, treaties moved), and mana fell 318 over the two turns, so it is charged every turn and still does nothing.
 `mompy cast` now asks for `--force` only for Time Stop.
 
+**The real Time Stop (2026-10-14).** Kevin cast the real spell (Jafar already had it: spell 80, Sorcery, casting cost 1500; Mirror's spell numbering, from `SPELLDAT.LBX`). It sets the **same** global byte (index 7) as `mompy cast`, and yet behaves differently:
+- the sidebar showed **-200 mana** at once, against about -106 for the hand-set flag; **gold and food income read 0**;
+- **Next Turn did not end the turn**: "turns are working for me and not wizards" (Kevin): each press costs the caster 200 mana (28976 to 28776 in one press) and the turn comes straight back;
+- the AI wizards' own records did not move (5 changed lines, all a per-turn history byte at `+0x386`) and the cities changed 4 lines, against about 120 and 100 on a normal turn; **but many units of every owner moved or changed orders** (57 neutral, about 27 of the AIs', 15 of Jafar's): not understood; Kevin knows the game better here.
+- The wizard record holds nothing that tells a hand-set flag from a real cast (the bytes that differed are a per-turn history and the usual turn changes), so the game keeps the "time is stopped" state somewhere else: *guess:* a variable in the data segment naming whose time it is. Not found.
+- A mistake caught on the way: a first comparison used `--ignore` with a snapshot from several turns earlier, which hides every change since as "noise" and made the freeze look total (4 AI lines). `diff --ignore` now refuses a snapshot taken more than 60 seconds from the first.
+
 **Not tested:** what the game does with an unaffordable *global* upkeep (for *unit* enchantments it dissipates all of them and disbands the wizard's summoned creatures, STORY-023); a value other than 1 in the byte; what happens when two wizards hold the same global; **Spell of Mastery** (not one of the 24: probably the wizard record's `+0x22`, and winning the game is not something to try on a game anyone cares about).
