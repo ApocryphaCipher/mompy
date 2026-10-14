@@ -11,7 +11,7 @@ mompy talks to **DOSBox Staging's built-in web API** (`webserver_enabled = true`
 and write the emulated machine's memory. It needs no game files of its own and ships none: only
 offsets, ranges and what we have checked about them.
 
-**Status: just started.** `mompy doctor` exists (below); `peek`, `fields`, `poke`, `undo`, `banish`, `unbanish`, and `cast`/`dispel` (a global enchantment), `where`, `poke city` (population, build, create) `cast unit`, `unit mercury`, `where pointer`, `pew` and mass enchantments exist too (see `docs/stories/`).
+**Status: just started.** `mompy doctor` exists (below); `peek`, `fields`, `poke`, `undo`, `banish`, `unbanish`, and `cast`/`dispel` (a global enchantment), `where`, `poke city` (population, build, create) `cast unit`, `unit mercury`, `where pointer`, `pew` mass enchantments, `snapshot` and `diff` exist too (see `docs/stories/`).
 Nothing here has been tried on anyone's machine but Kevin's.
 
 ## `mompy peek` and `mompy fields`
@@ -146,6 +146,23 @@ python -m mompy undo
 ```
 
 Puts one of the 32 unit enchantments (Flight, Wind Walking, Water Walking, Invisibility, Heroism, Bless...) on every unit on a tile, with no mana and no checks; `dispel` takes it off. The units' owner pays the upkeep at End Turn; if the wizard cannot, the game **disbands his summoned creatures** and dissipates the unit spells (below). Heroes on the tile are included. The map may need a nudge to redraw.
+
+## `mompy snapshot` and `mompy diff`: what moved?
+
+```
+python -m mompy snapshot before
+python -m mompy snapshot before2          # the same moment again: its differences from "before" are the game's own noise
+# ... cast something, send gold, end the turn ...
+python -m mompy snapshot after
+python -m mompy diff before after --ignore before2
+#   wizard 1 (Jafar) gold: 30000 -> 29950
+#   wizard 1 (Jafar) globals.Aura of Majesty: 0 -> 1
+#   unit 160 (type 179) moves_left: 4 -> 0
+#   data segment +0x78c2: ...
+```
+
+A snapshot keeps the wizards, cities, units (and their count), nodes, lairs and fortresses, and the game's 64 KiB data segment, in `~/.mompy/snapshots/NAME.json` (116 KiB each). A diff names the field when it knows it and shows the raw offset when it does not.
+It is how the pointer, the plane and the unit record were found. `mompy snapshot --list` lists them; they are never deleted for you.
 
 ## `mompy doctor`
 
