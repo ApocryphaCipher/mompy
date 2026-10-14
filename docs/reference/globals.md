@@ -12,7 +12,7 @@
 | 4 | Aura of Majesty | yes | yes | relations rose each turn (Freya 0 to 2, Sharee and Tauron -20 to -16); *guess:* the 9 mana a turn seen then is its upkeep (STORY-012) | seen |
 | 5 | Wind Mastery | yes | yes | not looked for | in the 17 mana batch |
 | 6 | Suppress Magic | not tried | | | |
-| 7 | Time Stop | yes | yes | **none, over three End Turns: the other wizards, the cities and the units all moved as usual** | charged: mana fell about 104 more than usual in the turn. Needs `--force` in `cast` |
+| 7 | Time Stop | yes | yes | **none, over three End Turns: the other wizards, the cities and the units all moved as usual** | charged: mana fell about 104 more than usual in the turn. Refused by `cast`: see below |
 | 8 | Nature Awareness | not tried | | | |
 | 9 | Nature's Wrath | yes | yes | not looked for | in the 17 mana batch |
 | 10 | Herb Mastery | yes | yes | not looked for | in the 17 mana batch |
@@ -35,7 +35,7 @@
 Planar Seal, Meteor Storm, Great Wasting and Armageddon cast together, one End Turn: **no crash, no hang, nothing unexpected.** The map changed (nine tiles: a volcano, four corrupted tiles); the other wizards' relations with Jafar fell a little (Freya 0 to -4, Sharee -20 to -21: "concerned").
 Time Stop then cast alone (the four dispelled first), one End Turn: **it showed and was charged, but did nothing:** all four other wizards, the cities and the units moved as normal. *Guess:* the game's turn logic reads a variable of its own (who holds time) that the flag alone does not set. Unexplored; not worth more unless someone wants the real effect.
 Kevin's thought: it might only start at the next turn. **Tried again, flag on through two more End Turns:** the AI wizards still took both turns (117 diff lines on wizards 2 to 5: research, gold, treaties moved), and mana fell 318 over the two turns, so it is charged every turn and still does nothing.
-`mompy cast` now asks for `--force` only for Time Stop.
+`mompy cast` no longer needs `--force` for those four. **Time Stop is not available in `mompy cast`** (Kevin: "just print a note that Time Stop is not available in mompy due to the game scripting"), even with `--force`; `dispel` still works.
 
 **The real Time Stop (2026-10-14).** Kevin cast the real spell (Jafar already had it: spell 80, Sorcery, casting cost 1500; Mirror's spell numbering, from `SPELLDAT.LBX`). It sets the **same** global byte (index 7) as `mompy cast`, and yet behaves differently:
 - the sidebar showed **-200 mana** at once, against about -106 for the hand-set flag; **gold and food income read 0**;

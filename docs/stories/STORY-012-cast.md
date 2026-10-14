@@ -45,4 +45,4 @@ Already cast (or not cast): nothing written, nothing logged. Any wizard can be t
 
 ## Update (2026-10-14)
 
-The `--force` list (Time Stop, Planar Seal, Armageddon, Meteor Storm, Great Wasting) came down to **Time Stop** alone after the spike in [STORY-014](STORY-014-spike-wonky-globals.md): the other four went through a real End Turn without trouble; Time Stop shows and costs mana but does nothing when set by hand.
+The `--force` list (Time Stop, Planar Seal, Armageddon, Meteor Storm, Great Wasting) is gone after the spike in [STORY-014](STORY-014-spike-wonky-globals.md): the other four went through a real End Turn without trouble and cast like any other; **Time Stop is refused** (even with `--force`), since set by hand it only shows and costs mana and the real spell needs the game's own scripting.

@@ -5,7 +5,7 @@ import unittest
 from mompy import fields as F
 from mompy import layout, poke as poking
 from mompy.api import DosboxApi
-from mompy.cast import QUESTIONABLE, cast, dispel
+from mompy.cast import UNAVAILABLE, cast, dispel
 from mompy.cli import main
 from mompy.poke import PokeError, undo
 
@@ -105,20 +105,27 @@ class DispelTest(CastCase):
 
 
 class QuestionableTest(CastCase):
-    def test_time_stop_needs_force_to_be_cast(self):
-        self.assertEqual(QUESTIONABLE, ("Time Stop",))
-        for spell in QUESTIONABLE:
-            before, logged = bytes(self.mem), len(poking.read_log()[0])
-            with self.assertRaisesRegex(PokeError, "--force"):
-                cast(self.api, 1, spell)
-            self.assertTrue(bytes(self.mem) == before, f"{spell}: memory changed")          # not assertEqual: 16 MiB diffs
-            self.assertEqual(len(poking.read_log()[0]), logged, spell)
-            cast(self.api, 1, spell, force=True)
-            index = GLOBALS.element(spell)
-            self.assertEqual(self.mem[global_at(1, index)], 1, spell)
+    def test_time_stop_is_not_available_even_with_force(self):
+        self.assertEqual(UNAVAILABLE, ("Time Stop",))
+        before, logged = bytes(self.mem), len(poking.read_log()[0])
+        for force in (False, True):
+            with self.assertRaisesRegex(PokeError, "not available in mompy"):
+                cast(self.api, 1, "Time Stop", force=force)
+        self.assertTrue(bytes(self.mem) == before)                                       # not assertEqual: 16 MiB diffs
+        self.assertEqual(len(poking.read_log()[0]), logged)
+
+    def test_a_stray_time_stop_flag_can_still_be_dispelled(self):
+        put_field(self.mem, BASE, "wizard", 1, "globals", [1 if i == GLOBALS.element("Time Stop") else 0 for i in range(24)])
+        self.assertEqual(dispel(self.api, 1, "time_stop"), "Time Stop dispelled from wizard 1 (Jafar)")
+        self.assertEqual(self.mem[global_at(1, 6)], 0)
+
+    def test_the_four_map_globals_cast_like_any_other(self):
+        for spell in ("Planar Seal", "Armageddon", "Meteor Storm", "Great Wasting"):
+            cast(self.api, 1, spell)
+            self.assertEqual(self.mem[global_at(1, GLOBALS.element(spell))], 1, spell)
 
     def test_the_rest_do_not(self):
-        asks = set(QUESTIONABLE)
+        asks = set(UNAVAILABLE)
         for i in range(24):
             spell = GLOBALS.label_for(i)
             if spell in asks:
@@ -129,9 +136,9 @@ class QuestionableTest(CastCase):
             self.assertEqual(mem[global_at(1, i)], 1, spell)
 
     def test_taking_one_off_never_needs_force(self):
-        cast(self.api, 1, "time_stop", force=True)
-        self.assertEqual(dispel(self.api, 1, "time_stop"), "Time Stop dispelled from wizard 1 (Jafar)")
-        self.assertEqual(self.mem[global_at(1, 6)], 0)
+        put_field(self.mem, BASE, "wizard", 1, "globals", [1 if i == 18 else 0 for i in range(24)])
+        self.assertEqual(dispel(self.api, 1, "just_cause"), "Just Cause dispelled from wizard 1 (Jafar)")
+        self.assertEqual(self.mem[global_at(1, 18)], 0)
 
 
 class ServerTest(CastCase):
@@ -163,10 +170,9 @@ class CliTest(CastCase):
         self.assertEqual(self.run_cli("peek", "wizard", "1", "globals")[1], "globals = Aura of Majesty")
         self.assertEqual(self.run_cli("poke", "wizard", "1", "dispel", "globals.aura_of_majesty"),
                          (0, "Aura of Majesty dispelled from wizard 1 (Jafar)", ""))
-        code, out, err = self.run_cli("poke", "wizard", "1", "cast", "time_stop")
+        code, out, err = self.run_cli("poke", "wizard", "1", "cast", "time_stop", "--force")
         self.assertEqual((code, out), (1, ""))
-        self.assertIn("--force", err)
-        self.assertEqual(self.run_cli("poke", "wizard", "1", "cast", "time_stop", "--force")[1], "Time Stop cast on wizard 1 (Jafar)")
+        self.assertIn("not available in mompy", err)
         code, _, err = self.run_cli("poke", "fortress", "1", "cast", "aura")
         self.assertEqual(code, 1)
         self.assertIn("cast is for wizards", err)
