@@ -15,6 +15,7 @@ from . import city as cities
 from . import peek as peeking
 from . import pew as pewing
 from . import poke as poking
+from . import snapshot as snapshots
 from . import summon
 from . import mass
 from . import unit as units
@@ -78,6 +79,15 @@ def main(argv: Optional[List[str]] = None) -> int:
     pw = sub.add_parser("pew", parents=[common], help="kill the units on a tile (not the city): pointer, a city name, or x,y,plane")
     pw.add_argument("place", help="pointer (the tile under the mouse), a city's name, or x,y,plane")
     pw.add_argument("--dry-run", action="store_true", help="say what would die; write nothing")
+    sn = sub.add_parser("snapshot", parents=[common], help="save the game's tables and data segment under a name (for diff)")
+    sn.add_argument("name", nargs="?", help="a name for this moment")
+    sn.add_argument("--list", action="store_true", help="list the snapshots there are")
+    sn.add_argument("--replace", action="store_true", help="overwrite a snapshot of the same name")
+    df = sub.add_parser("diff", help="what changed between two snapshots, by field name where the field table knows it")
+    df.add_argument("a", help="the earlier snapshot")
+    df.add_argument("b", help="the later snapshot")
+    df.add_argument("--ignore", help="a snapshot of the same moment as the first: bytes that differ between the two are noise and left out")
+    df.add_argument("--all", action="store_true", help="show every line (the default stops at 200)")
     fl = sub.add_parser("fields", help="list the fields mompy knows, with their ranges and how sure we are")
     fl.add_argument("block", nargs="?", choices=["wizard", "fortress", "city"])
 
@@ -136,6 +146,20 @@ def main(argv: Optional[List[str]] = None) -> int:
         try:
             print(whereis.where(DosboxApi(args.url), args.name, args.json))
         except (peeking.PeekError, ApiError) as err:
+            print(f"mompy: {err}", file=sys.stderr)
+            return 1
+        return 0
+    if args.command in ("snapshot", "diff"):
+        try:
+            if args.command == "diff":
+                print(snapshots.diff(args.a, args.b, args.ignore, args.all))
+            elif args.list:
+                print(snapshots.list_snapshots())
+            elif not args.name:
+                raise snapshots.SnapshotError("name the snapshot: mompy snapshot NAME  (or --list)")
+            else:
+                print(snapshots.take(DosboxApi(args.url), args.name, args.replace))
+        except (snapshots.SnapshotError, peeking.PeekError, ApiError) as err:
             print(f"mompy: {err}", file=sys.stderr)
             return 1
         return 0
