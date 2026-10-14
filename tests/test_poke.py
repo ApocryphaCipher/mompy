@@ -268,10 +268,11 @@ class CacheTest(PokeCase):
     def test_the_second_command_does_not_scan(self):
         from mompy.peek import peek
         peek(self.api, "wizard", 1, "gold")
-        self.assertEqual(len(self.full_reads()), 1)
+        first = len(self.full_reads())
+        self.assertIn(first, (1, 2))                                          # the wizards, and (once) the spell table when there is none
         peek(self.api, "wizard", 1, "gold")
         self.poke(1, "gold", "5")
-        self.assertEqual(len(self.full_reads()), 1)                           # remembered, confirmed by a small read
+        self.assertEqual(len(self.full_reads()), first)                       # remembered, confirmed by a small read
         self.assertTrue(os.path.exists(os.path.join(self.home, "cache.json")))
 
     def test_a_stale_or_damaged_cache_just_rescans(self):
@@ -279,7 +280,7 @@ class CacheTest(PokeCase):
         with open(cache, "w", encoding="utf-8") as f:
             json.dump({self.api.url: {"base": 0x40000}}, f)                   # nothing there
         self.assertEqual(self.poke(1, "gold", "5"), "gold: 8293 -> 5")
-        self.assertEqual(len(self.full_reads()), 1)
+        self.assertIn(len(self.full_reads()), (1, 2))
         with open(cache, encoding="utf-8") as f:
             self.assertEqual(json.load(f)[self.api.url]["base"], BASE)
         junk = ("{not json", "[]", json.dumps({self.api.url: "x"}), json.dumps({self.api.url: {"base": -5}}))
@@ -291,7 +292,7 @@ class CacheTest(PokeCase):
     def test_a_cache_pointing_at_a_moved_game_is_not_trusted(self):
         gamefile._remember(self.api.url, 0x3239A)                             # a 0.83 layout, but this game is at BASE
         self.assertEqual(self.poke(1, "gold", "5"), "gold: 8293 -> 5")
-        self.assertEqual(len(self.full_reads()), 1)
+        self.assertIn(len(self.full_reads()), (1, 2))
 
 
 class CliTest(PokeCase):

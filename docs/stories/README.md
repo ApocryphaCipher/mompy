@@ -7,7 +7,7 @@
 | [STORY-002](STORY-002-field-table-and-peek.md) | The field table and `peek` | done |
 | [STORY-003](STORY-003-poke.md) | `poke`, safely | done |
 | [STORY-004](STORY-004-snapshot-and-diff.md) | `snapshot` and `diff` | built; real game: a mana change found by name |
-| [STORY-005](STORY-005-spell-names.md) | Spell names from the player's files | proposed |
+| [STORY-005](STORY-005-spell-names.md) | Spell names, read from the running game | built; real game: names found in memory, nothing shipped |
 | [STORY-006](STORY-006-more-fields.md) | Relations, globals, banished; find the missing blocks | proposed |
 | [STORY-007](STORY-007-packaging.md) | Install, README, licence | proposed |
 | [STORY-009](STORY-009-dosbox-memory-map-endpoint.md) | Ask DOSBox where the game was loaded | proposed (nice to have) |

@@ -14,7 +14,7 @@ from typing import List, Optional, Tuple
 
 from . import fields as F
 from . import game as gamefile
-from . import layout, peek
+from . import layout, peek, spellnames
 from .api import ApiError, DosboxApi, Mismatch, WritesDisabled
 
 LOG_LIMIT = 200
@@ -112,10 +112,12 @@ def _decode(target: Target, raw: bytes):
     return f.decode_item(raw) if target.element is not None else f.decode(raw)
 
 
-def _words(target: Target, value) -> str:
+def _words(target: Target, value, names: List[str] = ()) -> str:
     f = target.field
     if f.type == "text":
         return str(value)
+    if f.format == "spell":
+        return ",".join(peek._spell(v, names) for v in (value if isinstance(value, list) else [value]))
     if isinstance(value, list):
         return ",".join(peek._plain(f, v) for v in value)
     return peek._plain(f, value)
@@ -131,10 +133,26 @@ def _encode(target: Target, value) -> bytes:
     return f.encode_item(value) if target.element is not None else f.encode(value)
 
 
-def _parse(target: Target, text: str):
+def _spell_number(text: str, names: List[str]) -> str:
+    """A spell's name as its number, when the game's spell names are known; anything else is left for the usual number check."""
+    spells = getattr(names, "spells", None)
+    word = text.strip()
+    if word.lower() == "none":
+        return "0"
+    if not spells or word.isdigit():
+        return text
+    try:
+        return str(spellnames.find(spells, word))
+    except ValueError as err:
+        raise PokeError(str(err)) from None
+
+
+def _parse(target: Target, text: str, names: List[str] = ()):
     f = target.field
     if f.type == "text":
         return _parse_name(text)
+    if f.format == "spell":
+        text = _spell_number(text, names) if not (target.element is None and f.is_array) else text
     if target.element is not None or not f.is_array:
         return parse_item(f, text)
     parts = [p for p in text.split(",")]
@@ -173,7 +191,7 @@ def poke(api: DosboxApi, number: int, spec: str, text: str, dry_run: bool = Fals
     last = block.first_number + block.count - 1
     if not block.first_number <= number <= last:
         raise PokeError(f"there is no {block.describe} {number} (1 to {last})")
-    names = list(found.names)
+    names = found.names
     name, _, element = spec.partition(".")
     try:
         field = F.find(block_name, name)
@@ -181,7 +199,7 @@ def poke(api: DosboxApi, number: int, spec: str, text: str, dry_run: bool = Fals
         target = resolve(found, field, number, element or None, names)
     except F.FieldError as err:
         raise PokeError(str(err)) from None
-    new_value = _parse(target, text)
+    new_value = _parse(target, text, names)
     label = _label(target, names)
     if block_name == "fortress":
         _check_fortresses(api, found)
@@ -196,8 +214,8 @@ def poke(api: DosboxApi, number: int, spec: str, text: str, dry_run: bool = Fals
         raise PokeError(str(err)) from None
     old_value = _decode(target, current)
     if old_value == new_value:
-        return f"{label} is already {_words(target, new_value)}, nothing written"
-    change = f"{label}: {_words(target, old_value)} -> {_words(target, new_value)}"
+        return f"{label} is already {_words(target, new_value, names)}, nothing written"
+    change = f"{label}: {_words(target, old_value, names)} -> {_words(target, new_value, names)}"
 
     pair = None                     # the other wizard's side of a mirrored field
     if field.mirrored and target.element is not None and target.element < block.count:
@@ -223,7 +241,7 @@ def poke(api: DosboxApi, number: int, spec: str, text: str, dry_run: bool = Fals
             except ApiError:
                 undone = "the first side could NOT be put back: check it with peek"
             raise PokeError(f"{err}; {undone}") from None
-    _log(api.url, label, _words(target, old_value), _words(target, new_value), writes)
+    _log(api.url, label, _words(target, old_value, names), _words(target, new_value, names), writes)
     return change
 
 

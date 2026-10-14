@@ -27,7 +27,7 @@ def _change(api: DosboxApi, number: int, text: str, on: bool, dry_run: bool, for
     last = block.first_number + block.count - 1
     if not block.first_number <= number <= last:
         raise PokeError(f"there is no wizard {number} (1 to {last})")
-    names = list(found.names)
+    names = found.names
     field = F.find("wizard", "globals")
     name = text.strip()
     if name.lower().startswith("globals."):

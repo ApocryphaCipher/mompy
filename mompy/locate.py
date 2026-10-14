@@ -22,6 +22,14 @@ class Candidate(NamedTuple):
     names: List[str]
 
 
+class Names(list):
+    """The wizards' names, which also carry the spell names (index = spell number) when the game's spell table was found."""
+
+    def __init__(self, wizards=(), spells=None):
+        super().__init__(wizards)
+        self.spells = spells
+
+
 class Game(NamedTuple):
     base: int                        # where the wizard table is
     names: List[str]
