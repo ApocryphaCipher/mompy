@@ -1,7 +1,7 @@
 # STORY-028: name tables for people to look things up (spells, globals, retorts, unit types, ...) (enhancement)
 
 **Parent:** [EPIC-001](../epics/EPIC-001-mompy-core.md)
-**Status:** built (2026-10-14): option tables generated from the field table; the wiki copy is Kevin's to push. A `mompy names` command for the game's own spell and unit names is not built (see below).
+**Status:** done (2026-10-14): option tables generated from the field table, in the repository and on the GitHub wiki. A `mompy names` command for the game's own spell and unit names is not built (see below).
 **Size:** small to medium
 **Raised by:** [Kevin](https://github.com/KevinAsbury), 2026-10-14 ("we need to include name tables for the spells and globals and such. Maybe the GitHub wiki is a good spot to stick that info and then just link to the tables from the readme")
 
@@ -39,3 +39,16 @@ Built: `scripts/make_wiki.py` writes `docs/wiki/*.md` from `mompy/fields.toml`: 
 
 - **They cannot go stale:** `tests/test_wiki.py` regenerates the pages and fails if the files in `docs/wiki/` differ; it also checks every field of every block is in its page and that **names that exist only in the game's spell and unit tables** (a sample of eight) appear nowhere. (The 24 global enchantments, such as Time Stop, are in the tables: their names were already in the field table and the README.)
 - **The GitHub wiki** (Kevin's to switch on: it needs a first page made in the web interface, and what is pushed there is public): `python3 scripts/make_wiki.py --wiki-links --out DIR` writes a copy with links without `.md`; push those files to `mompy.wiki.git`. Until then the same pages are readable in the repository.
+
+## The wiki is live (2026-10-14)
+
+Kevin created the wiki's first page and the eight pages were pushed to `mompy.wiki.git` (`master`): https://github.com/ApocryphaCipher/mompy/wiki (Home, Wizard, City, Unit, Node, Lair, Fortress, Unit-enchantments; all answer 200). They were checked first for any name from the game's spell and unit tables: none. The README links the wiki and the copy in `docs/wiki/`.
+
+**To refresh it after the field table changes** (the repository copy is kept in step by a test; the wiki is not, since it is a separate repository):
+
+```
+python3 scripts/make_wiki.py                                          # the repository copy (the test fails until this is done)
+git clone https://github.com/ApocryphaCipher/mompy.wiki.git /tmp/mompy.wiki
+python3 scripts/make_wiki.py --wiki-links --out /tmp/mompy.wiki       # the wiki copy: links without ".md"
+cd /tmp/mompy.wiki && git add -A && git commit -m "Option tables" && git push
+```

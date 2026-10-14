@@ -75,7 +75,7 @@ mompy never saves your game for you: the changes live in the running game until 
 ## The commands
 
 `mompy --help` lists them. Every command that takes a place accepts the tile under the mouse (`pointer`), a city's name, or `x,y,plane`.
-**Every field and what you can type for it** (names, ranges, example values) is in the [option tables](docs/wiki/Home.md).
+**Every field and what you can type for it** (names, ranges, example values) is in the [option tables on the wiki](https://github.com/ApocryphaCipher/mompy/wiki) (the same pages are in the repository: [docs/wiki](docs/wiki/Home.md)).
 
 ## `mompy doctor`: check everything first
 
