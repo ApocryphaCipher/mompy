@@ -100,6 +100,31 @@ class ExperienceTest(StackCase):
         touched = {unit_at(u) + k for u in (self.sword_a, self.sword_b, self.hero) for k in range(12, 16)}
         self.assertEqual(sorted(set(self.differing(before)) - touched), [])
 
+    def test_a_warlords_ordinary_units_reach_ultra_elite(self):
+        retorts = [0] * 18
+        retorts[1] = 1                                                                  # Warlord
+        from .fake_dosbox import put_field
+        put_field(self.mem, BASE, "wizard", 1, "retorts", retorts)
+        experience(self.api, "blackstone", "max")
+        self.assertEqual((self.field(self.sword_a, 12), self.field(self.sword_a, 14, 2)), (4, 120))     # Ultra Elite
+        self.assertEqual((self.field(self.hero, 12), self.field(self.hero, 14, 2)), (8, 1000))         # heroes are not raised past Demi-God
+        self.assertEqual(self.field(self.creature, 12), 0)
+
+    def test_without_warlord_elite_is_the_top(self):
+        experience(self.api, "blackstone", "max")
+        self.assertEqual(self.field(self.sword_a, 12), 3)
+
+    def test_nothing_is_ever_lowered(self):
+        at = unit_at(self.sword_a)
+        self.mem[at + 12] = 4                                                          # level 4 with 120 experience (a level a retort gave it)
+        struct.pack_into("<h", self.mem, at + 14, 120)
+        struct.pack_into("<h", self.mem, unit_at(self.sword_b) + 14, 500)              # more experience than the Elite entry
+        self.mem[unit_at(self.sword_b) + 12] = 3
+        experience(self.api, "blackstone", "max")
+        self.assertEqual((self.field(self.sword_a, 12), self.field(self.sword_a, 14, 2)), (4, 120))
+        self.assertEqual((self.field(self.sword_b, 12), self.field(self.sword_b, 14, 2)), (3, 500))
+        self.assertEqual((self.field(self.hero, 12), self.field(self.hero, 14, 2)), (8, 1000))
+
     def test_skip_heroes(self):
         out = experience(self.api, "blackstone", "max", skip_heroes=True)
         self.assertIn("heroes skipped: 1", out)

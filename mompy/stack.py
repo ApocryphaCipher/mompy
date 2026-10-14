@@ -5,7 +5,9 @@ Each is one compare-and-swap per unit, one ``undo`` for the stack, and a line th
 * ``heal``: the unit's damage (``+17``) to 0, for every unit including heroes and summoned creatures.
 * ``weapons``: the weapon grade, the low two bits of ``mutations`` (``+23``), for **ordinary units only**: summoned creatures carry no
   grade, and heroes are left alone (what their weapons show depends on their items). The mutation flags (undead...) are kept.
-* ``experience max``: experience and level together, to the top the game allows each kind. The numbers are read from the game itself
+* ``experience max``: experience and level together, to the top the game allows each kind. An ordinary unit of a wizard with the **Warlord**
+  retort is one level higher still, Ultra Elite (level 4 at 120 experience): Kevin's old units show exactly that, and the game adds it
+  again at End Turn, so this writes it at once. The numbers are read from the game itself
   (its experience table, nine values at the data segment ``+0x1D74``: 0, 20, 60, 120, 200, 300, 450, 600, 1000). ReMoM's own code caps an
   ordinary unit at the Elite entry (120, level 3) and a hero at the last (1000, level 8, Demi-God); summoned creatures do not level.
 
@@ -46,6 +48,16 @@ def experience_table(api: DosboxApi, game) -> List[int]:
     if table[0] != 0 or any(b <= a for a, b in zip(table, table[1:])) or table[-1] > 30000:
         raise PokeError("the experience table does not look right in this game: not writing")
     return table
+
+
+def warlords(api: DosboxApi, game) -> set:
+    """The wizards (0 to 4) whose retorts include Warlord: their ordinary units are a level above what experience gives."""
+    from . import fields as F
+    retorts = F.find("wizard", "retorts")
+    spot = retorts.element("warlord")
+    table = layout.WIZARDS
+    raw = api.read(game.base + table.offset, table.stride * table.count)
+    return {w for w in range(table.count) if raw[w * table.stride + retorts.offset + spot] != 0}
 
 
 def _apply(api: DosboxApi, place: str, what: str, now: str, label: str, plan: Callable[[bytes], Tuple[Optional[Change], Optional[str]]],
@@ -131,13 +143,18 @@ def weapons(api: DosboxApi, place: str, grade: str, skip_heroes: bool = False, d
 def experience(api: DosboxApi, place: str, how: str, skip_heroes: bool = False, dry_run: bool = False) -> str:
     if (how or "").strip().lower() not in ("max", "maximum"):
         raise PokeError("experience takes 'max': mompy unit experience max --at PLACE")
-    table = experience_table(api, peek.find_game(api))
+    game = peek.find_game(api)
+    table = experience_table(api, game)
+    bonus = warlords(api, game)
 
     def plan(r: bytes):
         if _is_creature(r):
             return None, "summoned creatures do not level"
         level = DEMI_GOD if _is_hero(r) else ELITE
+        shown = level + (1 if not _is_hero(r) and r[3] in bonus else 0)           # Warlord: Ultra Elite
         old = r[LEVEL:LEVEL + 4]
-        new = bytes([level, old[1]]) + struct.pack("<h", table[level])
+        have_level, have_xp = old[0], struct.unpack("<h", old[2:4])[0]
+        # never lower anything: a unit already above the table's top for its kind (a level a retort gave it) is left as it is
+        new = bytes([max(shown, have_level), old[1]]) + struct.pack("<h", max(table[level], have_xp))
         return (LEVEL, bytes(old), new), None
     return _apply(api, place, "set maximum experience on", "set maximum experience on", "experience", plan, skip_heroes, dry_run)

@@ -219,7 +219,7 @@ A sign means "change by"; no sign means "set it"; `to -50` sets a negative value
 ```
 python -m mompy unit heal --at pointer                     # damage to 0, heroes included
 python -m mompy unit weapons adamantium --at blackstone    # ordinary units only (not creatures, not heroes)
-python -m mompy unit experience max --at pointer           # Elite (120) for units, Demi-God (1000) for heroes; the game's own table
+python -m mompy unit experience max --at pointer           # Elite (120; Ultra Elite for a Warlord's units) or, for heroes, Demi-God (1000): the game's own table
 python -m mompy unit heal --at pointer --skip-heroes
 ```
 
