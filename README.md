@@ -1,18 +1,57 @@
 # mompy
 
-Change a running game of *Master of Magic* from the command line:
+Read and change a **running game of *Master of Magic*** from the command line.
 
 ```
-mompy peek wizard 1 gold
-mompy poke wizard 1 gold 30000
+mompy peek wizard freya relation tauron         # relations.Tauron = 23
+mompy poke wizard 1 gold 30000                  # gold: 8293 -> 30000
+mompy poke wizard freya relation tauron +20     # raise a relation by 20 (both wizards' records change)
+mompy unit experience max --at pointer          # the stack under the mouse becomes Elite
+mompy undo                                      # put the last change back
 ```
 
-mompy talks to **DOSBox Staging's built-in web API** (`webserver_enabled = true`), which can read
-and write the emulated machine's memory. It needs no game files of its own and ships none: only
-offsets, ranges and what we have checked about them.
+mompy talks to **DOSBox Staging's built-in web API**, which can read and write the emulated machine's memory while the game runs. It is a single Python package with **no dependencies**,
+needs none of the game's files and ships none: only offsets, ranges and what has been checked about them. It is **alpha** software and it **writes into a running game**: try it on a spare save.
 
-**Status: just started.** `mompy doctor` exists (below); `peek`, `fields`, `poke`, `undo`, `banish`, `unbanish`, and `cast`/`dispel` (a global enchantment), `where`, `poke city` (population, build, create) `cast unit`, `unit mercury`, `where pointer`, `pew` mass enchantments, `snapshot`, `diff`, spell names, `peek`/`poke` for units, nodes and lairs exist too (see `docs/stories/`).
-Nothing here has been tried on anyone's machine but Kevin's.
+## Install
+
+You need **Python 3.12 or newer**.
+
+```
+pipx install git+https://github.com/ApocryphaCipher/mompy        # or: pip install git+https://github.com/ApocryphaCipher/mompy
+mompy --version
+```
+
+No installation is needed to try it from a checkout: `python -m mompy ...` in the repository folder does the same. In the examples below, `python -m mompy` and `mompy` are the same thing.
+
+## Quick start
+
+1. **Start DOSBox Staging with its web API on**, and run the game from it as usual:
+
+   ```
+   dosbox --set webserver_enabled=true
+   ```
+
+   or put `webserver_enabled = true` in DOSBox's config file. The API listens on `127.0.0.1:8086` (`webserver_port` changes that; give mompy `--url http://127.0.0.1:PORT` to match).
+   Some builds (the research fork) also need `webserver_allow_writes = true` before they accept a write; stock DOSBox Staging does not.
+2. **Load a saved game** in *Master of Magic* (1.31, the GOG release was used). mompy finds the game by looking for the five wizards' names, so a game must be loaded.
+3. **Check it:**
+
+   ```
+   mompy doctor
+   ```
+
+   It reports whether the API answers, the memory can be read, the game's tables are found and look right, and a write is accepted (by writing back the byte that is already there). It ends with `READY`, `READ-ONLY` or `NOT READY`.
+4. **Look, then change:** `mompy peek wizard 1`, `mompy fields`, `mompy poke wizard 1 gold 30000 --dry-run`.
+
+**Safety:** every write is checked against the field's legal range, goes through a compare-and-swap (it is refused if the game changed the byte meanwhile), and is recorded so `mompy undo` can put it back. `--dry-run` says what would change and writes nothing.
+mompy never saves your game for you: the changes live in the running game until *you* save from it. A hand edit can leave the game in a state it does not expect (a unit moved by hand is drawn in its old place until the map is nudged, for example), so **keep a copy of a save you care about before you save over it.**
+
+**Platforms:** developed and checked on **macOS** with DOSBox Staging 0.84-alpha (a fork build) and the **0.83.0 release**. Windows and Linux builds of DOSBox Staging should behave the same, but they have **not been tried** (STORY-008). Python 3.14 was used for the tests; 3.12 is the stated minimum.
+
+## The commands
+
+`mompy --help` lists them. Every command that takes a place accepts the tile under the mouse (`pointer`), a city's name, or `x,y,plane`.
 
 ## `mompy peek` and `mompy fields`
 
@@ -235,12 +274,6 @@ It checks, without changing the game, that DOSBox's web API answers (and which v
 found and look right (their address depends on the DOSBox build, so they are *found*, not assumed), and that a write is accepted (by writing back the byte that is already there).
 It ends with `READY`, `READ-ONLY` or `NOT READY`, and exits 0 only for `READY`.
 
-## What it will need
-
-- DOSBox Staging with its web API on (`webserver_enabled = true`) running *Master of Magic* 1.31. Developed against **0.84-alpha** (Kevin's research fork);
-  the 0.83.0 release works too (checked), and `doctor` recognises both. A fork build also needs `webserver_allow_writes = true` before it accepts a write; stock DOSBox Staging does not.
-- Python 3.12 or newer. No other packages.
-
 ## Layout
 
 ```
@@ -255,3 +288,7 @@ source, clone [dosbox-staging/dosbox-staging](https://github.com/dosbox-staging/
 
 Related: [Mirror](https://github.com/ApocryphaCipher/Mirror) edits *save files* (and holds the verified
 research on the formats), and `gama` turns memory dumps into data.
+
+## Licence
+
+MIT: see [LICENSE](LICENSE). *Master of Magic* and its files belong to their owners; mompy contains none of them.
