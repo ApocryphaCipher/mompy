@@ -11,7 +11,7 @@ mompy talks to **DOSBox Staging's built-in web API** (`webserver_enabled = true`
 and write the emulated machine's memory. It needs no game files of its own and ships none: only
 offsets, ranges and what we have checked about them.
 
-**Status: just started.** `mompy doctor` exists (below); `peek`, `fields`, `poke`, `undo`, `banish`, `unbanish`, and `cast`/`dispel` (a global enchantment), `where`, `poke city` (population, build, create) `cast unit`, `unit mercury`, `where pointer`, `pew` mass enchantments, `snapshot` and `diff` exist too (see `docs/stories/`).
+**Status: just started.** `mompy doctor` exists (below); `peek`, `fields`, `poke`, `undo`, `banish`, `unbanish`, and `cast`/`dispel` (a global enchantment), `where`, `poke city` (population, build, create) `cast unit`, `unit mercury`, `where pointer`, `pew` mass enchantments, `snapshot`, `diff` and spell names exist too (see `docs/stories/`).
 Nothing here has been tried on anyone's machine but Kevin's.
 
 ## `mompy peek` and `mompy fields`
@@ -163,6 +163,18 @@ python -m mompy diff before after --ignore before2
 
 A snapshot keeps the wizards, cities, units (and their count), nodes, lairs and fortresses, and the game's 64 KiB data segment, in `~/.mompy/snapshots/NAME.json` (116 KiB each). A diff names the field when it knows it and shows the raw offset when it does not.
 It is how the pointer, the plane and the unit record were found. `mompy snapshot --list` lists them; they are never deleted for you.
+
+## Spell names
+
+```
+python -m mompy peek wizard 1 researching               # researching = Enchant Item (207)
+python -m mompy peek wizard 1 spells.time_stop          # spells.Time Stop = 2 (known)
+python -m mompy poke wizard 1 spells.earth_lore known
+python -m mompy poke wizard 1 researching vertigo       # or a number; "none" for nothing
+```
+
+The names come from the running game itself (it keeps the spell table in memory), so no game folder is needed and nothing is shipped. A partial name works when it is unique
+(`vert`); an ambiguous one lists its matches. If the table cannot be found, everything works with numbers as before.
 
 ## `mompy doctor`
 

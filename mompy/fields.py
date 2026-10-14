@@ -99,6 +99,9 @@ class Field:
         if self.labels == "wizards":
             names = list(wizard_names) + ["neutral"]
             return names[index] if index < len(names) else str(index + 1)
+        if self.labels == "spells":
+            spells = getattr(wizard_names, "spells", None)        # the game's own spell names, when they were found
+            return spells[index + 1] if spells and index + 1 < len(spells) else str(index + 1)
         if isinstance(self.labels, list) and index < len(self.labels):
             return self.labels[index]
         return str(index + 1)

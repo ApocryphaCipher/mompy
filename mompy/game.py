@@ -13,7 +13,7 @@ import os
 from pathlib import Path
 from typing import Optional
 
-from . import layout, locate
+from . import layout, locate, spellnames
 from .api import MEMORY_SIZE, ApiError, DosboxApi
 
 
@@ -34,9 +34,15 @@ def _load_cache() -> dict:
         return {}
 
 
-def _remember(url: str, base: int) -> None:
+def _remember(url: str, base: int, spells=None) -> None:
+    """Remember where the wizard table is and, with ``spells``, where the spell table is (an address, or False for none)."""
     cache = _load_cache()
-    cache[url] = {"base": base}
+    old = cache.get(url) if isinstance(cache.get(url), dict) else {}
+    entry = dict(old) if old.get("base") == base else {}
+    entry["base"] = base
+    if spells is not None:
+        entry["spells"] = spells
+    cache[url] = entry
     try:
         home().mkdir(parents=True, exist_ok=True)
         _cache_path().write_text(json.dumps(cache), encoding="utf-8")
@@ -67,6 +73,18 @@ def connect(api: DosboxApi) -> locate.Game:
 
     Raises ``locate.GameNotFound`` (with the reason) when there is no usable game.
     """
+    game = _find(api)
+    entry = _load_cache().get(api.url)
+    hint = entry.get("spells") if isinstance(entry, dict) and entry.get("base") == game.base else None
+    if not isinstance(hint, (int, bool)):
+        hint = None
+    names, where = spellnames.read(api, game.base, hint)
+    if where is not None and where != hint:
+        _remember(api.url, game.base, where)
+    return game._replace(names=locate.Names(game.names, names))
+
+
+def _find(api: DosboxApi) -> locate.Game:
     entry = _load_cache().get(api.url)
     base = entry.get("base") if isinstance(entry, dict) else None
     if isinstance(base, int):

@@ -48,6 +48,14 @@ def _enum(field: F.Field, value: int) -> str:
     return f"{value} ({text})" if text else str(value)
 
 
+def _spell(value: int, names: List[str]) -> str:
+    """A spell number as ``Earth Lore (11)``, or ``none`` for 0; just the number if the game's spell names were not found."""
+    spells = getattr(names, "spells", None)
+    if value == 0:
+        return "none"
+    return f"{spells[value]} ({value})" if spells and value < len(spells) else str(value)
+
+
 def _plain(field: F.Field, value: int) -> str:
     """One number in words: its meaning if the field has an enum, else the number."""
     return field.enum.get(str(value), str(value)) if field.enum else str(value)
@@ -78,6 +86,9 @@ def render(field: F.Field, record: bytes, names: List[str], element: Optional[st
     value = field.decode(_slice(field, record))
     if field.format == "map_position" and element is None:
         return f"{field.name} = {_position(value, cities or {})}"                 # type: ignore[arg-type]
+    if field.format == "spell" and element is None:
+        values = value if isinstance(value, list) else [value]
+        return f"{field.name} = " + ", ".join(_spell(v, names) for v in values)       # type: ignore[arg-type]
     if element is not None:
         i = field.element(element, names)
         label = field.label_for(i, names)
@@ -125,7 +136,7 @@ def read_cities(api: DosboxApi, game: locate.Game) -> Dict[Tuple[int, int, int],
 def peek(api: DosboxApi, block: str, number: int, spec: Optional[str], as_json: bool = False) -> str:
     game = find_game(api)
     record = read_record(api, game, block, number)
-    names = list(game.names)
+    names = game.names
     own = number - 1 if block == "wizard" else None
     title = f"{F.blocks()[block].describe} {number}"
     if block in ("wizard", "fortress") and number <= len(names):
