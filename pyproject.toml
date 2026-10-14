@@ -1,16 +1,30 @@
 [project]
 name = "mompy"
-version = "0.0.1"
+version = "0.1.0"
 description = "Read and change a running Master of Magic through DOSBox Staging's memory API"
 readme = "README.md"
+license = "MIT"
+license-files = ["LICENSE"]
 requires-python = ">=3.12"
+keywords = ["master of magic", "dosbox", "dosbox-staging", "game editor", "cheat", "memory"]
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Environment :: Console",
+    "Intended Audience :: End Users/Desktop",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.12",
+    "Topic :: Games/Entertainment :: Turn Based Strategy",
+]
 dependencies = []          # standard library only, on purpose: easy to install and to share
+
+[project.urls]
+Repository = "https://github.com/ApocryphaCipher/mompy"
 
 [project.scripts]
 mompy = "mompy.cli:main"
 
 [build-system]
-requires = ["setuptools>=68"]
+requires = ["setuptools>=77"]
 build-backend = "setuptools.build_meta"
 
 [tool.setuptools]
