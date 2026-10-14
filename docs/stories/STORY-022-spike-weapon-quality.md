@@ -1,7 +1,7 @@
 # STORY-022: Spike: where does a unit's weapon quality (magic, mithril, adamantine) live?
 
 **Parent:** [EPIC-001](../epics/EPIC-001-mompy-core.md)
-**Status:** answered from the notes (2026-10-13); the screen check is open. A **spike**.
+**Status:** done (2026-10-13): answered from the notes and seen on the unit screen. A **spike**.
 **Raised by:** [Kevin](https://github.com/KevinAsbury), 2026-10-13 (units made by `create` should have "max XP and adamantine weapons")
 
 ## The question
@@ -27,4 +27,4 @@ Kevin: "you are sitting on a 25-year MoM database". He was right; the evidence v
 - **Live data:** the 160 units in Kevin's game hold 0 or 1 in `+23` (the 1s are Jafar's and Freya's: magic weapons), never another value.
 - Also from ReMoM: `+28` is `Rd_Constr_Left` (our 0xFF means none), `+22` is `Sight_Range`, `+18` `Draw_Priority`, `+11` `Status`, `+16` `Move_Failed`.
 
-`create` now writes 3 in the low bits. **Still to confirm by eye:** a created unit's screen shows adamantium (Kevin).
+`create` now writes 3 in the low bits. **Checked on the real game (Kevin, 2026-10-13):** a Dark Elf Cavalry made by `poke city blackstone create 60` shows adamantium weapons and Elite with 120 experience on its unit screen, and walks. That is source 1 plus a visual check, which meets AGENTS.md section 6.
