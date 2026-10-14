@@ -6,7 +6,7 @@ from mompy import layout
 from mompy.api import DosboxApi
 from mompy.cli import main
 from mompy.poke import PokeError, poke, undo
-from mompy.summon import make_record, summon
+from mompy.summon import make_record, summon, create
 
 from .fake_dosbox import FakeDosbox, HomeTestCase, game_memory, put_field
 from .test_where import put_city
@@ -65,9 +65,21 @@ class SummonTest(SummonCase):
         self.assertEqual((rec[4], rec[8]), (2 + 179 % 3, 2 + 179 % 3))     # moves from the type's record
         self.assertEqual((rec[12], rec[22]), (0, 1))                       # fantastic: level 0; sight from the type
 
-    def test_an_ordinary_unit_starts_at_level_one(self):
-        summon(self.api, 1, "cavalry")
-        self.assertEqual(self.mem[unit_at(4) + 12], 1)
+    def test_an_ordinary_unit_is_made_by_a_city_for_its_owner_at_maximum_experience(self):
+        out = create(self.api, 2, "cavalry")           # city 2 is Darkmoor, wizard 3's
+        self.assertIn("for wizard 3", out)
+        rec = self.mem[unit_at(4):unit_at(4) + 32]
+        self.assertEqual((list(rec[:4]), rec[5], rec[12]), ([39, 20, 1, 2], 60, 3))
+        self.assertEqual(struct.unpack_from("<h", rec, 14)[0], 120)         # maximum experience
+
+    def test_summoned_and_ordinary_units_use_their_own_verb(self):
+        self.assertRaisesRegex(PokeError, "ordinary unit, not a summoned creature", summon, self.api, 1, "cavalry")
+        self.assertRaisesRegex(PokeError, "is a summoned creature: mompy poke wizard", create, self.api, 1, "war_bears")
+        self.assertEqual(self.server.writes, [])
+
+    def test_a_neutral_city_cannot_create(self):
+        put_city(self.mem, 5, "Wildburg", 5, 5, 0, 5)
+        self.assertRaisesRegex(PokeError, "neutral city", create, self.api, 6, "cavalry")
 
     def test_owner_follows_the_wizard_and_place_at_a_city(self):
         summon(self.api, 3, "sprites", at="darkmoor")
@@ -123,10 +135,13 @@ class RefusalTest(SummonCase):
         self.refuse("is a hero", 1, "barbarian")
 
     def test_an_ambiguous_name_lists_its_types(self):
-        self.refuse(r"Swordsmen exists for several races \(types 40, 58\)", 1, "swordsmen")
+        before = bytes(self.mem)
+        with self.assertRaisesRegex(PokeError, r"Swordsmen exists for several races \(types 40, 58\)"):
+            create(self.api, 1, "swordsmen")
+        self.assertEqual(bytes(self.mem), before)
 
     def test_a_type_number_is_accepted_for_those(self):
-        summon(self.api, 1, "58")
+        create(self.api, 1, "58")
         self.assertEqual(self.mem[unit_at(4) + 5], 58)
 
     def test_unknown_names_and_numbers(self):
@@ -202,6 +217,11 @@ class CommandTest(SummonCase):
         with contextlib.redirect_stdout(out), contextlib.redirect_stderr(err):
             code = main([*args, "--url", self.server.url])
         return code, out.getvalue(), err.getvalue()
+
+    def test_create_by_city_name(self):
+        code, out, _ = self.run_cli("poke", "city", "blackstone", "create", "unit.cavalry", "--count", "2")
+        self.assertEqual(code, 0)
+        self.assertIn("2 Cavalry for wizard 1 (Jafar) at Blackstone", out)
 
     def test_the_command(self):
         code, out, _ = self.run_cli("poke", "wizard", "1", "cast", "unit.war_bears", "--count", "2", "--at", "darkmoor")

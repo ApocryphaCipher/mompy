@@ -23,5 +23,6 @@
 | [STORY-019](STORY-019-poke-city.md) | `poke city <name> <field> <value>`: change a city by name (population first) | `population` built; real game: written, see the story |
 | [STORY-020](STORY-020-poke-city-build.md) | `poke city <name> build`: finish the current production next turn | proposed (nice to have; after 019) |
 | [STORY-021](STORY-021-mercury.md) | `unit mercury`: give a stack all the movement it needs | proposed (nice to have) |
+| [STORY-022](STORY-022-spike-weapon-quality.md) | Spike: where does a unit's weapon quality (adamantine) live? | proposed (nice to have) |
 
 Epic: [EPIC-001](../epics/EPIC-001-mompy-core.md).

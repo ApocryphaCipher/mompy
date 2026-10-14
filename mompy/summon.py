@@ -29,6 +29,7 @@ LAST_HERO, FIRST_FANTASTIC = 34, 154
 MOVES_AT, SIGHT_AT = 9, 19        # inside a type record
 STACK_LIMIT = 9
 DEAD = 0xFF
+MAX_EXPERIENCE, MAX_LEVEL = 120, 3  # an ordinary unit stops at 120 experience (Elite); the game works the level out from it at End Turn
 DRAW_PRIORITY = 0x0A              # *guess*: what a Guardian Spirit carries; the game works it out again when the unit moves
 
 
@@ -135,15 +136,20 @@ def make_record(unit: UnitType, owner: int, x: int, y: int, plane: int) -> bytes
     rec[7] = 1
     rec[8] = unit.moves                     # moves left: a full turn
     rec[11] = 1
-    rec[12] = 0 if unit.fantastic else 1    # level; *guess* for ordinary units: level 1 is a recruit
+    if not unit.fantastic:                  # creatures do not level; everything else starts at the top
+        rec[12] = MAX_LEVEL
+        struct.pack_into("<h", rec, 14, MAX_EXPERIENCE)
     rec[18] = DRAW_PRIORITY
     rec[22] = unit.sight
     rec[28] = 0xFF
     return bytes(rec)
 
 
-def summon(api: DosboxApi, number: int, text: str, count: int = 1, at: Optional[str] = None, dry_run: bool = False) -> str:
-    """Put ``count`` units named ``text`` under wizard ``number``, at ``at`` or at his summoning circle."""
+def summon(api: DosboxApi, number: int, text: str, count: int = 1, at: Optional[str] = None, dry_run: bool = False,
+           ordinary: bool = False) -> str:
+    """Put ``count`` units named ``text`` under wizard ``number``, at ``at`` or at his summoning circle.
+
+    ``cast`` is for summoned creatures only (``ordinary`` False); ``create`` (``ordinary`` True) is for ordinary units and boats, made in a city."""
     found = peek.find_game(api)
     if not 1 <= number <= 5:
         raise PokeError(f"there is no wizard {number} (1 to 5)")
@@ -153,6 +159,10 @@ def summon(api: DosboxApi, number: int, text: str, count: int = 1, at: Optional[
     unit = find_type(types, text)
     if unit.number <= LAST_HERO:
         raise PokeError(f"{unit.name} is a hero: a hero also needs a place in the wizard's hero list, which mompy cannot write yet")
+    if ordinary and unit.fantastic:
+        raise PokeError(f"{unit.name} is a summoned creature: mompy poke wizard {number} cast unit.{unit.number}")
+    if not ordinary and not unit.fantastic:
+        raise PokeError(f"{unit.name} is an ordinary unit, not a summoned creature; a city makes it: mompy poke city NAME create {unit.number}")
     names = list(found.names)
     who = f"wizard {number} ({names[number - 1]})"
     owner = number - 1
@@ -209,3 +219,13 @@ def summon(api: DosboxApi, number: int, text: str, count: int = 1, at: Optional[
         raise PokeError(str(err)) from None
     _log(api.url, label, f"{live} units", f"{new_live} units", writes)
     return summary
+
+
+def create(api: DosboxApi, city: int, text: str, count: int = 1, dry_run: bool = False) -> str:
+    """Make ``count`` ordinary units (or boats) at maximum experience named ``text`` in city number ``city``, owned by the city's owner."""
+    found = peek.find_game(api)
+    record = peek.read_record(api, found, "city", city)         # refuses an empty slot
+    owner = record[18]
+    if owner > 4:
+        raise PokeError(f"{record[:14].split(bytes(1), 1)[0].decode('latin-1')} is a neutral city: no wizard to own the unit")
+    return summon(api, owner + 1, text, count, at=str(city), dry_run=dry_run, ordinary=True)

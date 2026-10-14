@@ -47,7 +47,7 @@ def main(argv: Optional[List[str]] = None) -> int:
     pk2.add_argument("value", help="a number, an enum word (alliance), on/off for flags, or a,b,c for a whole array; for cast/dispel, the enchantment")
     pk2.add_argument("--dry-run", action="store_true", help="say what would change; write and log nothing")
     pk2.add_argument("--force", action="store_true", help="also write a field that is only a guess, or cast one of the questionable globals")
-    pk2.add_argument("--count", type=int, default=1, help="cast unit.NAME: how many units (1 to 9)")
+    pk2.add_argument("--count", type=int, default=1, help="cast unit.NAME or city create NAME: how many units (1 to 9)")
     pk2.add_argument("--at", help="cast unit.NAME: where, a city or x,y,plane; default the wizard's summoning circle")
     sub.add_parser("undo", parents=[common], help="put the last poke back")
     bn = sub.add_parser("banish", parents=[common], help="banish a wizard: take his fortress (he is not dead; he casts Spell of Return)")
@@ -88,6 +88,9 @@ def main(argv: Optional[List[str]] = None) -> int:
                 print(poking.undo(api))
             else:
                 args.number = _number(api, args.block, args.number)
+                if args.block == "city" and args.field == "create":
+                    print(summon.create(api, args.number, args.value.removeprefix("unit."), args.count, args.dry_run))
+                    return 0
                 if args.field in ("cast", "dispel"):
                     if args.block != "wizard":
                         raise poking.PokeError(f"{args.field} is for wizards: mompy poke wizard N {args.field} aura_of_majesty")
