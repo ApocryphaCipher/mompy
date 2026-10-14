@@ -11,7 +11,7 @@ mompy talks to **DOSBox Staging's built-in web API** (`webserver_enabled = true`
 and write the emulated machine's memory. It needs no game files of its own and ships none: only
 offsets, ranges and what we have checked about them.
 
-**Status: just started.** `mompy doctor` exists (below); `peek`, `fields`, `poke`, `undo`, `banish`, `unbanish`, and `cast`/`dispel` (a global enchantment), `where`, `poke city` (population, build, create) `cast unit` and `unit mercury` exist too (see `docs/stories/`).
+**Status: just started.** `mompy doctor` exists (below); `peek`, `fields`, `poke`, `undo`, `banish`, `unbanish`, and `cast`/`dispel` (a global enchantment), `where`, `poke city` (population, build, create) `cast unit`, `unit mercury`, `where pointer` and `pew` exist too (see `docs/stories/`).
 Nothing here has been tried on anyone's machine but Kevin's.
 
 ## `mompy peek` and `mompy fields`
@@ -121,6 +121,19 @@ python -m mompy undo
 ```
 
 Gives the units 63.5 moves for this turn (the most the game's byte holds; a Cavalry set this way crossed most of a continent). Max moves is unchanged, so the next turn is normal again. `--dry-run` says what would change.
+
+## The pointer, and `mompy pew`
+
+```
+python -m mompy where pointer             # Myrror (50, 18)  city Hellgate, owner Jafar  2 units: ...
+python -m mompy pew pointer               # kill the units on the tile under the mouse (the city stays)
+python -m mompy pew blackstone            # or by city name, or x,y,plane
+python -m mompy unit mercury --at pointer
+python -m mompy undo                      # brings them back, until End Turn sweeps them
+```
+
+`pointer` works anywhere a place does. The game keeps the pointer's position in its own memory, so nothing needs changing in DOSBox. It only means something over the overland map.
+`pew` spares heroes (and says so). The map keeps drawing killed units as ghosts until you nudge the map view, flip the plane, or end the turn: do not give a ghost orders.
 
 ## `mompy doctor`
 

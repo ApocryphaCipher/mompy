@@ -22,6 +22,21 @@ differ too. The tables below are therefore the **research setup's**; `doctor` fi
 
 **Located 2026-10-13:** the fortress table (see below). **Not located in RAM yet:** the fortress block's neighbours, the item block and the lair block. *Old note:* the fortress block (whose "active" byte is the *banished* flag; it is at save offset `0x65F8`), the item block and the lair block. STORY-006 finds them.
 
+## The screen: the pointer, the map view, the plane (found 2026-10-13, STORY-010)
+
+All in the game's data segment (DGROUP, the wizard table's address minus `0x9ECA`; `0x289F0` in the research setup).
+
+| What | DGROUP + | Type | How it was checked |
+| --- | --- | --- | --- |
+| the pointer's position on the 320 x 200 screen | `0x78C2` | u16 x, u16 y | one candidate in the whole 64 KiB: (0, 0) with the pointer in the top-left corner and (319, 199) in the bottom-right, (150, 100) near the middle |
+| the world tile at the map view's top-left | `0x6FFE` | u16 x, u16 y | pointer on Blackstone gave origin (45, 17); after scrolling the map, every copy of (45, 17) became (42, 18) together; Mirror's live-ram-map.md had the same address independently |
+| the plane being viewed | `0xBD86` | u16, 0 Arcanus, 1 Myrror | 0 and 1 followed the Plane button in four flips; four byte candidates survived and Mirror's live-ram-map.md names RAM `0x34776`, which is this one |
+
+**Tile under the pointer:** column = pointer x / 20, row = (pointer y - 20) / 18, then tile = (origin x + column, origin y + row), x wrapping at 60. The visible map is 12 x 10 tiles from screen row 20. **Checked:** the pointer on Hellgate's tile gave (50, 18) from memory alone and the game's city list has Hellgate there (Kevin confirmed it was Hellgate).
+The pointer is meaningful only over the map: x < 240 and y from 20 to 199.
+
+**The unit's stack picture:** the game draws stacks from a picture it builds earlier, not from the unit records, so a record marked dead (`pew`) keeps being drawn as a *ghost* (the unit's icon with no banner, clickable) until the map view is nudged, the plane flipped, or End Turn. Checked live.
+
 ## In a wizard record (offsets from the start of the record; all **checked** in the real game, see Mirror's `docs/reference/wizard-record-and-exploration.md`)
 
 | Field | Offset | Type | Range we have seen the game accept |
