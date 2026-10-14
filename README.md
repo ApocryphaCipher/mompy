@@ -201,6 +201,18 @@ python -m mompy poke node 3 owner freya         # or nobody
 
 "Lair" is any monster place: Towers of Wizardry, node guardians, caves, dungeons, temples, keeps and ruins (`peek lair N` says which). Numbers start at 0, the game's own.
 
+## Friendlier forms: names and changes
+
+```
+python -m mompy peek wizard freya relation tauron        # wizards by name; the element as a separate word
+python -m mompy poke wizard freya relation tauron +20    # raise by 20 (both wizards' records change)
+python -m mompy poke wizard freya relation tauron -=5    # lower by 5
+python -m mompy poke wizard jafar gold +1000
+python -m mompy poke wizard freya relation tauron -50    # a plain negative number is the number itself
+```
+
+A change (`+20`, `-=5`) is worked out from the value in the game and refused if the result would leave the field's range. Field names may be singular or a unique prefix (`treaty`).
+
 ## `mompy doctor`
 
 ```

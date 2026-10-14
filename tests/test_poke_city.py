@@ -116,10 +116,11 @@ class CityCommandTest(CityCase):
         self.assertEqual(code, 1)
         self.assertIn("mompy: 'black' could be", err)
 
-    def test_a_wizard_number_must_be_a_number(self):
-        code, _, err = self.run_cli("peek", "wizard", "freya", "gold")
+    def test_a_wizard_can_be_named_but_an_unknown_name_is_refused(self):
+        self.assertEqual(self.run_cli("peek", "wizard", "freya", "gold")[0], 0)
+        code, _, err = self.run_cli("peek", "wizard", "zed", "gold")
         self.assertEqual(code, 1)
-        self.assertIn("'freya' is not a wizard number", err)
+        self.assertIn("'zed' is not a wizard here", err)
 
 
 class RunAsScriptTest(CityCase):

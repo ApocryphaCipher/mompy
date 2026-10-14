@@ -167,5 +167,9 @@ def find(block: str, name: str) -> Field:
     for f in all_fields(block):
         if f.name == key:
             return f
+    for guess in (key + "s", None):                             # relation -> relations, then a unique prefix (treaty -> treaty_status)
+        found = [f for f in all_fields(block) if (f.name == guess if guess else key and f.name.startswith(key))]
+        if len(found) == 1:
+            return found[0]
     names = ", ".join(f.name for f in all_fields(block))
     raise FieldError(f"no {block} field {name!r}. Fields: {names}")
