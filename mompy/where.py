@@ -112,6 +112,8 @@ def where(api: DosboxApi, query: str, as_json: bool = False) -> str:
     game = find_game(api)
     names = list(game.names)
     cities = read_cities(api, game)
+    if text == "pointer":
+        return _under_pointer(api, game, cities, names, as_json)
     candidates = [("city", c.name, c) for c in cities] + [("wizard", n, i) for i, n in enumerate(names)]
     exact = [c for c in candidates if c[1].lower() == text]
     found = exact or [c for c in candidates if c[1].lower().startswith(text)]
@@ -126,3 +128,32 @@ def where(api: DosboxApi, query: str, as_json: bool = False) -> str:
     if as_json:
         return json.dumps([d for d, _ in results], indent=1)
     return results[0][1]
+
+
+def _under_pointer(api: DosboxApi, game: locate.Game, cities: List[City], names: List[str], as_json: bool) -> str:
+    """What is on the map tile under the mouse: the tile, its city and its units."""
+    from .pointer import tile_under_pointer
+    from .poke import PokeError
+    from .summon import DEAD, read_types
+
+    try:
+        x, y, plane = tile_under_pointer(api, game)
+    except PokeError as err:
+        raise PeekError(str(err)) from None
+    table = layout.UNITS
+    live = struct.unpack("<H", api.read(game.base + (layout.UNIT_COUNT_REFERENCE - layout.REFERENCE_WIZARD_BASE), 2))[0]
+    raw = api.read(game.base + table.offset, table.stride * min(live, table.count))
+    types = read_types(api, game)
+    units = [(types[raw[i * 32 + 5]].name, raw[i * 32 + 3]) for i in range(len(raw) // 32)
+             if tuple(raw[i * 32:i * 32 + 3]) == (x, y, plane) and raw[i * 32 + 3] != DEAD]
+    city = next((c for c in cities if (c.x, c.y, c.plane) == (x, y, plane)), None)
+    owner = lambda o: names[o] if o < len(names) else "neutral"
+    if as_json:
+        return json.dumps({"plane": PLANES[plane], "x": x, "y": y, "city": _city_data(city, names) if city else None,
+                           "units": [{"type": t, "owner": owner(o)} for t, o in units]}, indent=1)
+    line = _place(plane, x, y)
+    if city:
+        line += f"  city {city.name}, owner {_owner(city, names)}"
+    if units:
+        line += f"  {len(units)} unit{'s' if len(units) != 1 else ''}: " + ", ".join(f"{t} ({owner(o)})" for t, o in units)
+    return line

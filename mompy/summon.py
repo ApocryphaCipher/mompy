@@ -21,9 +21,10 @@ from . import layout, locate, peek
 from .peek import PeekError
 from .api import DosboxApi, ApiError
 from .poke import PokeError, _log, _write
+from .pointer import tile_under_pointer
 from .where import PLANES, find_city, read_cities, _circle
 
-DGROUP_BELOW_WIZARDS = 0x9ECA     # the data segment starts this far below the wizard table (0x289F0 vs 0x328BA)
+DGROUP_BELOW_WIZARDS = layout.DGROUP_BELOW_WIZARDS
 TYPE_TABLE, TYPE_STRIDE, TYPE_COUNT = 0x19C, 36, 198
 LAST_HERO, FIRST_FANTASTIC = 34, 154
 MOVES_AT, SIGHT_AT = 9, 19        # inside a type record
@@ -89,6 +90,8 @@ def find_type(types: List[UnitType], text: str) -> UnitType:
 
 def parse_place(api: DosboxApi, game: locate.Game, at: str) -> Tuple[int, int, int]:
     """(x, y, plane) from ``x,y,plane`` (plane 0/1 or arcanus/myrror), or a city's name or number."""
+    if at.strip().lower() == "pointer":
+        return tile_under_pointer(api, game)
     parts = [p.strip() for p in at.split(",")]
     if len(parts) == 3:
         try:

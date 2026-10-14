@@ -37,5 +37,6 @@ separate project if players want it.
 - [STORY-020](../stories/STORY-020-poke-city-build.md): `poke city <name> build`, finish the current production next turn (nice to have)
 - [STORY-021](../stories/STORY-021-mercury.md): `unit mercury`, give a stack all the movement it needs (nice to have)
 - [STORY-022](../stories/STORY-022-spike-weapon-quality.md): spike: where does a unit's weapon quality (adamantine) live? (nice to have)
+- [STORY-023](../stories/STORY-023-mass-spells.md): `cast mass.<spell>`, a unit enchantment on a whole stack, by city name or pointer (nice to have)
 
 Suggested order: 008 (a quick check that decides everything else), 001, 002, 003, then 004 to 007.

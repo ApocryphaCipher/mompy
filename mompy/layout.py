@@ -39,6 +39,11 @@ ENCOUNTERS = Table("lairs", 0x86660, 24, 102)
 # summoning-circle positions. The game keeps a second copy 0x1030 later (0x875F0), as it does for the node table.
 FORTRESSES = Table("fortresses", 0x865C0, 4, 6)
 
+# The game's data segment starts this far below the wizard table (0x289F0 vs 0x328BA), whatever the DOSBox build.
+DGROUP_BELOW_WIZARDS = 0x9ECA
+# In the data segment: where the pointer is on the 320 x 200 screen (u16 x, u16 y), the world tile at the map view's top-left
+# (u16 x, u16 y), and the plane being viewed (u16). Found 2026-10-13 (STORY-010): see docs/reference/ram-layout.md.
+POINTER_IN_DGROUP, VIEW_ORIGIN_IN_DGROUP, VIEW_PLANE_IN_DGROUP = 0x78C2, 0x6FFE, 0xBD86
 UNIT_COUNT_REFERENCE = 0x34782   # a u16: how many unit records are live
 
 TABLES = (WIZARDS, CITIES, UNITS, NODES, ENCOUNTERS, FORTRESSES)

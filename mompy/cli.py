@@ -12,6 +12,7 @@ from . import banish as banishing
 from . import cast as casting
 from . import city as cities
 from . import peek as peeking
+from . import pew as pewing
 from . import poke as poking
 from . import summon
 from . import unit as units
@@ -69,6 +70,9 @@ def main(argv: Optional[List[str]] = None) -> int:
     un.add_argument("--at", help="the stack on a city or x,y,plane")
     un.add_argument("--wizard", type=int, help="every unit of this wizard (1 is the player)")
     un.add_argument("--dry-run", action="store_true", help="say what would change; write nothing")
+    pw = sub.add_parser("pew", parents=[common], help="kill the units on a tile (not the city): pointer, a city name, or x,y,plane")
+    pw.add_argument("place", help="pointer (the tile under the mouse), a city's name, or x,y,plane")
+    pw.add_argument("--dry-run", action="store_true", help="say what would die; write nothing")
     fl = sub.add_parser("fields", help="list the fields mompy knows, with their ranges and how sure we are")
     fl.add_argument("block", nargs="?", choices=["wizard", "fortress", "city"])
 
@@ -122,6 +126,13 @@ def main(argv: Optional[List[str]] = None) -> int:
         try:
             print(whereis.where(DosboxApi(args.url), args.name, args.json))
         except (peeking.PeekError, ApiError) as err:
+            print(f"mompy: {err}", file=sys.stderr)
+            return 1
+        return 0
+    if args.command == "pew":
+        try:
+            print(pewing.pew(DosboxApi(args.url), args.place, args.dry_run))
+        except (poking.PokeError, peeking.PeekError, ApiError) as err:
             print(f"mompy: {err}", file=sys.stderr)
             return 1
         return 0

@@ -1,7 +1,7 @@
 # STORY-018: `mompy pew`: kill the units on the tile under the mouse (enhancement)
 
 **Parent:** [EPIC-001](../epics/EPIC-001-mompy-core.md)
-**Status:** proposed (2026-10-13). **Priority: nice to have.** Depends on [STORY-003](STORY-003-poke.md) (`poke`) and, for the mouse, on [STORY-010](STORY-010-where.md) (`where`).
+**Status:** built (2026-10-13), checked on a real game. **Priority: nice to have.** Depends on [STORY-003](STORY-003-poke.md) (`poke`) and, for the mouse, on [STORY-010](STORY-010-where.md) (`where`).
 **Size:** small (once the mouse tile is known)
 **Raised by:** [Kevin](https://github.com/KevinAsbury), 2026-10-13 ("mompy pew could be a more advanced command. Maybe it kills everything under a mouse stack (units, not cities or anything)")
 
@@ -34,3 +34,13 @@ Mirror's `docs/reference/live-ram-map.md` (2026-09-23, the node guardians dying 
 ## Definition of done
 
 On the real game: `pew` on a known stack (a neutral lair's guards, or the player's own test stack) removes it from the map (the game may need End Turn to redraw: say so) without touching a city on the same tile; heroes spared; `undo` before End Turn restores them. Tests with the fake DOSBox for the tile filter, the heroes, the dead marker and the undo.
+
+## Outcome
+
+`mompy pew PLACE` with PLACE a city's name, `x,y,plane`, or `pointer` (Kevin: "`pew <city name>`, and maybe `pew pointer` for the mouse one"), `--dry-run`, and one `undo` for the whole stack. It kills the units on the tile and nothing else (the city, the terrain and the node stay). Built as `mompy/pew.py` with `tests/test_pew.py`.
+Not built: `--enemy`, `--mine`, `--owner` filters, and `--heroes`; units on a boat were not looked at.
+
+- **Heroes are spared**, always, and the output says so; a tile of only heroes is refused. (A hero is also in his wizard's hero list.)
+- **The ghost (found live, 2026-10-13):** the game draws stacks from a picture it builds earlier, so a unit marked dead kept being drawn on the map as a ghost (no banner, still clickable, still listed as Cavalry in its Units box) until the map view was nudged. `pew` says so in its output.
+- **Undo works:** after `undo` the Cavalry's record was back (owner, plane, level 2) and, after the view was nudged, it was drawn again with its banner. Real game, Kevin's own Cavalry at Myrror (49, 20).
+- Not checked: End Turn sweeping the dead record (the game's own rule from Mirror's notes; mompy leaves the count alone).
