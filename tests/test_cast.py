@@ -105,8 +105,8 @@ class DispelTest(CastCase):
 
 
 class QuestionableTest(CastCase):
-    def test_the_five_need_force_to_be_cast(self):
-        self.assertEqual(QUESTIONABLE, ("Time Stop", "Planar Seal", "Armageddon", "Meteor Storm", "Great Wasting"))
+    def test_time_stop_needs_force_to_be_cast(self):
+        self.assertEqual(QUESTIONABLE, ("Time Stop",))
         for spell in QUESTIONABLE:
             before, logged = bytes(self.mem), len(poking.read_log()[0])
             with self.assertRaisesRegex(PokeError, "--force"):

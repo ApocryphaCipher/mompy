@@ -1,7 +1,7 @@
 """``mompy snapshot NAME`` and ``mompy diff A B``: see exactly which bytes of the game moved between two moments.
 
 A snapshot keeps the tables mompy knows (wizards, cities, units and their count, nodes, lairs, fortresses) and the game's data segment
-(where the pointer, the map view and many counters live), as one JSON file under ``$MOMPY_HOME/snapshots``. A diff names a changed field
+(where the pointer, the map view and many counters live), and the two map layers (terrain and its flags), as one JSON file under ``$MOMPY_HOME/snapshots``. A diff names a changed field
 when the field table knows it (``wizard 1 (Jafar) gold: 100 -> 200``) and shows raw offsets otherwise.
 
 The game changes a few hundred bytes on its own between two reads (timers and the like). Take a second snapshot of the *same* moment
@@ -41,6 +41,12 @@ TABLES = {"wizards": (layout.WIZARDS, "wizard"), "cities": (layout.CITIES, "city
           "nodes": (layout.NODES, None), "lairs": (layout.ENCOUNTERS, None), "fortresses": (layout.FORTRESSES, "fortress")}
 
 
+# The map layers, as offsets from the wizard table (0x72630 and 0x773A0 in the research setup): the terrain type (u16 a tile) and the
+# per-tile flags (a byte: 0x20 is corrupted), two planes of 60 x 40 each. Their addresses move with the DOSBox build like the tables.
+MAP_LAYERS = {"terrain": (0x72630, 2), "terrain_flags": (0x773A0, 1)}
+PLANE_TILES = 60 * 40
+
+
 class SnapshotError(Exception):
     pass
 
@@ -65,6 +71,8 @@ def take(api: DosboxApi, name: str, replace: bool = False) -> str:
         regions[region] = _grab(api, game.base + table.offset, table.stride * table.count)
     count_at = game.base + (layout.UNIT_COUNT_REFERENCE - layout.REFERENCE_WIZARD_BASE)
     regions["unit_count"] = _grab(api, count_at, 2)
+    for layer, (reference, width) in MAP_LAYERS.items():
+        regions[layer] = _grab(api, reference + (game.base - layout.REFERENCE_WIZARD_BASE), 2 * PLANE_TILES * width)
     regions["dgroup"] = _grab(api, game.base - layout.DGROUP_BELOW_WIZARDS, DGROUP_SIZE)
     doc = {"version": VERSION, "name": name, "time": datetime.now(timezone.utc).isoformat(timespec="seconds"), "url": api.url,
            "base": game.base, "wizards": list(game.names), "regions": regions}
@@ -124,7 +132,7 @@ def diff(a_name: str, b_name: str, ignore_name: Optional[str] = None, show_all: 
     noise = load(ignore_name)["regions"] if ignore_name else {}
     names = b["wizards"] or a["wizards"]
     lines: List[str] = []
-    for region in list(TABLES) + ["unit_count", "dgroup"]:
+    for region in list(TABLES) + ["unit_count", *MAP_LAYERS, "dgroup"]:
         ra, rb = a["regions"].get(region), b["regions"].get(region)
         if ra is None or rb is None or len(ra) != len(rb):
             continue
@@ -140,6 +148,8 @@ def diff(a_name: str, b_name: str, ignore_name: Optional[str] = None, show_all: 
             continue
         if region == "unit_count":
             lines.append(f"unit count: {struct.unpack('<H', ra)[0]} -> {struct.unpack('<H', rb)[0]}")
+        elif region in MAP_LAYERS:
+            lines += _map_lines(region, ra, rb, changed)
         elif region == "dgroup":
             lines += [f"data segment +0x{s:04x}: {_hex(ra[s:e])} -> {_hex(rb[s:e])}" for s, e in _runs(changed)]
         else:
@@ -150,6 +160,18 @@ def diff(a_name: str, b_name: str, ignore_name: Optional[str] = None, show_all: 
     if not show_all and total > limit:
         lines = lines[:limit] + [f"... {total - limit} more lines (--all shows them)"]
     return "\n".join(lines)
+
+
+def _map_lines(layer: str, ra: bytes, rb: bytes, changed: List[bool]) -> List[str]:
+    """One line per changed tile: ``terrain Myrror (12, 7): 0x00a1 -> 0x0140``."""
+    width = MAP_LAYERS[layer][1]
+    out = []
+    for tile in sorted({i // width for i, c in enumerate(changed) if c}):
+        plane, rest = divmod(tile, PLANE_TILES)
+        before = int.from_bytes(ra[tile * width:(tile + 1) * width], "little")
+        after = int.from_bytes(rb[tile * width:(tile + 1) * width], "little")
+        out.append(f"{layer} {'Myrror' if plane else 'Arcanus'} ({rest % 60}, {rest // 60}): 0x{before:0{width * 2}x} -> 0x{after:0{width * 2}x}")
+    return out
 
 
 def _table_lines(region: str, ra: bytes, rb: bytes, changed: List[bool], names: List[str]) -> List[str]:

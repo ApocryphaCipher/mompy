@@ -1,7 +1,7 @@
 # STORY-013: Spike: what does the game do with a global set by hand?
 
 **Parent:** [EPIC-001](../epics/EPIC-001-mompy-core.md)
-**Status:** proposed (2026-10-13). **Priority: nice to have.** A **spike**: a time-boxed experiment whose product is knowledge, not a feature.
+**Status:** closed early (2026-10-14): ten of the 24 tried, see [globals.md](../reference/globals.md). Kevin: "I know how the game handles them"; the other fourteen are not worth a play session. **Priority: nice to have.** A **spike**: a time-boxed experiment whose product is knowledge, not a feature.
 **Size:** small to medium (a play session)
 **Raised by:** [Kevin](https://github.com/KevinAsbury), 2026-10-13 ("not sure, flag as a test and see")
 
