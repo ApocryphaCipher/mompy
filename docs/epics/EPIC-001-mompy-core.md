@@ -42,5 +42,6 @@ separate project if players want it.
 - [STORY-025](../stories/STORY-025-nodes-and-lairs.md): `peek` and `poke` for magic nodes and lairs, with their monsters
 - [STORY-026](../stories/STORY-026-friendly-pokes.md): wizards by name, `relation tauron +20`, friendlier peek and poke
 - [STORY-027](../stories/STORY-027-stack-commands.md): heal, weapons and experience for a whole stack (nice to have)
+- [STORY-028](../stories/STORY-028-name-tables.md): name tables for spells, globals, retorts, unit types and the rest
 
 Suggested order: 008 (a quick check that decides everything else), 001, 002, 003, then 004 to 007.
