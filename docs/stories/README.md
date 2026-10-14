@@ -27,5 +27,7 @@
 | [STORY-023](STORY-023-mass-spells.md) | `cast mass.<spell>`: a unit enchantment on a whole stack (by city name or `pointer`) | built; real game: Flight showed and worked; no mana: summoned creatures disbanded and unit spells dissipated |
 | [STORY-024](STORY-024-unit-fields.md) | `peek unit N` / `poke unit N FIELD VALUE`: the unit record in the field table | built; real game: the record reads in words |
 | [STORY-025](STORY-025-nodes-and-lairs.md) | `peek`/`poke` for magic nodes and lairs, with the monsters guarding them | built; real game: read, one write and undo; edits rest on Mirror's checks |
+| [STORY-026](STORY-026-friendly-pokes.md) | wizards by name, `relation tauron +20`: friendlier peek and poke | built; real game: a relation raised on both wizards and undone |
+| [STORY-027](STORY-027-stack-commands.md) | heal, weapons and experience for a whole stack | proposed (nice to have) |
 
 Epic: [EPIC-001](../epics/EPIC-001-mompy-core.md).

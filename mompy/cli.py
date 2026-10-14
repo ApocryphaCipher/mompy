@@ -24,9 +24,16 @@ from .doctor import diagnose, render
 
 
 def _number(api: DosboxApi, block: str, text: str) -> int:
-    """The record number for what the player typed: a city may be named; everything else is a number."""
+    """The record number for what the player typed: a city or a wizard may be named; everything else is a number."""
     if block == "city":
         return whereis.find_city(api, text)
+    if block in ("wizard", "fortress") and not text.strip().lstrip("-").isdigit():
+        names = peeking.find_game(api).names
+        wanted = text.strip().lower()
+        hits = [i for i, n in enumerate(names) if n.lower() == wanted] or [i for i, n in enumerate(names) if n.lower().startswith(wanted)]
+        if len(hits) == 1:
+            return hits[0] + 1
+        raise peeking.PeekError(f"{text!r} is not a wizard here: " + ", ".join(names) if not hits else f"{text!r} could be " + ", ".join(names[i] for i in hits))
     try:
         return int(text)
     except ValueError:
@@ -43,14 +50,16 @@ def main(argv: Optional[List[str]] = None) -> int:
     sub.add_parser("doctor", parents=[common], help="check that the game can be read and written safely")
     pk = sub.add_parser("peek", parents=[common], help="read a record's fields from the running game")
     pk.add_argument("block", choices=["wizard", "fortress", "city", "unit", "node", "lair"], help="what to read")
-    pk.add_argument("number", help="which one; wizard 1 is the player; a city by name (darkmoor) or number")
+    pk.add_argument("number", help="which one: a wizard by name or number (1 is the player), a city by name, else a number")
     pk.add_argument("field", nargs="?", help="a field, or field.element (books.sorcery, relations.freya); omit for all")
+    pk.add_argument("element", nargs="?", help="or the element as a separate word: peek wizard freya relations tauron")
     pk.add_argument("--json", action="store_true", help="print plain data for scripts")
     pk2 = sub.add_parser("poke", parents=[common], help="change a field of the running game (checked, undoable)")
     pk2.add_argument("block", choices=["wizard", "fortress", "city", "unit", "node", "lair"], help="what to change")
-    pk2.add_argument("number", help="which one; wizard 1 is the player; a city by name (darkmoor) or number")
+    pk2.add_argument("number", help="which one: a wizard by name or number (1 is the player), a city by name, else a number")
     pk2.add_argument("field", help="a field, or field.element (books.sorcery, relations.freya); or cast / dispel a global enchantment")
-    pk2.add_argument("value", nargs="?", help="a number, an enum word (alliance), on/off for flags, or a,b,c for a whole array; for cast/dispel, the enchantment")
+    pk2.add_argument("value", nargs="*", help="a number (20 sets it; 'to -20' sets a negative), +20 / -20 (change by), an enum word (alliance), on/off, or a,b,c for a whole array; "
+                     "for cast/dispel, the enchantment. An element may be a separate word: poke wizard freya relation tauron +20 (or: ... tauron to -50)")
     pk2.add_argument("--dry-run", action="store_true", help="say what would change; write and log nothing")
     pk2.add_argument("--force", action="store_true", help="also write a field that is only a guess")
     pk2.add_argument("--count", type=int, default=1, help="cast unit.NAME or city create NAME: how many units (1 to 9)")
@@ -92,6 +101,18 @@ def main(argv: Optional[List[str]] = None) -> int:
     fl.add_argument("block", nargs="?", choices=["wizard", "fortress", "city", "unit", "node", "lair"])
 
     args = parser.parse_args(argv)
+    if args.command == "poke":                      # `poke wizard freya relation tauron +20`: the element may be a separate word
+        values = args.value
+        if len(values) >= 2 and values[-2].lower() == "to" and args.field not in ("cast", "dispel"):
+            values = values[:-2] + ["=" + values[-1]]          # `relation tauron to -50`: a hard value, said in words
+        if len(values) == 2 and args.field not in ("cast", "dispel"):
+            args.field, args.value = f"{args.field}.{values[0]}", values[1]
+        elif len(values) <= 1:
+            args.value = values[0] if values else None
+        else:
+            parser.error("too many values: poke BLOCK NUMBER FIELD [ELEMENT] VALUE")
+    if args.command == "peek" and args.element:
+        args.field = f"{args.field}.{args.element}"
     if args.command == "doctor":
         report = diagnose(DosboxApi(args.url))
         print(render(report, args.url))

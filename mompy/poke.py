@@ -135,6 +135,25 @@ def _encode(target: Target, value) -> bytes:
     return f.encode_item(value) if target.element is not None else f.encode(value)
 
 
+_DELTA = re.compile(r"^\s*([+-])\s*(\d+)\s*$")
+
+
+def _delta(text: str) -> Optional[int]:
+    """``+20`` raises a number by 20 and ``-20`` lowers it by 20; ``None`` for anything else. A hard value is ``20`` or ``=20`` (``=-20`` for a negative one)."""
+    m = _DELTA.match(text or "")
+    return None if m is None else (-int(m.group(2)) if m.group(1) == "-" else int(m.group(2)))
+
+
+def _apply_delta(target: Target, old_value, delta: int, text: str, label: str) -> int:
+    f = target.field
+    if f.type == "text" or isinstance(old_value, list) or f.enum or f.format in ("spell", "unit_type", "guard_count"):
+        raise PokeError(f"{text.strip()} changes a number by an amount: name one numeric element or field (relations.freya, gold)")
+    new_value = old_value + delta
+    if f.min is not None and f.max is not None and not f.min <= new_value <= f.max:
+        raise PokeError(f"{label} is {old_value}: {text.strip()} would make {new_value}, outside {f.min} to {f.max}")
+    return new_value
+
+
 def _guard_count(text: str) -> str:
     """``3`` as three guards at full strength (the byte 0x33), ``2/3`` as two left of three; a larger number is the whole byte."""
     word = text.strip()
@@ -249,7 +268,11 @@ def poke(api: DosboxApi, number: int, spec: str, text: str, dry_run: bool = Fals
         target = resolve(found, field, number, element or None, names)
     except F.FieldError as err:
         raise PokeError(str(err)) from None
-    new_value = _parse(target, text, names)
+    if text.strip().startswith("="):                       # =75 and =-50: a hard value, even a negative one
+        text, delta = text.strip()[1:].strip(), None
+    else:
+        delta = None if field.type == "text" else _delta(text)
+    new_value = None if delta is not None else _parse(target, text, names)
     label = _label(target, names)
     if block_name == "fortress":
         _check_fortresses(api, found)
@@ -268,6 +291,8 @@ def poke(api: DosboxApi, number: int, spec: str, text: str, dry_run: bool = Fals
     except ApiError as err:
         raise PokeError(str(err)) from None
     old_value = _decode(target, current)
+    if delta is not None:
+        new_value = _apply_delta(target, old_value, delta, text, label)
     if old_value == new_value:
         return f"{label} is already {_words(target, new_value, names)}, nothing written"
     change = f"{label}: {_words(target, old_value, names)} -> {_words(target, new_value, names)}"

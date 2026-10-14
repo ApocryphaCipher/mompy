@@ -118,7 +118,7 @@ class RefusalTest(PokeCase):
 
     def test_values_out_of_range_or_not_numbers(self):
         self.refused(1, "gold", "30001", "from 0 to 30000")
-        self.refused(1, "gold", "-1", "from 0 to 30000")
+        self.refused(1, "gold", "=-1", "from 0 to 30000")
         self.refused(1, "gold", "lots", "whole number")
         self.refused(1, "gold", "1.5", "whole number")
         self.refused(1, "books.sorcery", "14", "from 0 to 13")

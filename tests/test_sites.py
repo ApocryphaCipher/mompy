@@ -107,7 +107,7 @@ class PokeTest(SiteCase):
         for field, value, pattern in (("guard1_count", "3/2", "left/started"), ("guard1_count", "2/16", "left/started"),
                                       ("guard1_count", "lots", "left/started"), ("guard1_count", "256", "whole number"),
                                       ("guard1_type", "198", "whole number"), ("guard1_type", "dragon", "no unit is called"),
-                                      ("gold", "30001", "whole number"), ("gold", "-1", "whole number"),
+                                      ("gold", "30001", "whole number"), ("gold", "=-1", "whole number"),
                                       ("kind", "5", "not editable"), ("x", "5", "not editable")):
             with self.assertRaisesRegex(PokeError, pattern):
                 poke(self.api, 12, field, value, block_name="lair")
