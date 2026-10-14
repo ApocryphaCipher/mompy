@@ -214,6 +214,17 @@ python -m mompy poke wizard jafar gold +1000
 
 A sign means "change by"; no sign means "set it"; `to -50` sets a negative value (the shell zsh reads a word starting with `=` as a command, so `=-50` needs quotes). A change is worked out from the value in the game and refused if the result would leave the field's range. Field names may be singular or a unique prefix (`treaty`).
 
+## Stacks: heal, weapons, maximum experience
+
+```
+python -m mompy unit heal --at pointer                     # damage to 0, heroes included
+python -m mompy unit weapons adamantium --at blackstone    # ordinary units only (not creatures, not heroes)
+python -m mompy unit experience max --at pointer           # Elite (120) for units, Demi-God (1000) for heroes; the game's own table
+python -m mompy unit heal --at pointer --skip-heroes
+```
+
+The place is the tile under the mouse, a city's name, or `x,y,plane`. Each says how many units it changed and why it left the others. One `mompy undo` puts the stack back.
+
 ## `mompy doctor`
 
 ```
