@@ -76,7 +76,8 @@ def _field_table(block: str) -> List[str]:
     for f in F.all_fields(block):
         kind = f"text[{f.length}]" if f.type == "text" else (f"{f.type} x {f.count}" if f.is_array else f.type)
         note = f.note.replace("|", "\\|").replace("\n", " ")
-        rows.append(f"| `{f.name}` | {kind} | {_values(f)} | {_how(f, block)} | {f.confidence} | {note} |")
+        values = _values(f) + (f"; the elements: [Elements of {f.name}](#elements-of-{f.name})" if f.is_array else "")
+        rows.append(f"| `{f.name}` | {kind} | {values} | {_how(f, block)} | {f.confidence} | {note} |")
     return rows
 
 
@@ -85,7 +86,7 @@ def _element_tables(block: str) -> List[str]:
     for f in F.all_fields(block):
         if not f.is_array:
             continue
-        out += ["", f"### `{f.name}.<element>`", ""]
+        out += ["", f"### Elements of {f.name}", ""]
         if f.labels == "wizards":
             out += [f"One element per wizard: `{f.name}.<wizard name>` (`mompy peek wizard 2 {f.name}.tauron`), and the neutral player last. A wizard has none for himself.",
                     "A change is written on both wizards' records." if f.mirrored else ""]
@@ -108,6 +109,9 @@ def page(title: str, block: str, what: str, numbering: str) -> str:
     lines = [HEADER + f"# {title} fields", "",
              f"Fields of {what} ({b.count} records; {numbering}).", "",
              f"```\nmompy peek {block} <number or name> [field[.element]]\nmompy poke {block} <number or name> <field>[.<element>] <value>\n```", ""]
+    arrays = [f for f in F.all_fields(block) if f.is_array]
+    if arrays:
+        lines += ["**Element tables on this page:** " + ", ".join(f"[{f.name}](#elements-of-{f.name})" for f in arrays), ""]
     lines += _field_table(block) + _element_tables(block)
     return "\n".join(lines).rstrip("\n") + "\n"
 
@@ -121,10 +125,21 @@ def enchantments_page() -> str:
     return "\n".join(lines)
 
 
+LOOKUPS = [("The 24 global enchantments (`globals.<name>`)", "Wizard", "#elements-of-globals"),
+           ("The 18 retorts (`retorts.<name>`)", "Wizard", "#elements-of-retorts"),
+           ("Spellbooks per realm (`books.<realm>`)", "Wizard", "#elements-of-books"),
+           ("Spells: what `spells.<spell name>` takes (known, unknown...)", "Wizard", "#elements-of-spells"),
+           ("Relations and treaties with each wizard", "Wizard", "#elements-of-relations"),
+           ("The 32 unit enchantments (`unit cast mass.<name>`)", "Unit-enchantments", ""),
+           ("Weapon grades (`unit weapons <grade>`)", "Unit-enchantments", "#weapon-grades")]
+
+
 def home(ext: str = ".md") -> str:
     lines = [HEADER + "# mompy: what you can type", "",
              "Tables of the options of `mompy peek`, `poke` and friends, one page per kind of record. They are generated from the field table, so they match the program.",
-             "", "| Page | Records |", "| --- | --- |"]
+             "", "## Look something up", "", "| I want to know... | Where |", "| --- | --- |"]
+    lines += [f"| {what} | [{page}{anchor}]({page}{ext}{anchor}) |" for what, page, anchor in LOOKUPS]
+    lines += ["", "## All the pages", "", "| Page | Records |", "| --- | --- |"]
     lines += [f"| [{t}]({t}{ext}) | {F.blocks()[b].count} |" for t, b, _, _ in PAGES]
     lines += [f"| [Unit enchantments and weapons](Unit-enchantments{ext}) | 32 enchantments, 4 weapon grades |", "",
               "**How to write a value:** a number sets the field (`75`); a sign changes it (`+20`, `-5`); `to -50` sets a negative value; a word picks a named value (`alliance`, `known`, `on`).",

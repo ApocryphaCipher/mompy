@@ -48,3 +48,23 @@ class WikiTest(unittest.TestCase):
         self.assertIn("[Wizard](Wizard)", home)
         self.assertNotIn(".md)", home.split("[Back to the README]")[0])
         self.assertIn("[Wizard](Wizard.md)", make_wiki.build()["Home.md"])
+
+    def test_every_link_to_a_section_points_at_a_heading_that_exists(self):
+        import re
+
+        def anchor(heading):                                   # how GitHub makes a heading's link: lower case, letters digits _ - kept, spaces to -
+            return re.sub(r"\s", "-", re.sub(r"[^a-z0-9 _-]", "", heading.strip().lower()))
+
+        for ext in (".md", ""):
+            files = make_wiki.build(ext)
+            headings = {name: {anchor(m.group(1)) for m in re.finditer(r"^#+ (.+)$", text, re.M)} for name, text in files.items()}
+            for name, text in files.items():
+                for target, frag in re.findall(r"\]\(([A-Za-z-]*(?:\.md)?)#([^)]+)\)", text):
+                    page = (target or name[:-3]) + ".md" if not target.endswith(".md") else target
+                    page = page if page in files else name
+                    self.assertIn(frag, headings[page], f"{name} links to {page}#{frag}, but that heading does not exist")
+
+    def test_the_home_page_leads_to_the_globals_retorts_and_spell_values(self):
+        home = make_wiki.build()["Home.md"]
+        for what in ("global enchantments", "retorts", "spells.<spell name>", "unit enchantments"):
+            self.assertIn(what, home)
