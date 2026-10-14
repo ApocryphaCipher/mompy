@@ -11,7 +11,7 @@ mompy talks to **DOSBox Staging's built-in web API** (`webserver_enabled = true`
 and write the emulated machine's memory. It needs no game files of its own and ships none: only
 offsets, ranges and what we have checked about them.
 
-**Status: just started.** `mompy doctor` exists (below); `peek`, `fields`, `poke`, `undo`, `banish`, `unbanish`, and `cast`/`dispel` (a global enchantment), `where`, `poke city` (population, build, create) `cast unit`, `unit mercury`, `where pointer` and `pew` exist too (see `docs/stories/`).
+**Status: just started.** `mompy doctor` exists (below); `peek`, `fields`, `poke`, `undo`, `banish`, `unbanish`, and `cast`/`dispel` (a global enchantment), `where`, `poke city` (population, build, create) `cast unit`, `unit mercury`, `where pointer`, `pew` and mass enchantments exist too (see `docs/stories/`).
 Nothing here has been tried on anyone's machine but Kevin's.
 
 ## `mompy peek` and `mompy fields`
@@ -135,6 +135,18 @@ python -m mompy undo                      # brings them back, until End Turn swe
 
 `pointer` works anywhere a place does. The game keeps the pointer's position in its own memory, so nothing needs changing in DOSBox. It only means something over the overland map.
 `pew` spares heroes (and says so). The map keeps drawing killed units as ghosts until you nudge the map view, flip the plane, or end the turn: do not give a ghost orders.
+
+## Mass enchantments
+
+```
+python -m mompy poke city hellgate cast mass.flight      # every unit on Hellgate's tile
+python -m mompy unit cast mass.flight --at pointer       # the stack under the mouse (or --at x,y,plane)
+python -m mompy unit dispel mass.flight --at hellgate
+python -m mompy undo
+```
+
+Puts one of the 32 unit enchantments (Flight, Wind Walking, Water Walking, Invisibility, Heroism, Bless...) on every unit on a tile, with no mana and no checks; `dispel` takes it off. The units' owner pays the upkeep at End Turn:
+four Flying Nagas cost about 16 mana. Heroes on the tile are included. The map may need a nudge to redraw.
 
 ## `mompy doctor`
 
