@@ -108,6 +108,18 @@ class DiffTest(SnapshotCase):
         self.snap("b")
         self.assertEqual(diff("a", "b"), "terrain Myrror (12, 7): 0x0000 -> 0x0140\nterrain_flags Arcanus (3, 5): 0x00 -> 0x20")
 
+    def test_a_noise_snapshot_from_another_moment_is_refused(self):
+        # --ignore with a snapshot taken long before would hide every real change as "noise" (it did, once, in a real session)
+        import json
+        from mompy.snapshot import _path
+        self.snap("a"), self.snap("old_twin"), self.snap("b")
+        doc = json.loads(_path("old_twin").read_text(encoding="utf-8"))
+        doc["taken"] -= 3600
+        _path("old_twin").write_text(json.dumps(doc), encoding="utf-8")
+        with self.assertRaisesRegex(SnapshotError, "second snapshot of the same moment"):
+            diff("a", "b", ignore_name="old_twin")
+        self.assertEqual(diff("a", "b"), "no differences")
+
     def test_a_long_diff_stops_at_the_limit_unless_all(self):
         self.snap("a")
         for i in range(0, 600, 2):

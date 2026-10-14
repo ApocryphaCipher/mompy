@@ -52,8 +52,7 @@ python -m mompy peek wizard 1 globals                  # which ones are on
 ```
 
 It sets the one byte the game keeps for that enchantment (the wizard is the caster). **No mana, no spell book, none of the game's casting checks**, and no waiting for End Turn: it is active now, and the game's own sums
-(the effect, the upkeep, a dispel it cannot afford) happen at End Turn. The name can be spelled loosely (`aura`, `natures-wrath`, `globals.aura_of_majesty`). Five enchantments that change how turns or the whole map work
-(Time Stop, Planar Seal, Armageddon, Meteor Storm, Great Wasting) need `--force` to cast; they have not been tried by hand yet. `mompy undo` takes the last one off.
+(the effect, the upkeep, a dispel it cannot afford) happen at End Turn. The name can be spelled loosely (`aura`, `natures-wrath`, `globals.aura_of_majesty`). Planar Seal, Armageddon, Meteor Storm and Great Wasting were tried through a real End Turn and cast like any other. **Time Stop is not available**: the game does it with its own scripting when the real spell is cast, so cast it from your spell book. If the owner has no mana at End Turn the game disbands his summoned creatures and dissipates every unit enchantment. `mompy undo` takes the last one off.
 
 ## `mompy banish` and `mompy unbanish`
 

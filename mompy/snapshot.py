@@ -15,6 +15,7 @@ import base64
 import json
 import re
 import struct
+import time
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Dict, List, Optional, Tuple
@@ -27,6 +28,7 @@ from .game import home
 
 DGROUP_SIZE = 0x10000
 VERSION = 1
+SAME_MOMENT = 60        # seconds: a noise snapshot taken further from the first is not of the same moment
 _NAME = re.compile(r"^[A-Za-z0-9][A-Za-z0-9_.-]{0,63}$")
 
 # The unit record, by ReMoM's s_UNIT (offsets and sizes), so a diff can say what moved.
@@ -74,7 +76,8 @@ def take(api: DosboxApi, name: str, replace: bool = False) -> str:
     for layer, (reference, width) in MAP_LAYERS.items():
         regions[layer] = _grab(api, reference + (game.base - layout.REFERENCE_WIZARD_BASE), 2 * PLANE_TILES * width)
     regions["dgroup"] = _grab(api, game.base - layout.DGROUP_BELOW_WIZARDS, DGROUP_SIZE)
-    doc = {"version": VERSION, "name": name, "time": datetime.now(timezone.utc).isoformat(timespec="seconds"), "url": api.url,
+    doc = {"version": VERSION, "name": name, "time": datetime.now(timezone.utc).isoformat(timespec="seconds"),
+           "taken": time.time(), "url": api.url,
            "base": game.base, "wizards": list(game.names), "regions": regions}
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text(json.dumps(doc), encoding="utf-8")
@@ -108,7 +111,7 @@ def load(name: str) -> dict:
         raise SnapshotError(f"no snapshot called {name!r} (mompy snapshot --list)") from None
     except (ValueError, KeyError, TypeError):
         raise SnapshotError(f"the snapshot {name!r} is damaged: take it again") from None
-    return {"name": name, "wizards": doc.get("wizards", []), "regions": regions, "addresses": addresses}
+    return {"name": name, "wizards": doc.get("wizards", []), "regions": regions, "addresses": addresses, "taken": doc.get("taken")}
 
 
 def _runs(changed: List[bool]) -> List[Tuple[int, int]]:
@@ -129,7 +132,14 @@ def _hex(b: bytes) -> str:
 
 def diff(a_name: str, b_name: str, ignore_name: Optional[str] = None, show_all: bool = False, limit: int = 200) -> str:
     a, b = load(a_name), load(b_name)
-    noise = load(ignore_name)["regions"] if ignore_name else {}
+    noise = {}
+    if ignore_name:
+        twin = load(ignore_name)
+        noise = twin["regions"]
+        if a["taken"] is not None and twin["taken"] is not None and abs(twin["taken"] - a["taken"]) > SAME_MOMENT:
+            raise SnapshotError(
+                f"--ignore {ignore_name} was taken {abs(twin['taken'] - a['taken']):.0f} seconds from {a_name}: it must be a second snapshot "
+                f"of the same moment (take it right after {a_name}, before changing anything), or it hides real changes as noise")
     names = b["wizards"] or a["wizards"]
     lines: List[str] = []
     for region in list(TABLES) + ["unit_count", *MAP_LAYERS, "dgroup"]:

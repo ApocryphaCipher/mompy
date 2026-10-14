@@ -52,7 +52,7 @@ def main(argv: Optional[List[str]] = None) -> int:
     pk2.add_argument("field", help="a field, or field.element (books.sorcery, relations.freya); or cast / dispel a global enchantment")
     pk2.add_argument("value", nargs="?", help="a number, an enum word (alliance), on/off for flags, or a,b,c for a whole array; for cast/dispel, the enchantment")
     pk2.add_argument("--dry-run", action="store_true", help="say what would change; write and log nothing")
-    pk2.add_argument("--force", action="store_true", help="also write a field that is only a guess, or cast one of the questionable globals")
+    pk2.add_argument("--force", action="store_true", help="also write a field that is only a guess")
     pk2.add_argument("--count", type=int, default=1, help="cast unit.NAME or city create NAME: how many units (1 to 9)")
     pk2.add_argument("--at", help="cast unit.NAME: where, a city or x,y,plane; default the wizard's summoning circle")
     sub.add_parser("undo", parents=[common], help="put the last poke back")
