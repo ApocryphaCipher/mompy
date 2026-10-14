@@ -23,3 +23,13 @@ Needs [STORY-004](STORY-004-snapshot-and-diff.md) (`snapshot` and `diff`) and th
 ## Definition of done
 
 A page in `docs/reference/`: the unit record a summon produces, per kind; every other byte the game touches; what a hand-made record needs to show and work; and the free-slot rule. STORY-015 is then written from it. (The same page tells Mirror how to add units to its editor.)
+
+## Findings so far (2026-10-13, Kevin's MAXIMUS game, fork 0.84.0-alpha)
+
+The record format and a first hand-written summon, without `snapshot`/`diff` (watched, not diffed):
+
+- **The unit type table is in memory** (`DGROUP + 0x19C`, 36 bytes a record, 198 types; DGROUP is the wizard table's address minus `0x9ECA`, at 0x289F0 in this build). Each record starts with a pointer (u16, from DGROUP) to the type's **name**, so names need no shipped data: they are read from the running game. Checked by reading War Bears (179), Sprites (180), Guardian Spirit (176), Fire Elemental (158), Cavalry (60).
+- **Unit record fields that come from the type table** (compared over all 160 live units): max moves `+4` = type `+9` (159 of 160; the odd one out likely carries a speed enchantment); `+22` = type `+19` (160 of 160, value 1 in every unit seen; *guess:* sight range). The type table's `+10` reads like the cost (Cavalry 100).
+- **Units built by cities** (Kevin's four, owner 0): `x y plane owner maxmoves type 0xFF(hero slot) 1 maxmoves(left) 0 0 1 level 0 exp ...`. `+7` and `+11` were 1 on every wizard-owned unit and 0 on the neutral ones (*guess:* active / visible).
+- **A hand-written War Bears** (type 179), cloned from a Guardian Spirit record with position, type, `+4`/`+8` (type `+9`) and `+22` (type `+19`) filled in, written at slot 160 (the first slot after the live count, which held stale bytes of an old record, so the "free" slot is **not** zeroed), then the live count `160 -> 161`: **it showed in the Blackstone city screen at once (no End Turn), then on the map, and walked** (Kevin, 2026-10-13). Moving it wrote `+9,+10` (the destination), `+11` = 3 (a unit on the way), `+8` moves left to 0 and changed `+18` from 10 to 7.
+- Still open: End Turn and a save and load with the hand-made unit; a boat and a normal racial unit (`+18`, `+12`, level and upkeep); a full stack (nine units) on the tile; the dead-slot rule.
