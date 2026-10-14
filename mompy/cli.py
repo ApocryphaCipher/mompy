@@ -16,6 +16,7 @@ from . import peek as peeking
 from . import pew as pewing
 from . import poke as poking
 from . import snapshot as snapshots
+from . import stack
 from . import summon
 from . import mass
 from . import unit as units
@@ -79,9 +80,11 @@ def main(argv: Optional[List[str]] = None) -> int:
     wh.add_argument("name", help="a city or wizard name, any case")
     wh.add_argument("--json", action="store_true", help="print plain data for scripts; several matches are all listed")
     un = sub.add_parser("unit", parents=[common], help="act on units in the running game")
-    un.add_argument("action", choices=["mercury", "cast", "dispel"],
-                    help="mercury: all the movement units can hold, for this turn; cast / dispel: a unit enchantment on the whole stack")
-    un.add_argument("spell", nargs="?", help="for cast / dispel: mass.flight, mass.wind_walking ...")
+    un.add_argument("action", choices=["mercury", "cast", "dispel", "heal", "weapons", "experience"],
+                    help="mercury: all the movement units can hold, for this turn; cast / dispel: a unit enchantment on the whole stack; "
+                         "heal; weapons GRADE (ordinary units); experience max")
+    un.add_argument("what", nargs="?", help="cast / dispel: mass.flight, mass.wind_walking ...; weapons: normal, magic, mithril, adamantium; experience: max")
+    un.add_argument("--skip-heroes", dest="skip_heroes", action="store_true", help="leave heroes out (heal, experience)")
     un.add_argument("--at", help="the stack on a city or x,y,plane")
     un.add_argument("--wizard", type=int, help="every unit of this wizard (1 is the player)")
     un.add_argument("--dry-run", action="store_true", help="say what would change; write nothing")
@@ -193,12 +196,22 @@ def main(argv: Optional[List[str]] = None) -> int:
         return 0
     if args.command == "unit":
         try:
+            api = DosboxApi(args.url)
             if args.action == "mercury":
-                print(units.mercury(DosboxApi(args.url), args.at, args.wizard, args.dry_run))
+                print(units.mercury(api, args.at, args.wizard, args.dry_run))
+            elif args.action in ("heal", "weapons", "experience"):
+                if not args.at:
+                    raise poking.PokeError(f"say where: mompy unit {args.action}{' ' + args.what if args.what else ''} --at PLACE  (a city, x,y,plane or pointer)")
+                if args.action == "heal":
+                    print(stack.heal(api, args.at, args.skip_heroes, args.dry_run))
+                elif args.action == "weapons":
+                    print(stack.weapons(api, args.at, args.what, args.skip_heroes, args.dry_run))
+                else:
+                    print(stack.experience(api, args.at, args.what, args.skip_heroes, args.dry_run))
             else:
-                if not args.spell or not args.at:
+                if not args.what or not args.at:
                     raise poking.PokeError(f"mompy unit {args.action} mass.flight --at PLACE  (a city, x,y,plane or pointer)")
-                print(mass.change(DosboxApi(args.url), args.at, args.spell, args.action == "cast", args.dry_run))
+                print(mass.change(api, args.at, args.what, args.action == "cast", args.dry_run))
         except (poking.PokeError, peeking.PeekError, ApiError) as err:
             print(f"mompy: {err}", file=sys.stderr)
             return 1
