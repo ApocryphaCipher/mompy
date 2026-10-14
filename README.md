@@ -24,6 +24,15 @@ mompy --version
 
 No installation is needed to try it from a checkout: `python -m mompy ...` in the repository folder does the same. In the examples below, `python -m mompy` and `mompy` are the same thing.
 
+## Which DOSBox?
+
+mompy needs **DOSBox Staging, version 0.83.0 or newer**: the ordinary release from the project's [releases page](https://github.com/dosbox-staging/dosbox-staging/releases).
+
+- **Nothing to build, and no fork.** The web API is part of the released program; it is only switched off by default. This was checked with the released macOS build of 0.83.0 running the real game (and with the author's development build).
+- **Other DOSBoxes do not work:** as far as we know the original DOSBox, DOSBox-X and the other variants have no such API. Older DOSBox Staging releases (before 0.83.0) were not checked; `mompy doctor` tells you the version it found and says `NOT READY` if there is no API to talk to.
+- **The author's research fork** (`ApocryphaCipher/dosbox-staging`, branch `apocrypha/research`) is a development tool, not something you need: it adds screenshots, pausing and a write switch. If you do use it, it also needs `webserver_allow_writes = true` before it accepts a write; the released program has no such switch.
+- Set DOSBox up for *Master of Magic* the way you always do (the game's folder mounted, the game run from it). mompy changes nothing about that.
+
 ## Quick start
 
 1. **Start DOSBox Staging with its web API on**, and run the game from it as usual:
@@ -33,7 +42,6 @@ No installation is needed to try it from a checkout: `python -m mompy ...` in th
    ```
 
    or put `webserver_enabled = true` in DOSBox's config file. The API listens on `127.0.0.1:8086` (`webserver_port` changes that; give mompy `--url http://127.0.0.1:PORT` to match).
-   Some builds (the research fork) also need `webserver_allow_writes = true` before they accept a write; stock DOSBox Staging does not.
 2. **Load a saved game** in *Master of Magic* (1.31, the GOG release was used). mompy finds the game by looking for the five wizards' names, so a game must be loaded.
 3. **Check it:**
 
