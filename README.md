@@ -11,7 +11,7 @@ mompy talks to **DOSBox Staging's built-in web API** (`webserver_enabled = true`
 and write the emulated machine's memory. It needs no game files of its own and ships none: only
 offsets, ranges and what we have checked about them.
 
-**Status: just started.** `mompy doctor` exists (below); `peek`, `fields`, `poke`, `undo`, `banish`, `unbanish`, and `cast`/`dispel` (a global enchantment), `where`, `poke city` (population, build, create) `cast unit`, `unit mercury`, `where pointer`, `pew` mass enchantments, `snapshot`, `diff`, spell names and `peek`/`poke unit` exist too (see `docs/stories/`).
+**Status: just started.** `mompy doctor` exists (below); `peek`, `fields`, `poke`, `undo`, `banish`, `unbanish`, and `cast`/`dispel` (a global enchantment), `where`, `poke city` (population, build, create) `cast unit`, `unit mercury`, `where pointer`, `pew` mass enchantments, `snapshot`, `diff`, spell names, `peek`/`poke` for units, nodes and lairs exist too (see `docs/stories/`).
 Nothing here has been tried on anyone's machine but Kevin's.
 
 ## `mompy peek` and `mompy fields`
@@ -185,6 +185,21 @@ python -m mompy fields unit               # what can be read and what can be cha
 ```
 
 Units are numbered from 0, the way `where pointer` and `pew` print them (`Cavalry #158`). Position and a few other fields are guesses and need `--force`; owner and type are read-only.
+
+## Nodes, lairs and their monsters
+
+```
+python -m mompy peek lair 12              # a cave: kind, where, the guards (Sprites 1 left of 2), gold and mana rewards
+python -m mompy peek node 3               # a magic node, owner, and "guardians (lair 7, not cleared): War Bears 3 of 3, Sprites 2 of 2"
+python -m mompy where pointer             # a tile in words: city, units, node, and the monsters that live there
+python -m mompy where 8,30,myrror
+python -m mompy poke lair 12 gold 300
+python -m mompy poke lair 12 guard1_type sprites
+python -m mompy poke lair 12 guard1_count 3     # three at full strength; 2/3 is two left of three
+python -m mompy poke node 3 owner freya         # or nobody
+```
+
+"Lair" is any monster place: Towers of Wizardry, node guardians, caves, dungeons, temples, keeps and ruins (`peek lair N` says which). Numbers start at 0, the game's own.
 
 ## `mompy doctor`
 
