@@ -118,6 +118,8 @@ def _words(target: Target, value, names: List[str] = ()) -> str:
         return str(value)
     if f.format == "spell":
         return ",".join(peek._spell(v, names) for v in (value if isinstance(value, list) else [value]))
+    if f.format in ("unit_type", "guard_count", "node_owner") and not isinstance(value, list):
+        return peek._formatted(f, value, names) or str(value)
     if isinstance(value, list):
         return ",".join(peek._plain(f, v) for v in value)
     return peek._plain(f, value)
@@ -131,6 +133,45 @@ def _label(target: Target, names: List[str]) -> str:
 def _encode(target: Target, value) -> bytes:
     f = target.field
     return f.encode_item(value) if target.element is not None else f.encode(value)
+
+
+def _guard_count(text: str) -> str:
+    """``3`` as three guards at full strength (the byte 0x33), ``2/3`` as two left of three; a larger number is the whole byte."""
+    word = text.strip()
+    if "/" in word:
+        left, _, start = word.partition("/")
+        if not (left.strip().isdigit() and start.strip().isdigit() and int(left) <= int(start) <= 15):
+            raise PokeError("guards are 'N' (N at full strength, 1 to 15) or 'left/started' such as 2/3")
+        return str(int(start) * 16 + int(left))
+    if word.isdigit() and 0 < int(word) <= 15:
+        return str(int(word) * 17)
+    try:
+        return str(int(word, 0))
+    except ValueError:
+        raise PokeError("guards are 'N' (N at full strength, 1 to 15), 'left/started' such as 2/3, or a whole byte") from None
+
+
+def _node_owner_number(text: str, names: List[str]) -> str:
+    """``nobody`` or a wizard's name as the node's owner byte (the wizard's index, 0 for wizard 1); a number is taken as it is."""
+    word = text.strip().lower()
+    if word in ("nobody", "none", "neutral"):
+        return "-1"
+    for i, name in enumerate(names):
+        if name.lower() == word:
+            return str(i)
+    return text
+
+
+def _unit_type_number(text: str, names: List[str]) -> str:
+    """A unit type's name as its number when the game's names are known; numbers and 'none' pass through."""
+    word = text.strip()
+    types = getattr(names, "unit_types", None)
+    if word.lower() == "none":
+        return "0"
+    if not types or word.isdigit():
+        return text
+    from .summon import UnitType, find_type
+    return str(find_type([UnitType(i, n, 0, 0) for i, n in enumerate(types)], word).number)
 
 
 def _spell_number(text: str, names: List[str]) -> str:
@@ -153,6 +194,12 @@ def _parse(target: Target, text: str, names: List[str] = ()):
         return _parse_name(text)
     if f.format == "spell":
         text = _spell_number(text, names) if not (target.element is None and f.is_array) else text
+    elif f.format == "guard_count":
+        text = _guard_count(text)
+    elif f.format == "unit_type":
+        text = _unit_type_number(text, names)
+    elif f.format == "node_owner":
+        text = _node_owner_number(text, names)
     if target.element is not None or not f.is_array:
         return parse_item(f, text)
     parts = [p for p in text.split(",")]
@@ -192,6 +239,9 @@ def poke(api: DosboxApi, number: int, spec: str, text: str, dry_run: bool = Fals
     if not block.first_number <= number <= last:
         raise PokeError(f"there is no {block.describe} {number} ({block.first_number} to {last})")
     names = found.names
+    if block_name in ("lair", "node", "unit"):
+        from .summon import read_types
+        names.unit_types = [t.name for t in read_types(api, found)]
     name, _, element = spec.partition(".")
     try:
         field = F.find(block_name, name)

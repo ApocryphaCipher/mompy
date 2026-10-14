@@ -39,5 +39,6 @@ separate project if players want it.
 - [STORY-022](../stories/STORY-022-spike-weapon-quality.md): spike: where does a unit's weapon quality (adamantine) live? (nice to have)
 - [STORY-023](../stories/STORY-023-mass-spells.md): `cast mass.<spell>`, a unit enchantment on a whole stack, by city name or pointer (nice to have)
 - [STORY-024](../stories/STORY-024-unit-fields.md): `peek unit N` and `poke unit N FIELD VALUE`, the unit record in the field table
+- [STORY-025](../stories/STORY-025-nodes-and-lairs.md): `peek` and `poke` for magic nodes and lairs, with their monsters
 
 Suggested order: 008 (a quick check that decides everything else), 001, 002, 003, then 004 to 007.

@@ -39,6 +39,10 @@ def read_record(api: DosboxApi, game: locate.Game, block: str, number: int) -> b
             raise PeekError(f"there is no unit {number}: the game has units 0 to {live - 1}")
     start = game.base + layout.table(b.table).offset + (number - b.first_number) * b.stride
     record = api.read(start, b.stride)
+    if block == "lair" and (record == bytes(24) or record[0] >= 60 or record[1] >= 40 or record[2] > 1):
+        raise PeekError(f"there is no lair {number}: that slot is empty")
+    if block == "node" and (record[0] >= 60 or record[1] >= 40 or record[2] > 1):
+        raise PeekError(f"there is no node {number}: that slot is empty")
     if block == "city" and not locate._valid_city(record):
         raise PeekError(f"there is no city in slot {number} (it is empty, or the table does not look right)")
     return record
@@ -70,6 +74,10 @@ def _unit_type(value: int, names: List[str]) -> str:
     return f"{types[value]} ({value})" if types and value < len(types) else str(value)
 
 
+def _guards(value: int) -> str:
+    return "none" if value == 0 else f"{value & 15} left of {value >> 4} (0x{value:02x})"
+
+
 def _weapon(value: int) -> str:
     grade = ("normal", "magic", "mithril", "adamantium")[value & 3]
     flags = [name for bit, name in ((0x4, "demon skin"), (0x8, "fire breath"), (0x10, "demon wings"), (0x20, "undead")) if value & bit]
@@ -87,7 +95,11 @@ def _formatted(field: F.Field, value, names: List[str]) -> Optional[str]:
     if field.format == "owner":
         return _owner(value, names)
     if field.format == "unit_type":
-        return _unit_type(value, names)
+        return _unit_type(value, names) if value or field.block == "unit" else "none"
+    if field.format == "guard_count":
+        return _guards(value)
+    if field.format == "node_owner":
+        return "nobody" if value < 0 else _owner(value, names)
     if field.format == "mutations":
         return _weapon(value)
     if field.format == "enchantments":
@@ -185,9 +197,19 @@ def peek(api: DosboxApi, block: str, number: int, spec: Optional[str], as_json: 
         title += f" ({names[number - 1]})"
     if block == "city":
         title += f" ({record[:14].split(b'\0', 1)[0].decode('latin-1')})"
-    if block == "unit":
+    if block in ("unit", "lair", "node"):
         from .summon import read_types
         names.unit_types = [t.name for t in read_types(api, game)]
+    if block == "lair":
+        from .sites import KINDS, PLANES as SITE_PLANES
+        title += f" ({KINDS.get(record[4], record[4])}, {SITE_PLANES[record[2]] if record[2] < 2 else record[2]} ({record[0]}, {record[1]}), " \
+                 f"{'not cleared' if record[3] else 'cleared'})"
+    if block == "node":
+        from .sites import NODE_TYPES, PLANES as SITE_PLANES
+        owner = struct.unpack("<b", record[3:4])[0]
+        title += f" ({NODE_TYPES.get(record[45], record[45])}, {SITE_PLANES[record[2]] if record[2] < 2 else record[2]} ({record[0]}, {record[1]}), " \
+                 f"{'nobody' if owner < 0 else _owner(owner, names)})"
+    if block == "unit":
         dead = record[2] == 0xFF and record[3] == 0xFF
         title += f" ({names.unit_types[record[5]] if record[5] < len(names.unit_types) else record[5]}, {'dead' if dead else _owner(record[3], names)})"
     try:
@@ -206,9 +228,22 @@ def peek(api: DosboxApi, block: str, number: int, spec: Optional[str], as_json: 
         # the city table is read only to name a position (the summoning circle): not for `peek wizard 1 gold`
         cities = read_cities(api, game) if any(f.format == "map_position" and el is None for f, el in chosen) else {}
         lines = [render(f, record, names, el, own, cities) for f, el in chosen]
+        if block == "node" and spec is None:
+            lines += _node_guardians(api, game, record, names)
     except F.FieldError as err:
         raise PeekError(str(err)) from None
     return "\n".join(([title] if spec is None else []) + [("  " if spec is None else "") + ln for ln in lines])
+
+
+def _node_guardians(api: DosboxApi, game: locate.Game, record: bytes, names: List[str]) -> List[str]:
+    """The node's defenders: a separate encounter (kind 1 to 3) at the node's tile."""
+    from .sites import guardians_of, guards_text, read_lairs
+    node = {"x": record[0], "y": record[1], "plane": record[2]}
+    lair = guardians_of(node, read_lairs(api, game))
+    if lair is None:
+        return ["guardians: none recorded"]
+    state = "not cleared" if lair["intact"] else "cleared"
+    return [f"guardians (lair {lair['index']}, {state}): {guards_text(lair['guards'], names.unit_types)}"]
 
 
 def describe_fields(block: Optional[str] = None) -> str:

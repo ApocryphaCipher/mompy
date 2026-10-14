@@ -42,12 +42,12 @@ def main(argv: Optional[List[str]] = None) -> int:
     sub = parser.add_subparsers(dest="command", required=True)
     sub.add_parser("doctor", parents=[common], help="check that the game can be read and written safely")
     pk = sub.add_parser("peek", parents=[common], help="read a record's fields from the running game")
-    pk.add_argument("block", choices=["wizard", "fortress", "city", "unit"], help="what to read")
+    pk.add_argument("block", choices=["wizard", "fortress", "city", "unit", "node", "lair"], help="what to read")
     pk.add_argument("number", help="which one; wizard 1 is the player; a city by name (darkmoor) or number")
     pk.add_argument("field", nargs="?", help="a field, or field.element (books.sorcery, relations.freya); omit for all")
     pk.add_argument("--json", action="store_true", help="print plain data for scripts")
     pk2 = sub.add_parser("poke", parents=[common], help="change a field of the running game (checked, undoable)")
-    pk2.add_argument("block", choices=["wizard", "fortress", "city", "unit"], help="what to change")
+    pk2.add_argument("block", choices=["wizard", "fortress", "city", "unit", "node", "lair"], help="what to change")
     pk2.add_argument("number", help="which one; wizard 1 is the player; a city by name (darkmoor) or number")
     pk2.add_argument("field", help="a field, or field.element (books.sorcery, relations.freya); or cast / dispel a global enchantment")
     pk2.add_argument("value", nargs="?", help="a number, an enum word (alliance), on/off for flags, or a,b,c for a whole array; for cast/dispel, the enchantment")
@@ -89,7 +89,7 @@ def main(argv: Optional[List[str]] = None) -> int:
     df.add_argument("--ignore", help="a snapshot of the same moment as the first: bytes that differ between the two are noise and left out")
     df.add_argument("--all", action="store_true", help="show every line (the default stops at 200)")
     fl = sub.add_parser("fields", help="list the fields mompy knows, with their ranges and how sure we are")
-    fl.add_argument("block", nargs="?", choices=["wizard", "fortress", "city", "unit"])
+    fl.add_argument("block", nargs="?", choices=["wizard", "fortress", "city", "unit", "node", "lair"])
 
     args = parser.parse_args(argv)
     if args.command == "doctor":

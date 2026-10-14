@@ -112,8 +112,8 @@ def where(api: DosboxApi, query: str, as_json: bool = False) -> str:
     game = find_game(api)
     names = list(game.names)
     cities = read_cities(api, game)
-    if text == "pointer":
-        return _under_pointer(api, game, cities, names, as_json)
+    if text == "pointer" or text.count(",") == 2:
+        return _describe_tile(api, game, cities, names, as_json, text)
     candidates = [("city", c.name, c) for c in cities] + [("wizard", n, i) for i, n in enumerate(names)]
     exact = [c for c in candidates if c[1].lower() == text]
     found = exact or [c for c in candidates if c[1].lower().startswith(text)]
@@ -130,14 +130,13 @@ def where(api: DosboxApi, query: str, as_json: bool = False) -> str:
     return results[0][1]
 
 
-def _under_pointer(api: DosboxApi, game: locate.Game, cities: List[City], names: List[str], as_json: bool) -> str:
-    """What is on the map tile under the mouse: the tile, its city and its units."""
-    from .pointer import tile_under_pointer
+def _describe_tile(api: DosboxApi, game: locate.Game, cities: List[City], names: List[str], as_json: bool, place: str) -> str:
+    """What is on a map tile (the one under the mouse, or ``x,y,plane``): its city, units, node and the monsters that live there."""
     from .poke import PokeError
-    from .summon import DEAD, read_types
+    from .summon import DEAD, parse_place, read_types
 
     try:
-        x, y, plane = tile_under_pointer(api, game)
+        x, y, plane = parse_place(api, game, place)
     except PokeError as err:
         raise PeekError(str(err)) from None
     table = layout.UNITS
@@ -148,12 +147,31 @@ def _under_pointer(api: DosboxApi, game: locate.Game, cities: List[City], names:
              if tuple(raw[i * 32:i * 32 + 3]) == (x, y, plane) and raw[i * 32 + 3] != DEAD]
     city = next((c for c in cities if (c.x, c.y, c.plane) == (x, y, plane)), None)
     owner = lambda o: names[o] if o < len(names) else "neutral"
+    from .sites import KINDS, NODE_TYPES, guards_text, guardians_of, read_lairs, read_nodes
+    type_names = [t.name for t in types]
+    lairs = read_lairs(api, game)
+    here_node = next((n for n in read_nodes(api, game) if (n["x"], n["y"], n["plane"]) == (x, y, plane)), None)
+    here_lairs = [l for l in lairs if (l["x"], l["y"], l["plane"]) == (x, y, plane)]
     if as_json:
         return json.dumps({"plane": PLANES[plane], "x": x, "y": y, "city": _city_data(city, names) if city else None,
-                           "units": [{"unit": n, "type": t, "owner": owner(o)} for t, n, o in units]}, indent=1)
+                           "units": [{"unit": n, "type": t, "owner": owner(o)} for t, n, o in units],
+                           "node": ({**here_node, "type": NODE_TYPES.get(here_node["type"]),
+                                     "owner": "nobody" if here_node["owner"] < 0 else owner(here_node["owner"])} if here_node else None),
+                           "sites": [{"lair": l["index"], "kind": KINDS.get(l["kind"]), "cleared": not l["intact"],
+                                      "guards": [{"type": type_names[t], "left": left, "started": start} for t, left, start in l["guards"]]}
+                                     for l in here_lairs]}, indent=1)
     line = _place(plane, x, y)
     if city:
         line += f"  city {city.name}, owner {_owner(city, names)}"
     if units:
         line += f"  {len(units)} unit{'s' if len(units) != 1 else ''}: " + ", ".join(f"{t} #{n} ({owner(o)})" for t, n, o in units)
+    if here_node:
+        who = "nobody" if here_node["owner"] < 0 else owner(here_node["owner"])
+        line += f"\n  {NODE_TYPES.get(here_node['type'], here_node['type'])} node #{here_node['index']}, melded by {who}" if who != "nobody" else \
+                f"\n  {NODE_TYPES.get(here_node['type'], here_node['type'])} node #{here_node['index']}, nobody's"
+    for l in here_lairs:
+        state = "not cleared" if l["intact"] else "cleared"
+        line += f"\n  {KINDS.get(l['kind'], l['kind'])} (lair #{l['index']}, {state}): guards {guards_text(l['guards'], type_names)}"
+        if l["gold"] or l["mana"]:
+            line += f"; reward {l['gold']} gold, {l['mana']} mana"
     return line
