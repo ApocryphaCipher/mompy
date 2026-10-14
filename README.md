@@ -11,7 +11,7 @@ mompy talks to **DOSBox Staging's built-in web API** (`webserver_enabled = true`
 and write the emulated machine's memory. It needs no game files of its own and ships none: only
 offsets, ranges and what we have checked about them.
 
-**Status: just started.** `mompy doctor` exists (below); `peek`, `fields`, `poke`, `undo`, `banish`, `unbanish`, and `cast`/`dispel` (a global enchantment), `where`, `poke city` (population, build, create) and `cast unit` exist too (see `docs/stories/`).
+**Status: just started.** `mompy doctor` exists (below); `peek`, `fields`, `poke`, `undo`, `banish`, `unbanish`, and `cast`/`dispel` (a global enchantment), `where`, `poke city` (population, build, create) `cast unit` and `unit mercury` exist too (see `docs/stories/`).
 Nothing here has been tried on anyone's machine but Kevin's.
 
 ## `mompy peek` and `mompy fields`
@@ -111,6 +111,16 @@ Puts a unit straight into the game, owned by the wizard: no mana, no spell book,
 (Swordsmen) lists its type numbers; use one. `cast` is for summoned creatures (Sprites, War Bears...); `poke city NAME create UNIT` is for ordinary units and boats: it makes them in that city for the city's owner, at maximum experience (120, Elite) and with adamantium weapons.
 Heroes are refused (they also need a place in the wizard's hero list). A tile holds nine units of one owner, so a full or foreign tile
 sends the unit to a free neighbouring tile, and it says so. `--at` takes a city name or `x,y,plane`. One `undo` takes the whole summon back.
+
+## `mompy unit mercury`
+
+```
+python -m mompy unit mercury --at blackstone      # the stack on a city (or --at x,y,plane)
+python -m mompy unit mercury --wizard 1           # every unit of wizard 1
+python -m mompy undo
+```
+
+Gives the units 63.5 moves for this turn (the most the game's byte holds; a Cavalry set this way crossed most of a continent). Max moves is unchanged, so the next turn is normal again. `--dry-run` says what would change.
 
 ## `mompy doctor`
 
