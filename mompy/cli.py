@@ -14,6 +14,7 @@ from . import city as cities
 from . import peek as peeking
 from . import poke as poking
 from . import summon
+from . import unit as units
 from . import where as whereis
 from .doctor import diagnose, render
 
@@ -63,6 +64,11 @@ def main(argv: Optional[List[str]] = None) -> int:
     wh = sub.add_parser("where", parents=[common], help="find a city or a wizard by name (a unique prefix works)")
     wh.add_argument("name", help="a city or wizard name, any case")
     wh.add_argument("--json", action="store_true", help="print plain data for scripts; several matches are all listed")
+    un = sub.add_parser("unit", parents=[common], help="act on units in the running game")
+    un.add_argument("action", choices=["mercury"], help="mercury: give units all the movement they can hold, for this turn")
+    un.add_argument("--at", help="the stack on a city or x,y,plane")
+    un.add_argument("--wizard", type=int, help="every unit of this wizard (1 is the player)")
+    un.add_argument("--dry-run", action="store_true", help="say what would change; write nothing")
     fl = sub.add_parser("fields", help="list the fields mompy knows, with their ranges and how sure we are")
     fl.add_argument("block", nargs="?", choices=["wizard", "fortress", "city"])
 
@@ -116,6 +122,13 @@ def main(argv: Optional[List[str]] = None) -> int:
         try:
             print(whereis.where(DosboxApi(args.url), args.name, args.json))
         except (peeking.PeekError, ApiError) as err:
+            print(f"mompy: {err}", file=sys.stderr)
+            return 1
+        return 0
+    if args.command == "unit":
+        try:
+            print(units.mercury(DosboxApi(args.url), args.at, args.wizard, args.dry_run))
+        except (poking.PokeError, peeking.PeekError, ApiError) as err:
             print(f"mompy: {err}", file=sys.stderr)
             return 1
         return 0
