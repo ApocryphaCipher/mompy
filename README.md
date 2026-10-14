@@ -90,6 +90,19 @@ python -m mompy undo
 A city is named the way `where` names it (whole name, else a unique prefix; an ambiguous one is refused), or given by its number. Only `population` can be changed so far, in
 thousands (1 to 25). The game also keeps the tens, which are left alone. Same safety as every `poke`: compare-and-swap, range checks, `--dry-run`, `undo`.
 
+## Units: `cast unit`
+
+```
+python -m mompy poke wizard 1 cast unit.war_bears              # one War Bears at the wizard's summoning circle
+python -m mompy poke wizard 1 cast unit.sprites --count 3 --at darkmoor
+python -m mompy poke wizard 1 cast unit.58                     # a unit by type number
+python -m mompy undo
+```
+
+Puts a unit of any type straight into the game, owned by the wizard: no mana, no spell book, none of the game's checks. Unit names are read from the running game. A name several races share
+(Swordsmen) lists its type numbers; use one. Heroes are refused (they also need a place in the wizard's hero list). A tile holds nine units of one owner, so a full or foreign tile
+sends the unit to a free neighbouring tile, and it says so. `--at` takes a city name or `x,y,plane`. One `undo` takes the whole summon back.
+
 ## `mompy doctor`
 
 ```

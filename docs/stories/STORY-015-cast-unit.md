@@ -1,7 +1,7 @@
 # STORY-015: `mompy poke wizard N cast unit.<name>`: summon any unit, no fuss (enhancement)
 
 **Parent:** [EPIC-001](../epics/EPIC-001-mompy-core.md)
-**Status:** proposed (2026-10-13). **Priority: nice to have.** Depends on [STORY-003](STORY-003-poke.md) (`poke`) and on the spike [STORY-016](STORY-016-spike-summon-a-unit.md), which finds out what the game writes when a unit appears.
+**Status:** built (2026-10-13), not yet pushed; checked on a real game. **Priority: nice to have.** Depends on [STORY-003](STORY-003-poke.md) (`poke`) and on the spike [STORY-016](STORY-016-spike-summon-a-unit.md), which finds out what the game writes when a unit appears.
 **Size:** medium
 **Raised by:** [Kevin](https://github.com/KevinAsbury), 2026-10-13
 
@@ -45,3 +45,15 @@ read them from the game's own memory if the type table holds them (the spike che
 
 `cast unit.war_bears` on the real game gives a War Bears stack of the wizard's colour at the summoning city that shows on the map (after End Turn if that is what the game needs), can be moved, and survives a turn and a save and load; refusals tested with the fake DOSBox.
 Mirror's editor could learn to **add** units from the same result (it can move and edit units today, not create them): note it in Mirror's backlog when this lands.
+
+## Outcome
+
+Built as `mompy/summon.py` and `poke wizard N cast unit.NAME [--count N] [--at CITY|x,y,plane]`, with `tests/test_summon.py`.
+
+- Names come from the running game's unit type table (STORY-016), so nothing is shipped. A name shared by races lists the type numbers; `unit.58` works. Heroes (types 0 to 34) are refused.
+- The record is built from scratch: position, owner, max moves and sight from the type's record, level 0 for summoned creatures (type 154 and up) and level 1 for the rest. *Guess:* the draw-priority byte (`+18`); the game rewrote it on its own (0x0A to 0 and 5 in the records read back).
+- Free slots: dead records first (plane and owner both 0xFF), then appended after the live count. The count is written last; if it fails the records are put back.
+- A full tile (nine), another owner's units or another owner's city sends the unit to the first free neighbour; no room anywhere is refused.
+- Real game (fork 0.84.0-alpha, Kevin's MAXIMUS save, 2026-10-13): War Bears (by a hand-written spike, then through `cast`), Sprites and a Dark Elf Cavalry at Blackstone: all showed in the city screen, all walked. The Cavalry shows as a Regular with 0 experience, as written. War Bears survived an End Turn.
+- Also fixed: `doctor` and every command called the unit table broken while a unit that died this turn was still in it (marked 0xFF); test added that fails without the fix.
+- Not done: a boat or land-water check (a land unit on the sea is allowed, unwarned), a save and load with a cast unit, a tenth unit written onto a full tile by hand (STORY-016's question; `cast` avoids it).

@@ -12,6 +12,7 @@ from . import banish as banishing
 from . import cast as casting
 from . import peek as peeking
 from . import poke as poking
+from . import summon
 from . import where as whereis
 from .doctor import diagnose, render
 
@@ -46,6 +47,8 @@ def main(argv: Optional[List[str]] = None) -> int:
     pk2.add_argument("value", help="a number, an enum word (alliance), on/off for flags, or a,b,c for a whole array; for cast/dispel, the enchantment")
     pk2.add_argument("--dry-run", action="store_true", help="say what would change; write and log nothing")
     pk2.add_argument("--force", action="store_true", help="also write a field that is only a guess, or cast one of the questionable globals")
+    pk2.add_argument("--count", type=int, default=1, help="cast unit.NAME: how many units (1 to 9)")
+    pk2.add_argument("--at", help="cast unit.NAME: where, a city or x,y,plane; default the wizard's summoning circle")
     sub.add_parser("undo", parents=[common], help="put the last poke back")
     bn = sub.add_parser("banish", parents=[common], help="banish a wizard: take his fortress (he is not dead; he casts Spell of Return)")
     bn.add_argument("block", choices=["wizard"])
@@ -88,7 +91,9 @@ def main(argv: Optional[List[str]] = None) -> int:
                 if args.field in ("cast", "dispel"):
                     if args.block != "wizard":
                         raise poking.PokeError(f"{args.field} is for wizards: mompy poke wizard N {args.field} aura_of_majesty")
-                    if args.field == "cast":
+                    if args.field == "cast" and args.value.lower().startswith("unit."):
+                        print(summon.summon(api, args.number, args.value[5:], args.count, args.at, args.dry_run))
+                    elif args.field == "cast":
                         print(casting.cast(api, args.number, args.value, args.dry_run, args.force))
                     else:
                         print(casting.dispel(api, args.number, args.value, args.dry_run))
