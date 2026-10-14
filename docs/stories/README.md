@@ -16,11 +16,13 @@
 | [STORY-012](STORY-012-cast.md) | `poke ... cast <global>`: a global enchantment straight on the wizard | built; real game: shows in the Magic screen and acts at End Turn |
 | [STORY-013](STORY-013-spike-globals-by-hand.md) | Spike: what does the game do with a global set by hand? | proposed (nice to have) |
 | [STORY-014](STORY-014-spike-wonky-globals.md) | Spike: the wonky globals (Spell of Mastery, Planar Seal...) | proposed (nice to have) |
-| [STORY-015](STORY-015-cast-unit.md) | `poke ... cast unit.<name>`: summon any unit, no fuss | proposed (nice to have; after `poke`) |
+| [STORY-015](STORY-015-cast-unit.md) | `poke ... cast unit.<name>`: summon any unit, no fuss | built; real game: shows, walks, survives End Turn |
 | [STORY-016](STORY-016-spike-summon-a-unit.md) | Spike: what the game writes when a unit is summoned | proposed (nice to have) |
 | [STORY-017](STORY-017-banish.md) | `banish wizard N`: banish a wizard (`--dead` to finish them) | `banish`/`unbanish` done; `--dead` open |
 | [STORY-018](STORY-018-pew.md) | `pew`: kill the units on the tile under the mouse | proposed (nice to have; after `poke` and `where`) |
 | [STORY-019](STORY-019-poke-city.md) | `poke city <name> <field> <value>`: change a city by name (population first) | `population` built; real game: written, see the story |
 | [STORY-020](STORY-020-poke-city-build.md) | `poke city <name> build`: finish the current production next turn | built; real game: the building stands after one End Turn |
+| [STORY-021](STORY-021-mercury.md) | `unit mercury`: give a stack all the movement it needs | proposed (nice to have) |
+| [STORY-022](STORY-022-spike-weapon-quality.md) | Spike: where does a unit's weapon quality (adamantine) live? | done: byte found in the vault, seen on the unit screen |
 
 Epic: [EPIC-001](../epics/EPIC-001-mompy-core.md).

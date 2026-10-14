@@ -88,6 +88,8 @@ def _valid_city(rec: bytes) -> bool:
 
 def _valid_unit(rec: bytes) -> bool:
     x, y, plane, owner = rec[0], rec[1], rec[2], rec[3]
+    if plane == 0xFF and owner == 0xFF:
+        return True                 # a unit that died this turn: the game leaves the record until End Turn sweeps it
     kind = rec[5]
     return x < 60 and y < 40 and plane in (0, 1) and owner <= 5 and kind < 198
 

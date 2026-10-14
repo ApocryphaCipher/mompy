@@ -35,5 +35,7 @@ separate project if players want it.
 - [STORY-018](../stories/STORY-018-pew.md): `pew`, kill the units on the tile under the mouse (nice to have)
 - [STORY-019](../stories/STORY-019-poke-city.md): `poke city <name> <field> <value>`, change a city by name, population first (nice to have)
 - [STORY-020](../stories/STORY-020-poke-city-build.md): `poke city <name> build`, finish the current production next turn (nice to have)
+- [STORY-021](../stories/STORY-021-mercury.md): `unit mercury`, give a stack all the movement it needs (nice to have)
+- [STORY-022](../stories/STORY-022-spike-weapon-quality.md): spike: where does a unit's weapon quality (adamantine) live? (nice to have)
 
 Suggested order: 008 (a quick check that decides everything else), 001, 002, 003, then 004 to 007.

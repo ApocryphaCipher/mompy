@@ -31,6 +31,16 @@ def game_memory(base: int = layout.REFERENCE_WIZARD_BASE,
         at = layout.UNITS.reference + shift + i * layout.UNITS.stride
         mem[at:at + 6] = bytes([5 + i, 7, 0, i % 5, 2, 40])            # x, y, plane, owner, moves, type
     struct.pack_into("<H", mem, layout.UNIT_COUNT_REFERENCE + shift, units)
+    dgroup = base - 0x9ECA                                              # the data segment: the unit type table and its names
+    special = {179: "War Bears", 180: "Sprites", 40: "Swordsmen", 58: "Swordsmen", 60: "Cavalry", 1: "Barbarian", 176: "Guardian Spirit"}
+    for t in range(198):
+        name = special.get(t, f"Unit {t}").encode() + b"\0"
+        name_at = 0x4000 + t * 32
+        mem[dgroup + name_at:dgroup + name_at + len(name)] = name
+        rec = dgroup + 0x19C + t * 36
+        struct.pack_into("<H", mem, rec, name_at)
+        mem[rec + 9] = 2 + t % 3                                        # moves
+        mem[rec + 19] = 1                                               # sight
     for i in range(layout.FORTRESSES.count):                            # each wizard's fortress (x, y, plane, active), then the neutral player's
         at = layout.FORTRESSES.reference + shift + i * layout.FORTRESSES.stride
         mem[at:at + 4] = bytes([10 + 5 * i, 7 + i, i % 2, 1])

@@ -193,3 +193,13 @@ class CliTest(HomeTestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+class DeadUnitTest(unittest.TestCase):
+    def test_a_unit_that_died_this_turn_does_not_break_the_unit_table_check(self):
+        # the game marks a dead unit plane 0xFF, owner 0xFF and leaves it until End Turn
+        mem = game_memory(units=4)
+        at = layout.UNITS.reference + 2 * layout.UNITS.stride
+        mem[at:at + 32] = bytes([0xFF, 0xFF, 0xFF, 0xFF]) + bytes(28)
+        game = locate.find_game(mem)
+        self.assertEqual(game.base, layout.REFERENCE_WIZARD_BASE)

@@ -11,7 +11,7 @@ mompy talks to **DOSBox Staging's built-in web API** (`webserver_enabled = true`
 and write the emulated machine's memory. It needs no game files of its own and ships none: only
 offsets, ranges and what we have checked about them.
 
-**Status: just started.** `mompy doctor` exists (below); `peek`, `fields`, `poke`, `undo`, `banish`, `unbanish`, and `cast`/`dispel` (a global enchantment) `where` and `poke city` (population, build) exist too (see `docs/stories/`).
+**Status: just started.** `mompy doctor` exists (below); `peek`, `fields`, `poke`, `undo`, `banish`, `unbanish`, and `cast`/`dispel` (a global enchantment), `where`, `poke city` (population, build, create) and `cast unit` exist too (see `docs/stories/`).
 Nothing here has been tried on anyone's machine but Kevin's.
 
 ## `mompy peek` and `mompy fields`
@@ -96,6 +96,21 @@ python -m mompy poke city blackstone build       # the building in production co
 
 `build` fills the city's production store (`production_stored`) so that the building in production is finished at the next End Turn. It refuses a city making Housing or
 Trade Goods (nothing to finish), and an item that is not a building unless `--force`. It does not know the cost, so it writes more than any building costs; `undo` puts the store back.
+
+## Units: `cast unit`
+
+```
+python -m mompy poke wizard 1 cast unit.war_bears              # one War Bears at the wizard's summoning circle
+python -m mompy poke wizard 1 cast unit.sprites --count 3 --at darkmoor
+python -m mompy poke wizard 1 cast unit.58                     # a unit by type number
+python -m mompy poke city blackstone create 60               # an ordinary unit (type 60), maxed out, made in a city
+python -m mompy undo
+```
+
+Puts a unit straight into the game, owned by the wizard: no mana, no spell book, none of the game's checks. Unit names are read from the running game. A name several races share
+(Swordsmen) lists its type numbers; use one. `cast` is for summoned creatures (Sprites, War Bears...); `poke city NAME create UNIT` is for ordinary units and boats: it makes them in that city for the city's owner, at maximum experience (120, Elite) and with adamantium weapons.
+Heroes are refused (they also need a place in the wizard's hero list). A tile holds nine units of one owner, so a full or foreign tile
+sends the unit to a free neighbouring tile, and it says so. `--at` takes a city name or `x,y,plane`. One `undo` takes the whole summon back.
 
 ## `mompy doctor`
 
