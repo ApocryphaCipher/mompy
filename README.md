@@ -15,7 +15,13 @@ needs none of the game's files and ships none: only offsets, ranges and what has
 
 ## Install
 
-You need **Python 3.12 or newer**.
+You need three things:
+
+1. **Python 3.12 or newer** (no other Python packages).
+2. **DOSBox Staging 0.83.0 or newer**, the emulator the game runs in: see [Which DOSBox?](#which-dosbox) below for the download.
+3. Your own copy of *Master of Magic* (1.31) running in it. mompy contains none of the game.
+
+Then install mompy:
 
 ```
 pipx install git+https://github.com/ApocryphaCipher/mompy        # or: pip install git+https://github.com/ApocryphaCipher/mompy
@@ -26,7 +32,16 @@ No installation is needed to try it from a checkout: `python -m mompy ...` in th
 
 ## Which DOSBox?
 
-mompy needs **DOSBox Staging, version 0.83.0 or newer**: the ordinary release from the project's [releases page](https://github.com/dosbox-staging/dosbox-staging/releases).
+mompy needs **DOSBox Staging, version 0.83.0 or newer**: the ordinary release, from the project's website, [dosbox-staging.org](https://www.dosbox-staging.org/), or straight from its
+[releases page](https://github.com/dosbox-staging/dosbox-staging/releases). **[Version 0.83.0](https://github.com/dosbox-staging/dosbox-staging/releases/tag/v0.83.0)** has a download for each system:
+
+| System | File on the release page |
+| --- | --- |
+| macOS | `dosbox-staging-macOS-v0.83.0.dmg` |
+| Windows | `dosbox-staging-windows-x64-v0.83.0-setup.exe` (installer) or `dosbox-staging-windows-x64-v0.83.0.zip` (no install) |
+| Linux | `dosbox-staging-linux-x86_64-v0.83.0.tar.xz` |
+
+Only the macOS download has been tried with mompy so far. Take a numbered release such as 0.83.0, not the rolling "dev-latest" build, which was not checked.
 
 - **Nothing to build, and no fork.** The web API is part of the released program; it is only switched off by default. This was checked with the released macOS build of 0.83.0 running the real game (and with the author's development build).
 - **Other DOSBoxes do not work:** as far as we know the original DOSBox, DOSBox-X and the other variants have no such API. Older DOSBox Staging releases (before 0.83.0) were not checked; `mompy doctor` tells you the version it found and says `NOT READY` if there is no API to talk to.
@@ -60,6 +75,37 @@ mompy never saves your game for you: the changes live in the running game until 
 ## The commands
 
 `mompy --help` lists them. Every command that takes a place accepts the tile under the mouse (`pointer`), a city's name, or `x,y,plane`.
+
+## `mompy doctor`: check everything first
+
+```
+mompy doctor            # --url http://127.0.0.1:8086 is the default
+```
+
+Run this before anything else, with DOSBox running and a game loaded. It changes nothing in the game (its one test write puts back the very byte that was already there), and tells you what works and what does not:
+
+```
+mompy doctor  (http://127.0.0.1:8086)
+
+  [ok  ] DOSBox    0.84.0-alpha (83716)                      <- the web API answers, and which DOSBox it is
+  [ok  ] Memory    read 16 MiB                               <- the emulated machine's memory can be read
+  [ok  ] Game      wizards: Jafar, Freya, Sss'ra, Sharee, Tauron   <- a game is loaded: the five wizards' names were found
+  [ok  ] Address   wizard table at 0x328ba, as expected for this DOSBox
+  [ok  ]   cities  at 0x6f980: 33 plausible of 100 slots     <- the game's other tables are where they should be and look right
+  [ok  ]   units   at 0x7e060: 153 live, 153 plausible
+  [ok  ]   nodes   at 0x85fe0: 30 plausible of 30 slots
+  [ok  ] Writes    accepted (wrote one byte back unchanged, with a compare-and-swap)
+
+Verdict: READY. Reading and writing are safe.
+```
+
+The last line is the answer, and the exit status says the same (0 only for `READY`):
+
+- **`READY`**: go ahead.
+- **`READ-ONLY`**: the game was found, but the web API will not accept writes. `peek` works, `poke` will refuse. (A development build of DOSBox may need `webserver_allow_writes = true`.)
+- **`NOT READY`**: something before that failed, and the failed line says what to do: "cannot reach ... Start DOSBox Staging with `webserver_enabled = true`" (DOSBox is not running or the API is off), or "no wizard table found: load a saved game first".
+
+The game's tables sit at addresses that depend on the DOSBox build, so mompy *finds* them (by looking for the wizards' names) and checks that each one looks right before it will write anything.
 
 ## `mompy peek` and `mompy fields`
 
@@ -271,16 +317,6 @@ python -m mompy unit heal --at pointer --skip-heroes
 ```
 
 The place is the tile under the mouse, a city's name, or `x,y,plane`. Each says how many units it changed and why it left the others. One `mompy undo` puts the stack back.
-
-## `mompy doctor`
-
-```
-python -m mompy doctor            # or: mompy doctor, once installed;  --url http://127.0.0.1:8086 is the default
-```
-
-It checks, without changing the game, that DOSBox's web API answers (and which version), that the memory can be read, that the game's tables are
-found and look right (their address depends on the DOSBox build, so they are *found*, not assumed), and that a write is accepted (by writing back the byte that is already there).
-It ends with `READY`, `READ-ONLY` or `NOT READY`, and exits 0 only for `READY`.
 
 ## Layout
 
