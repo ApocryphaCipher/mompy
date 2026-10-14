@@ -10,6 +10,7 @@ from . import __version__
 from .api import DEFAULT_URL, ApiError, DosboxApi
 from . import banish as banishing
 from . import cast as casting
+from . import city as cities
 from . import peek as peeking
 from . import poke as poking
 from . import where as whereis
@@ -43,7 +44,7 @@ def main(argv: Optional[List[str]] = None) -> int:
     pk2.add_argument("block", choices=["wizard", "fortress", "city"], help="what to change")
     pk2.add_argument("number", help="which one; wizard 1 is the player; a city by name (darkmoor) or number")
     pk2.add_argument("field", help="a field, or field.element (books.sorcery, relations.freya); or cast / dispel a global enchantment")
-    pk2.add_argument("value", help="a number, an enum word (alliance), on/off for flags, or a,b,c for a whole array; for cast/dispel, the enchantment")
+    pk2.add_argument("value", nargs="?", help="a number, an enum word (alliance), on/off for flags, or a,b,c for a whole array; for cast/dispel, the enchantment")
     pk2.add_argument("--dry-run", action="store_true", help="say what would change; write and log nothing")
     pk2.add_argument("--force", action="store_true", help="also write a field that is only a guess, or cast one of the questionable globals")
     sub.add_parser("undo", parents=[common], help="put the last poke back")
@@ -85,6 +86,11 @@ def main(argv: Optional[List[str]] = None) -> int:
                 print(poking.undo(api))
             else:
                 args.number = _number(api, args.block, args.number)
+                if args.block == "city" and args.field == "build":
+                    print(cities.build(api, args.number, args.dry_run, args.force))
+                    return 0
+                if args.value is None:
+                    raise poking.PokeError(f"say what to change {args.field} to: mompy poke {args.block} N {args.field} VALUE")
                 if args.field in ("cast", "dispel"):
                     if args.block != "wizard":
                         raise poking.PokeError(f"{args.field} is for wizards: mompy poke wizard N {args.field} aura_of_majesty")

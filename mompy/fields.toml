@@ -363,3 +363,32 @@ max = 25
 writable = true
 confidence = "checked"
 note = "Population in thousands: the city screen shows this times 1000 plus the tens at +24 (a live RAM write showed it). Only the thousands are written; the tens stay. 25 as the top is Mirror's guess at the game's cap."
+
+[[field]]
+block = "city"
+name = "production"
+offset = 0x1C
+type = "u16"
+writable = false
+confidence = "checked"
+note = "The item in production, by the same ids as the buildings: 1 Trade Goods, 2 Housing, 3 to 35 buildings (29 Granary, 35 City Walls); larger numbers are units; 0xFFFC on cities that build nothing. Seen while the city screen said Producing Housing, Granary, then back (Mirror's live-ram-map.md)."
+
+[[field]]
+block = "city"
+name = "production_per_turn"
+offset = 0x5D
+type = "u8"
+writable = false
+confidence = "checked"
+note = "Hammers per turn; the city screen showed the same number."
+
+[[field]]
+block = "city"
+name = "production_stored"
+offset = 0x5E
+type = "u16"
+min = 0
+max = 30000
+writable = true
+confidence = "guess"
+note = "Production stored toward the item. The game itself set it to the full cost when a building was bought (0 -> 40, Granary) and to 0 when built; a hand-written value is not yet seen to complete the building. 30000 as the top is mompy's own safe limit (the field is a u16)."

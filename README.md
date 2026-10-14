@@ -11,7 +11,7 @@ mompy talks to **DOSBox Staging's built-in web API** (`webserver_enabled = true`
 and write the emulated machine's memory. It needs no game files of its own and ships none: only
 offsets, ranges and what we have checked about them.
 
-**Status: just started.** `mompy doctor` exists (below); `peek`, `fields`, `poke`, `undo`, `banish`, `unbanish`, and `cast`/`dispel` (a global enchantment) `where` and `poke city` exist too (see `docs/stories/`).
+**Status: just started.** `mompy doctor` exists (below); `peek`, `fields`, `poke`, `undo`, `banish`, `unbanish`, and `cast`/`dispel` (a global enchantment) `where` and `poke city` (population, build) exist too (see `docs/stories/`).
 Nothing here has been tried on anyone's machine but Kevin's.
 
 ## `mompy peek` and `mompy fields`
@@ -89,6 +89,13 @@ python -m mompy undo
 
 A city is named the way `where` names it (whole name, else a unique prefix; an ambiguous one is refused), or given by its number. Only `population` can be changed so far, in
 thousands (1 to 25). The game also keeps the tens, which are left alone. Same safety as every `poke`: compare-and-swap, range checks, `--dry-run`, `undo`.
+
+```
+python -m mompy poke city blackstone build       # the building in production completes at End Turn
+```
+
+`build` fills the city's production store (`production_stored`) so that the building in production is finished at the next End Turn. It refuses a city making Housing or
+Trade Goods (nothing to finish), and an item that is not a building unless `--force`. It does not know the cost, so it writes more than any building costs; `undo` puts the store back.
 
 ## `mompy doctor`
 
