@@ -11,7 +11,7 @@ mompy talks to **DOSBox Staging's built-in web API** (`webserver_enabled = true`
 and write the emulated machine's memory. It needs no game files of its own and ships none: only
 offsets, ranges and what we have checked about them.
 
-**Status: just started.** `mompy doctor` exists (below); `peek`, `fields`, `poke`, `undo`, `banish`, `unbanish`, and `cast`/`dispel` (a global enchantment), `where`, `poke city` (population, build, create) `cast unit`, `unit mercury`, `where pointer`, `pew` mass enchantments, `snapshot`, `diff` and spell names exist too (see `docs/stories/`).
+**Status: just started.** `mompy doctor` exists (below); `peek`, `fields`, `poke`, `undo`, `banish`, `unbanish`, and `cast`/`dispel` (a global enchantment), `where`, `poke city` (population, build, create) `cast unit`, `unit mercury`, `where pointer`, `pew` mass enchantments, `snapshot`, `diff`, spell names and `peek`/`poke unit` exist too (see `docs/stories/`).
 Nothing here has been tried on anyone's machine but Kevin's.
 
 ## `mompy peek` and `mompy fields`
@@ -174,6 +174,17 @@ python -m mompy poke wizard 1 researching vertigo       # or a number; "none" fo
 
 The names come from the running game itself (it keeps the spell table in memory), so no game folder is needed and nothing is shipped. A partial name works when it is unique
 (`vert`); an ambiguous one lists its matches. If the table cannot be found, everything works with numbers as before.
+
+## Units: `peek unit` and `poke unit`
+
+```
+python -m mompy peek unit 158             # unit 158 (Halberdiers, neutral): x, y, owner, type, moves, level, experience, weapons, enchantments
+python -m mompy poke unit 158 experience 120
+python -m mompy poke unit 158 moves_left 127
+python -m mompy fields unit               # what can be read and what can be changed
+```
+
+Units are numbered from 0, the way `where pointer` and `pew` print them (`Cavalry #158`). Position and a few other fields are guesses and need `--force`; owner and type are read-only.
 
 ## `mompy doctor`
 

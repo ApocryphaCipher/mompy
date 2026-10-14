@@ -144,16 +144,16 @@ def _under_pointer(api: DosboxApi, game: locate.Game, cities: List[City], names:
     live = struct.unpack("<H", api.read(game.base + (layout.UNIT_COUNT_REFERENCE - layout.REFERENCE_WIZARD_BASE), 2))[0]
     raw = api.read(game.base + table.offset, table.stride * min(live, table.count))
     types = read_types(api, game)
-    units = [(types[raw[i * 32 + 5]].name, raw[i * 32 + 3]) for i in range(len(raw) // 32)
+    units = [(types[raw[i * 32 + 5]].name, i, raw[i * 32 + 3]) for i in range(len(raw) // 32)
              if tuple(raw[i * 32:i * 32 + 3]) == (x, y, plane) and raw[i * 32 + 3] != DEAD]
     city = next((c for c in cities if (c.x, c.y, c.plane) == (x, y, plane)), None)
     owner = lambda o: names[o] if o < len(names) else "neutral"
     if as_json:
         return json.dumps({"plane": PLANES[plane], "x": x, "y": y, "city": _city_data(city, names) if city else None,
-                           "units": [{"type": t, "owner": owner(o)} for t, o in units]}, indent=1)
+                           "units": [{"unit": n, "type": t, "owner": owner(o)} for t, n, o in units]}, indent=1)
     line = _place(plane, x, y)
     if city:
         line += f"  city {city.name}, owner {_owner(city, names)}"
     if units:
-        line += f"  {len(units)} unit{'s' if len(units) != 1 else ''}: " + ", ".join(f"{t} ({owner(o)})" for t, o in units)
+        line += f"  {len(units)} unit{'s' if len(units) != 1 else ''}: " + ", ".join(f"{t} #{n} ({owner(o)})" for t, n, o in units)
     return line

@@ -12,8 +12,8 @@ from dataclasses import dataclass, field
 from importlib import resources
 from typing import Dict, List, Optional, Sequence, Union
 
-_SIZES = {"u8": 1, "i8": 1, "u16": 2, "i16": 2}
-_STRUCT = {"u8": "<B", "i8": "<b", "u16": "<H", "i16": "<h"}
+_SIZES = {"u8": 1, "i8": 1, "u16": 2, "i16": 2, "u32": 4}
+_STRUCT = {"u8": "<B", "i8": "<b", "u16": "<H", "i16": "<h", "u32": "<I"}
 
 Value = Union[int, str, List[int]]
 
