@@ -42,3 +42,7 @@ Already cast (or not cast): nothing written, nothing logged. Any wizard can be t
   **A difference from a real cast:** when Kevin cast it through the game (2026-10-12) the first turn took *every* relation to 20, then +2 a turn; the hand-set flag gave +2 and +4 and no jump. *Guess:* the jump to 20 is the game's cast routine, the per-turn rise is the flag.
 - **Not yet seen:** whether the game dispels it when the upkeep cannot be paid, and the same questions for the other 23 globals: the spike [STORY-013](STORY-013-spike-globals-by-hand.md). Also open: what a *power level* in the byte would mean (only 0 and 1 have been seen) and the questionable five ([STORY-014](STORY-014-spike-wonky-globals.md)).
 - 109 tests (17 new), warnings as errors, with the fake DOSBox: the write changes only the one byte, every spelling of a name, ambiguous and unknown names, the caster is whichever wizard you name, two holders, already cast, dry run, the five need `--force` and the other 19 do not, `dispel` of a questionable one needs nothing, `undo`, writes disabled, the race, and the command line.
+
+## Update (2026-10-14)
+
+The `--force` list (Time Stop, Planar Seal, Armageddon, Meteor Storm, Great Wasting) came down to **Time Stop** alone after the spike in [STORY-014](STORY-014-spike-wonky-globals.md): the other four went through a real End Turn without trouble; Time Stop shows and costs mana but does nothing when set by hand.

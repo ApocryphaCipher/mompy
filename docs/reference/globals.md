@@ -12,23 +12,29 @@
 | 4 | Aura of Majesty | yes | yes | relations rose each turn (Freya 0 to 2, Sharee and Tauron -20 to -16); *guess:* the 9 mana a turn seen then is its upkeep (STORY-012) | seen |
 | 5 | Wind Mastery | yes | yes | not looked for | in the 17 mana batch |
 | 6 | Suppress Magic | not tried | | | |
-| 7 | Time Stop | not tried | | | |
+| 7 | Time Stop | yes | yes | **none, over three End Turns: the other wizards, the cities and the units all moved as usual** | charged: mana fell about 104 more than usual in the turn. Needs `--force` in `cast` |
 | 8 | Nature Awareness | not tried | | | |
 | 9 | Nature's Wrath | yes | yes | not looked for | in the 17 mana batch |
 | 10 | Herb Mastery | yes | yes | not looked for | in the 17 mana batch |
 | 11 | Chaos Surge | not tried | | | |
 | 12 | Doom Mastery | not tried | | | |
-| 13 | Great Wasting | not tried | | | |
-| 14 | Meteor Storm | not tried | | | |
-| 15 | Armageddon | not tried | | | |
+| 13 | Great Wasting | yes | yes | **four tiles got the corrupted flag `0x20`** in the turn's diff | batch 2 |
+| 14 | Meteor Storm | yes | yes | **a volcano rose** (Kevin saw it; terrain type `0xB3` on several tiles in the diff) | batch 2 |
+| 15 | Armageddon | yes | yes | no effect told apart from the other three | batch 2 |
 | 16 | Tranquility | yes | yes | not looked for | in the 17 mana batch |
 | 17 | Life Force | not tried | | | |
 | 18 | Crusade | not tried | | | |
 | 19 | Just Cause | not tried by hand | | | a real cast was seen (STORY-012) |
 | 20 | Holy Arms | not tried | | | |
-| 21 | Planar Seal | not tried | | | |
+| 21 | Planar Seal | yes | yes | not looked for | sidebar mana -1 to -3: **2 mana a turn** |
 | 22 | Charm of Life | not tried | | | |
 | 23 | Detect Magic | not tried | | | |
 | 24 | Awareness | not tried | | | |
 
-**Not tested:** what the game does with an unaffordable *global* upkeep (for *unit* enchantments it dissipates all of them and disbands the wizard's summoned creatures, STORY-023); a value other than 1 in the byte; what happens when two wizards hold the same global.
+**Batch 2, 2026-10-14 (the "wonky" ones, STORY-014; Kevin: "I know how the game handles them", so only the question that matters for mompy was asked: does the game survive it):**
+Planar Seal, Meteor Storm, Great Wasting and Armageddon cast together, one End Turn: **no crash, no hang, nothing unexpected.** The map changed (nine tiles: a volcano, four corrupted tiles); the other wizards' relations with Jafar fell a little (Freya 0 to -4, Sharee -20 to -21: "concerned").
+Time Stop then cast alone (the four dispelled first), one End Turn: **it showed and was charged, but did nothing:** all four other wizards, the cities and the units moved as normal. *Guess:* the game's turn logic reads a variable of its own (who holds time) that the flag alone does not set. Unexplored; not worth more unless someone wants the real effect.
+Kevin's thought: it might only start at the next turn. **Tried again, flag on through two more End Turns:** the AI wizards still took both turns (117 diff lines on wizards 2 to 5: research, gold, treaties moved), and mana fell 318 over the two turns, so it is charged every turn and still does nothing.
+`mompy cast` now asks for `--force` only for Time Stop.
+
+**Not tested:** what the game does with an unaffordable *global* upkeep (for *unit* enchantments it dissipates all of them and disbands the wizard's summoned creatures, STORY-023); a value other than 1 in the byte; what happens when two wizards hold the same global; **Spell of Mastery** (not one of the 24: probably the wizard record's `+0x22`, and winning the game is not something to try on a game anyone cares about).

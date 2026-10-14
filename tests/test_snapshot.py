@@ -22,7 +22,7 @@ class SnapshotCase(SummonCase):
 class TakeTest(SnapshotCase):
     def test_a_snapshot_is_saved_and_listed(self):
         out = self.snap("before")
-        self.assertIn("snapshot before: 8 regions", out)
+        self.assertIn("snapshot before: 10 regions", out)
         self.assertIn("before", list_snapshots())
 
     def test_the_same_name_is_refused_unless_replaced(self):
@@ -98,6 +98,15 @@ class DiffTest(SnapshotCase):
         out = diff("a", "b")
         self.assertIn("+0x1000", out)
         self.assertEqual(diff("a", "b", ignore_name="a2"), "data segment +0x2000: 00 -> 07")
+
+    def test_map_tiles_are_named_by_plane_and_position(self):
+        self.snap("a")
+        terrain = 0x72630 + layout.REFERENCE_WIZARD_BASE - 0x328BA
+        struct.pack_into("<H", self.mem, terrain + 2 * (2400 + 7 * 60 + 12), 0x140)      # Myrror (12, 7)
+        flags = 0x773A0 + layout.REFERENCE_WIZARD_BASE - 0x328BA
+        self.mem[flags + 5 * 60 + 3] = 0x20                                              # Arcanus (3, 5) corrupted
+        self.snap("b")
+        self.assertEqual(diff("a", "b"), "terrain Myrror (12, 7): 0x0000 -> 0x0140\nterrain_flags Arcanus (3, 5): 0x00 -> 0x20")
 
     def test_a_long_diff_stops_at_the_limit_unless_all(self):
         self.snap("a")

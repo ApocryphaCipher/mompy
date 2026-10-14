@@ -1,7 +1,7 @@
 # STORY-014: Spike: the wonky globals (Spell of Mastery, Planar Seal, ...)
 
 **Parent:** [EPIC-001](../epics/EPIC-001-mompy-core.md)
-**Status:** proposed (2026-10-13). **Priority: nice to have.** A **spike**.
+**Status:** done for the five (2026-10-14); Spell of Mastery not tried. **Priority: nice to have.** A **spike**.
 **Size:** small to medium
 **Raised by:** [Kevin](https://github.com/KevinAsbury), 2026-10-13 ("except maybe Spell of Mastery, Planar Seal, and some other wonky spell mechanics ... spike to investigate questionable spells")
 
@@ -24,3 +24,12 @@ Write what is found into `docs/reference/`; decide for each: plain `cast`, `cast
 ## Definition of done
 
 A short page per questionable global (or one table): what a hand-set flag does, whether two holders work, and the decision; STORY-012's `--force` list and the field table's marks updated.
+
+## Outcome (2026-10-14)
+
+Tried on Kevin's spare game, in the order mildest first, one End Turn each; details and the per-spell table in [globals.md](../reference/globals.md).
+
+- **Planar Seal, Meteor Storm, Great Wasting, Armageddon:** cast together, one End Turn, no crash. A volcano rose, four tiles were corrupted, the other wizards' relations dipped. `cast` no longer asks for `--force` for them.
+- **Time Stop:** shows in the Magic screen and is charged (about 100 mana more than usual), but the other wizards, cities and units all moved, through three End Turns (Kevin suggested it might start a turn late; it did not): the flag alone does nothing. `cast` still asks for `--force` and says so. Not explored why.
+- Kept as it was: Spell of Mastery is not one of the 24 flags; not tried.
+- Kevin's judgement ("I know how the game handles them"): the effect of each was not examined beyond what he happened to see; the question asked was only whether the game survives.

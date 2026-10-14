@@ -250,7 +250,7 @@ min = 0
 max = 1
 writable = true
 confidence = "checked"
-note = "1 when this wizard has that global enchantment active. Only bytes 3 (Aura of Majesty) and 18 (Just Cause) have been seen set."
+note = "1 when this wizard has that global enchantment active. Real casts seen: bytes 3 (Aura of Majesty) and 18 (Just Cause). Set by hand and watched through an End Turn: Aura of Majesty, Wind Mastery, Nature's Wrath, Herb Mastery, Tranquility, Planar Seal, Meteor Storm, Great Wasting, Armageddon, Time Stop (docs/reference/globals.md)."
 
 [[field]]
 block = "fortress"
