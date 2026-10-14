@@ -76,7 +76,7 @@ class PokeUnitTest(UnitFieldCase):
 
     def test_ranges_and_read_only_fields(self):
         before = bytes(self.mem)
-        for field, value, pattern in (("level", "9", "whole number from 0 to 8"), ("experience", "-1", "whole number"),
+        for field, value, pattern in (("level", "9", "whole number from 0 to 8"), ("experience", "=-1", "whole number"),
                                       ("experience", "30001", "whole number"), ("moves_left", "128", "whole number"),
                                       ("owner", "1", "not editable"), ("type", "5", "not editable"),
                                       ("enchantments", "1", "not editable"), ("sight", "3", "not editable")):

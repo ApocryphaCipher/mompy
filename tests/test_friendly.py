@@ -36,29 +36,38 @@ class DeltaTest(FriendlyCase):
     def test_plus_and_minus_change_the_number_and_both_wizards_records(self):
         self.assertEqual(poke(self.api, 2, "relations.tauron", "+20"), "relations.Tauron: 23 -> 43  (and Tauron's view of Freya)")
         self.assertEqual((relation(self.mem, 2, 5), relation(self.mem, 5, 2)), (43, 43))
-        poke(self.api, 2, "relations.tauron", "+=7")
-        poke(self.api, 2, "relations.tauron", "delta:-10")
+        poke(self.api, 2, "relations.tauron", "-3")
         self.assertEqual((relation(self.mem, 2, 5), relation(self.mem, 5, 2)), (40, 40))
 
-    def test_a_plain_negative_number_is_still_the_number_itself(self):
-        poke(self.api, 2, "relations.tauron", "-50")
+    def test_a_sign_changes_and_a_bare_or_equals_number_sets(self):
+        poke(self.api, 2, "relations.tauron", "75")
+        self.assertEqual(relation(self.mem, 2, 5), 75)
+        poke(self.api, 2, "relations.tauron", "=-50")                                  # a hard negative value
         self.assertEqual(relation(self.mem, 2, 5), -50)
+        poke(self.api, 2, "relations.tauron", "-50")                                   # ... but -50 alone lowers by 50
+        self.assertEqual(relation(self.mem, 2, 5), -100)
+        poke(self.api, 2, "relations.tauron", "= 20")
+        self.assertEqual(relation(self.mem, 2, 5), 20)
 
     def test_a_change_that_leaves_the_range_is_refused_and_nothing_is_written(self):
         before = bytes(self.mem)
-        for text in ("+80", "+=78", "delta:-124"):
+        for text in ("+80", "+78", "-124"):
             with self.assertRaisesRegex(PokeError, r"relations.Tauron is 23: .* would make -?\d+, outside -100 to 100"):
                 poke(self.api, 2, "relations.tauron", text)
         with self.assertRaisesRegex(PokeError, "gold is 500: .* outside 0 to 30000"):
-            poke(self.api, 1, "gold", "delta:-501")
+            poke(self.api, 1, "gold", "-501")
         self.assertEqual(bytes(self.mem), before)
 
     def test_it_works_on_any_number_but_not_on_words_or_lists(self):
         poke(self.api, 1, "gold", "+250")
         self.assertEqual(struct.unpack_from("<H", self.mem, BASE + 0x356)[0], 750)
-        for field, text in (("name", "+5"), ("books", "+1"), ("treaty_status.tauron", "+1")):
+        for field, text in (("books", "+1"), ("treaty_status.tauron", "+1")):
             with self.assertRaisesRegex(PokeError, "changes a number by an amount"):
                 poke(self.api, 2 if "treaty" in field else 1, field, text)
+
+    def test_a_name_that_looks_like_a_sign_is_still_a_name(self):
+        poke(self.api, 1, "name", "-5")
+        self.assertEqual(bytes(self.mem[BASE + 1:BASE + 3]), b"-5")
 
     def test_dry_run_and_undo(self):
         before = bytes(self.mem)
@@ -79,9 +88,14 @@ class CommandTest(FriendlyCase):
         self.assertEqual((code, out), (0, "relations.Tauron = 23"))
         code, out, _ = self.run_cli("poke", "wizard", "Freya", "relation", "Tauron", "+20")
         self.assertEqual((code, out), (0, "relations.Tauron: 23 -> 43  (and Tauron's view of Freya)"))
-        code, out, _ = self.run_cli("poke", "wizard", "freya", "relation", "tauron", "-=3")
+        code, out, _ = self.run_cli("poke", "wizard", "freya", "relation", "tauron", "-3")
         self.assertEqual((code, out), (0, "relations.Tauron: 43 -> 40  (and Tauron's view of Freya)"))
         self.assertEqual(relation(self.mem, 5, 2), 40)
+        code, out, _ = self.run_cli("poke", "wizard", "freya", "relation", "tauron", "to", "-50")
+        self.assertEqual((code, out), (0, "relations.Tauron: 40 -> -50  (and Tauron's view of Freya)"))
+        self.assertEqual(self.run_cli("poke", "wizard", "freya", "relation.tauron", "to", "5")[1],
+                         "relations.Tauron: -50 -> 5  (and Tauron's view of Freya)")
+        self.assertEqual(relation(self.mem, 5, 2), 5)
 
     def test_a_dotted_element_and_a_number_still_work(self):
         self.assertEqual(self.run_cli("poke", "wizard", "2", "relations.tauron", "5")[1],

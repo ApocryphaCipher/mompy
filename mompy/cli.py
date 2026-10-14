@@ -3,7 +3,6 @@
 from __future__ import annotations
 
 import argparse
-import re
 import sys
 from typing import List, Optional
 
@@ -59,8 +58,8 @@ def main(argv: Optional[List[str]] = None) -> int:
     pk2.add_argument("block", choices=["wizard", "fortress", "city", "unit", "node", "lair"], help="what to change")
     pk2.add_argument("number", help="which one: a wizard by name or number (1 is the player), a city by name, else a number")
     pk2.add_argument("field", help="a field, or field.element (books.sorcery, relations.freya); or cast / dispel a global enchantment")
-    pk2.add_argument("value", nargs="*", help="a number, +20 or -=20 (a change), an enum word (alliance), on/off, or a,b,c for a whole array; "
-                     "for cast/dispel, the enchantment. An element may be a separate word: poke wizard freya relation tauron +20")
+    pk2.add_argument("value", nargs="*", help="a number (20 sets it; 'to -20' sets a negative), +20 / -20 (change by), an enum word (alliance), on/off, or a,b,c for a whole array; "
+                     "for cast/dispel, the enchantment. An element may be a separate word: poke wizard freya relation tauron +20 (or: ... tauron to -50)")
     pk2.add_argument("--dry-run", action="store_true", help="say what would change; write and log nothing")
     pk2.add_argument("--force", action="store_true", help="also write a field that is only a guess")
     pk2.add_argument("--count", type=int, default=1, help="cast unit.NAME or city create NAME: how many units (1 to 9)")
@@ -101,11 +100,11 @@ def main(argv: Optional[List[str]] = None) -> int:
     fl = sub.add_parser("fields", help="list the fields mompy knows, with their ranges and how sure we are")
     fl.add_argument("block", nargs="?", choices=["wizard", "fortress", "city", "unit", "node", "lair"])
 
-    # a value such as -=5 would be taken for an option: hand it over as "delta:-5", which poke understands
-    argv = [f"delta:-{a[2:]}" if re.fullmatch(r"-=\d+", a) else a for a in (sys.argv[1:] if argv is None else argv)]
     args = parser.parse_args(argv)
     if args.command == "poke":                      # `poke wizard freya relation tauron +20`: the element may be a separate word
         values = args.value
+        if len(values) >= 2 and values[-2].lower() == "to" and args.field not in ("cast", "dispel"):
+            values = values[:-2] + ["=" + values[-1]]          # `relation tauron to -50`: a hard value, said in words
         if len(values) == 2 and args.field not in ("cast", "dispel"):
             args.field, args.value = f"{args.field}.{values[0]}", values[1]
         elif len(values) <= 1:

@@ -135,13 +135,13 @@ def _encode(target: Target, value) -> bytes:
     return f.encode_item(value) if target.element is not None else f.encode(value)
 
 
-_DELTA = re.compile(r"^\s*(\+=|-=|\+|delta:-)\s*(\d+)\s*$")
+_DELTA = re.compile(r"^\s*([+-])\s*(\d+)\s*$")
 
 
 def _delta(text: str) -> Optional[int]:
-    """``+20`` and ``+=20`` raise by 20 and ``-=20`` lowers by 20; ``None`` for anything else. A plain ``-20`` is the number minus 20 itself."""
+    """``+20`` raises a number by 20 and ``-20`` lowers it by 20; ``None`` for anything else. A hard value is ``20`` or ``=20`` (``=-20`` for a negative one)."""
     m = _DELTA.match(text or "")
-    return None if m is None else (-int(m.group(2)) if m.group(1) in ("-=", "delta:-") else int(m.group(2)))
+    return None if m is None else (-int(m.group(2)) if m.group(1) == "-" else int(m.group(2)))
 
 
 def _apply_delta(target: Target, old_value, delta: int, text: str, label: str) -> int:
@@ -150,7 +150,7 @@ def _apply_delta(target: Target, old_value, delta: int, text: str, label: str) -
         raise PokeError(f"{text.strip()} changes a number by an amount: name one numeric element or field (relations.freya, gold)")
     new_value = old_value + delta
     if f.min is not None and f.max is not None and not f.min <= new_value <= f.max:
-        raise PokeError(f"{label} is {old_value}: {text.strip().replace('delta:-', '-=')} would make {new_value}, outside {f.min} to {f.max}")
+        raise PokeError(f"{label} is {old_value}: {text.strip()} would make {new_value}, outside {f.min} to {f.max}")
     return new_value
 
 
@@ -268,7 +268,10 @@ def poke(api: DosboxApi, number: int, spec: str, text: str, dry_run: bool = Fals
         target = resolve(found, field, number, element or None, names)
     except F.FieldError as err:
         raise PokeError(str(err)) from None
-    delta = _delta(text)
+    if text.strip().startswith("="):                       # =75 and =-50: a hard value, even a negative one
+        text, delta = text.strip()[1:].strip(), None
+    else:
+        delta = None if field.type == "text" else _delta(text)
     new_value = None if delta is not None else _parse(target, text, names)
     label = _label(target, names)
     if block_name == "fortress":

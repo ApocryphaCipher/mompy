@@ -41,5 +41,6 @@ separate project if players want it.
 - [STORY-024](../stories/STORY-024-unit-fields.md): `peek unit N` and `poke unit N FIELD VALUE`, the unit record in the field table
 - [STORY-025](../stories/STORY-025-nodes-and-lairs.md): `peek` and `poke` for magic nodes and lairs, with their monsters
 - [STORY-026](../stories/STORY-026-friendly-pokes.md): wizards by name, `relation tauron +20`, friendlier peek and poke
+- [STORY-027](../stories/STORY-027-stack-commands.md): heal, weapons and experience for a whole stack (nice to have)
 
 Suggested order: 008 (a quick check that decides everything else), 001, 002, 003, then 004 to 007.

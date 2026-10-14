@@ -206,12 +206,13 @@ python -m mompy poke node 3 owner freya         # or nobody
 ```
 python -m mompy peek wizard freya relation tauron        # wizards by name; the element as a separate word
 python -m mompy poke wizard freya relation tauron +20    # raise by 20 (both wizards' records change)
-python -m mompy poke wizard freya relation tauron -=5    # lower by 5
+python -m mompy poke wizard freya relation tauron -5     # lower by 5
+python -m mompy poke wizard freya relation tauron 75     # set it to 75
+python -m mompy poke wizard freya relation tauron to -50 # set it to minus 50
 python -m mompy poke wizard jafar gold +1000
-python -m mompy poke wizard freya relation tauron -50    # a plain negative number is the number itself
 ```
 
-A change (`+20`, `-=5`) is worked out from the value in the game and refused if the result would leave the field's range. Field names may be singular or a unique prefix (`treaty`).
+A sign means "change by"; no sign means "set it"; `to -50` sets a negative value (the shell zsh reads a word starting with `=` as a command, so `=-50` needs quotes). A change is worked out from the value in the game and refused if the result would leave the field's range. Field names may be singular or a unique prefix (`treaty`).
 
 ## `mompy doctor`
 

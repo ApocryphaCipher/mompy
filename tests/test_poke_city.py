@@ -62,7 +62,7 @@ class PokeCityTest(CityCase):
 
     def test_out_of_range_is_refused_and_nothing_is_written(self):
         before = bytes(self.mem)
-        for bad in ("0", "26", "-1", "lots"):
+        for bad in ("0", "26", "=-1", "lots"):
             with self.assertRaises(PokeError, msg=bad):
                 poke(self.api, 4, "population", bad, block_name="city")
         self.assertEqual(bytes(self.mem), before)
