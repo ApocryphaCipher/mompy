@@ -9,7 +9,7 @@
 | 1 | Eternal Night | not tried | | | |
 | 2 | Evil Omens | not tried | | | |
 | 3 | Zombie Mastery | not tried | | | |
-| 4 | Aura of Majesty | yes | yes | relations rose each turn (Freya 0 to 2, Sharee and Tauron -20 to -16); 9 mana a turn is probably this one (STORY-012) | seen |
+| 4 | Aura of Majesty | yes | yes | relations rose each turn (Freya 0 to 2, Sharee and Tauron -20 to -16); *guess:* the 9 mana a turn seen then is its upkeep (STORY-012) | seen |
 | 5 | Wind Mastery | yes | yes | not looked for | in the 17 mana batch |
 | 6 | Suppress Magic | not tried | | | |
 | 7 | Time Stop | not tried | | | |
@@ -24,7 +24,7 @@
 | 16 | Tranquility | yes | yes | not looked for | in the 17 mana batch |
 | 17 | Life Force | not tried | | | |
 | 18 | Crusade | not tried | | | |
-| 19 | Just Cause | yes | yes | not looked for | seen |
+| 19 | Just Cause | not tried by hand | | | a real cast was seen (STORY-012) |
 | 20 | Holy Arms | not tried | | | |
 | 21 | Planar Seal | not tried | | | |
 | 22 | Charm of Life | not tried | | | |
