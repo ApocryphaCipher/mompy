@@ -18,7 +18,7 @@
 | [STORY-014](STORY-014-spike-wonky-globals.md) | Spike: the wonky globals (Spell of Mastery, Planar Seal...) | proposed (nice to have) |
 | [STORY-015](STORY-015-cast-unit.md) | `poke ... cast unit.<name>`: summon any unit, no fuss | built; real game: shows, walks, survives End Turn |
 | [STORY-016](STORY-016-spike-summon-a-unit.md) | Spike: what the game writes when a unit is summoned | proposed (nice to have) |
-| [STORY-017](STORY-017-banish.md) | `banish wizard N`: banish a wizard (`--dead` to finish them) | `banish`/`unbanish` done; `--dead` open |
+| [STORY-017](STORY-017-banish.md) | `banish wizard N`: banish a wizard (`--dead` to finish them) | `banish`, `unbanish` and `--dead` done; a banished wizard who keeps his cities across a turn: not run |
 | [STORY-018](STORY-018-pew.md) | `pew`: kill the units on a tile (pointer, a city, x,y,plane) | built; real game: units die, a ghost shows until the view is nudged; undo works |
 | [STORY-019](STORY-019-poke-city.md) | `poke city <name> <field> <value>`: change a city by name (population first) | `population` built; real game: written, see the story |
 | [STORY-020](STORY-020-poke-city-build.md) | `poke city <name> build`: finish the current production next turn | built; real game: the building stands after one End Turn |

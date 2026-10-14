@@ -10,6 +10,7 @@ from . import __version__
 from .api import DEFAULT_URL, ApiError, DosboxApi
 from . import banish as banishing
 from . import cast as casting
+from . import eliminate as eliminating
 from . import city as cities
 from . import peek as peeking
 from . import pew as pewing
@@ -57,6 +58,7 @@ def main(argv: Optional[List[str]] = None) -> int:
     bn.add_argument("block", choices=["wizard"])
     bn.add_argument("number", type=int, help="which wizard; 1 is the player and needs --force")
     bn.add_argument("--force", action="store_true", help="allow banishing the player")
+    bn.add_argument("--dead", action="store_true", help="also take his cities (to neutral), units and heroes, and his gold and mana: eliminated")
     bn.add_argument("--dry-run", action="store_true", help="say what would change; write nothing")
     ub = sub.add_parser("unbanish", parents=[common], help="give a banished wizard his fortress back")
     ub.add_argument("block", choices=["wizard"])
@@ -84,7 +86,9 @@ def main(argv: Optional[List[str]] = None) -> int:
     if args.command in ("banish", "unbanish"):
         try:
             api = DosboxApi(args.url)
-            if args.command == "banish":
+            if args.command == "banish" and args.dead:
+                print(eliminating.eliminate(api, args.number, args.force, args.dry_run))
+            elif args.command == "banish":
                 print(banishing.banish(api, args.number, args.force, args.dry_run))
             else:
                 print(banishing.unbanish(api, args.number, args.dry_run))

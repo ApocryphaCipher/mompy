@@ -62,10 +62,11 @@ python -m mompy banish wizard 3        # wizard 3 (Sss'ra) is banished
 python -m mompy unbanish wizard 3      # wizard 3 (Sss'ra): banishment lifted
 python -m mompy banish wizard 1 --force   # the player: refused without --force
 python -m mompy peek fortress 3        # the fortress record: where, and whether it is in place
+python -m mompy banish wizard 3 --dead   # and finish him: cities to neutral, units and heroes gone, gold and mana 0
 ```
 
 A banished wizard has lost his fortress: the Magic screen draws him as a cracked stone frame and, in the game's rules, he casts Spell of Return. He is **not dead**: he is only
-eliminated if he has no cities left. It is one byte (`active` of the fortress table), written like any `poke` (a compare-and-swap, logged for `mompy undo`).
+eliminated if he has no cities left. `--dead` finishes the job the way the game leaves an eliminated wizard (one `undo`; the Magic screen then says "Shattered Gem": eliminated or banished). Plain `banish` is one byte (`active` of the fortress table), written like any `poke` (a compare-and-swap, logged for `mompy undo`).
 
 ## `mompy where`
 
