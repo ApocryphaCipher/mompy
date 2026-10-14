@@ -30,6 +30,7 @@ MOVES_AT, SIGHT_AT = 9, 19        # inside a type record
 STACK_LIMIT = 9
 DEAD = 0xFF
 MAX_EXPERIENCE, MAX_LEVEL = 120, 3  # an ordinary unit stops at 120 experience (Elite); the game works the level out from it at End Turn
+ADAMANTIUM = 3                      # the low two bits of the mutations byte (+23): 0 normal, 1 magic, 2 mithril, 3 adamantium
 DRAW_PRIORITY = 0x0A              # *guess*: what a Guardian Spirit carries; the game works it out again when the unit moves
 
 
@@ -139,6 +140,7 @@ def make_record(unit: UnitType, owner: int, x: int, y: int, plane: int) -> bytes
     if not unit.fantastic:                  # creatures do not level; everything else starts at the top
         rec[12] = MAX_LEVEL
         struct.pack_into("<h", rec, 14, MAX_EXPERIENCE)
+        rec[23] = ADAMANTIUM
     rec[18] = DRAW_PRIORITY
     rec[22] = unit.sight
     rec[28] = 0xFF
@@ -222,7 +224,7 @@ def summon(api: DosboxApi, number: int, text: str, count: int = 1, at: Optional[
 
 
 def create(api: DosboxApi, city: int, text: str, count: int = 1, dry_run: bool = False) -> str:
-    """Make ``count`` ordinary units (or boats) at maximum experience named ``text`` in city number ``city``, owned by the city's owner."""
+    """Make ``count`` ordinary units (or boats) named ``text`` in city number ``city``, owned by the city's owner."""
     found = peek.find_game(api)
     record = peek.read_record(api, found, "city", city)         # refuses an empty slot
     owner = record[18]

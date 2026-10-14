@@ -101,7 +101,7 @@ python -m mompy undo
 ```
 
 Puts a unit straight into the game, owned by the wizard: no mana, no spell book, none of the game's checks. Unit names are read from the running game. A name several races share
-(Swordsmen) lists its type numbers; use one. `cast` is for summoned creatures (Sprites, War Bears...); `poke city NAME create UNIT` is for ordinary units and boats: it makes them in that city for the city's owner, at maximum experience (120, Elite).
+(Swordsmen) lists its type numbers; use one. `cast` is for summoned creatures (Sprites, War Bears...); `poke city NAME create UNIT` is for ordinary units and boats: it makes them in that city for the city's owner, at maximum experience (120, Elite) and with adamantium weapons.
 Heroes are refused (they also need a place in the wizard's hero list). A tile holds nine units of one owner, so a full or foreign tile
 sends the unit to a free neighbouring tile, and it says so. `--at` takes a city name or `x,y,plane`. One `undo` takes the whole summon back.
 

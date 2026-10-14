@@ -1,7 +1,7 @@
 # STORY-022: Spike: where does a unit's weapon quality (magic, mithril, adamantine) live?
 
 **Parent:** [EPIC-001](../epics/EPIC-001-mompy-core.md)
-**Status:** proposed (2026-10-13). **Priority: nice to have.** A **spike**.
+**Status:** answered from the notes (2026-10-13); the screen check is open. A **spike**.
 **Raised by:** [Kevin](https://github.com/KevinAsbury), 2026-10-13 (units made by `create` should have "max XP and adamantine weapons")
 
 ## The question
@@ -17,3 +17,14 @@
 ## Definition of done
 
 A page in `docs/reference/` saying where weapon quality is decided, from two independent sources (an AGENTS.md §6 rule). Then `create` can set it, or the story says it cannot.
+
+## Answer from what we already had (2026-10-13)
+
+Kevin: "you are sitting on a 25-year MoM database". He was right; the evidence vault had it.
+
+- **Source 1** (the 2001 save-game anatomy, `MoMSaveGame_Item.htm` in the vault, by Zastai): the unit byte at its `0x1B` holds "Weapon type & Mutation Flags": **the lower 2 bits are the weapon type** (0 normal, 1 magical, 2 mithril, 3 adamantium), the upper 6 bits are mutation flags. That document's unit offsets are ours plus 4 (its level `0x10`, experience `0x12`, damage `0x15` are our `+12`, `+14`, `+17`), so its `0x1B` is our **`+23`**, the byte Mirror already calls `mutations` (8 demon wings, 32 undead).
+- **Source 2** (ReMoM's `s_UNIT` in `MOM_DAT.h`, same vault): the same record at `+23` is `mutations` and ReMoM tests `mutations & UM_UNDEAD` / `& 0x20`, the same bit as Mirror's 32. ReMoM's `e_WEAPON_QUALITY` is `wq_Normal, wq_Magic, wq_Mithril, wq_Adamantium` (0 to 3), the same four values. ReMoM's header does not say which byte carries it, so the byte is Source 1's claim; the values are both sources'.
+- **Live data:** the 160 units in Kevin's game hold 0 or 1 in `+23` (the 1s are Jafar's and Freya's: magic weapons), never another value.
+- Also from ReMoM: `+28` is `Rd_Constr_Left` (our 0xFF means none), `+22` is `Sight_Range`, `+18` `Draw_Priority`, `+11` `Status`, `+16` `Move_Failed`.
+
+`create` now writes 3 in the low bits. **Still to confirm by eye:** a created unit's screen shows adamantium (Kevin).

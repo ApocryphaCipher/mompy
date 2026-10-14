@@ -64,6 +64,7 @@ class SummonTest(SummonCase):
         self.assertEqual((rec[3], rec[5], rec[6]), (0, 179, 0xFF))
         self.assertEqual((rec[4], rec[8]), (2 + 179 % 3, 2 + 179 % 3))     # moves from the type's record
         self.assertEqual((rec[12], rec[22]), (0, 1))                       # fantastic: level 0; sight from the type
+        self.assertEqual(rec[23], 0)                                       # creatures carry no weapon grade
 
     def test_an_ordinary_unit_is_made_by_a_city_for_its_owner_at_maximum_experience(self):
         out = create(self.api, 2, "cavalry")           # city 2 is Darkmoor, wizard 3's
@@ -71,6 +72,7 @@ class SummonTest(SummonCase):
         rec = self.mem[unit_at(4):unit_at(4) + 32]
         self.assertEqual((list(rec[:4]), rec[5], rec[12]), ([39, 20, 1, 2], 60, 3))
         self.assertEqual(struct.unpack_from("<h", rec, 14)[0], 120)         # maximum experience
+        self.assertEqual(rec[23] & 3, 3)                                    # adamantium weapons
 
     def test_summoned_and_ordinary_units_use_their_own_verb(self):
         self.assertRaisesRegex(PokeError, "ordinary unit, not a summoned creature", summon, self.api, 1, "cavalry")
